@@ -55,8 +55,8 @@ else()
   set(NANOGUI_BUILD_GLAD_DEFAULT OFF)
 endif()
 
-set(NANOGUI_BUILD_SHARED_DEFAULT ON)
-set(NANOGUI_BUILD_PYTHON_DEFAULT ON)
+set(NANOGUI_BUILD_SHARED_DEFAULT OFF)
+set(NANOGUI_BUILD_PYTHON_DEFAULT OFF)
 set(NANOGUI_BUILD_GLFW_DEFAULT ON)
 
 if (CMAKE_CXX_COMPILER MATCHES "/em\\+\\+(-[a-zA-Z0-9.])?$")
@@ -84,7 +84,8 @@ elseif (APPLE AND CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
   # Apple M1 compatibility
   set(NANOGUI_NATIVE_FLAGS_DEFAULT "-mcpu=apple-a12")
 else()
-  set(NANOGUI_NATIVE_FLAGS_DEFAULT "-march=nehalem")
+  set(NANOGUI_NATIVE_FLAGS_DEFAULT "-march=armv8-a")
+  set(NANOGUI_BACKEND_DEFAULT "GLES 2")
 endif()
 
 option(NANOGUI_BUILD_EXAMPLES            "Build NanoGUI example application?" ON)
@@ -118,6 +119,10 @@ set(NANOGUI_EXTRA_INCS "")
 
 include(CheckCXXCompilerFlag)
 include(CheckCXXSourceRuns)
+
+include_directories(/home/red/.local/bin/m3568-sdk-v1.0.0-ga/host/aarch64-buildroot-linux-gnu/sysroot/usr/include)
+link_directories(/home/red/.local/bin/m3568-sdk-v1.0.0-ga/host/aarch64-buildroot-linux-gnu/sysroot/usr/lib/)
+set(CMAKE_LIBRARY_PATH /home/red/.local/bin/m3568-sdk-v1.0.0-ga/host/aarch64-buildroot-linux-gnu/sysroot/usr/lib/)
 
 macro(CHECK_CXX_COMPILER_AND_LINKER_FLAGS _RESULT _CXX_FLAGS _LINKER_FLAGS)
   set(CMAKE_REQUIRED_FLAGS ${_CXX_FLAGS})
@@ -299,7 +304,7 @@ elseif (APPLE)
   list(APPEND NANOGUI_EXTRA src/darwin.mm src/autorelease.mm)
   set_property(SOURCE src/autorelease.mm PROPERTY COMPILE_FLAGS -fno-objc-arc)
 elseif (CMAKE_SYSTEM MATCHES "Linux" OR CMAKE_SYSTEM_NAME MATCHES "BSD")
-  list(APPEND NANOGUI_LIBS X11 pthread)
+  list(APPEND NANOGUI_LIBS pthread)
   if (NANOGUI_BACKEND STREQUAL "OpenGL")
     list(APPEND NANOGUI_LIBS GL)
   elseif (NANOGUI_BACKEND STREQUAL "GLES 2")
@@ -377,7 +382,7 @@ if (APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 if (NANOGUI_BUILD_GLFW)
-  list(APPEND NANOGUI_EXTRA $<TARGET_OBJECTS:glfw_objects>)
+  list(APPEND NANOGUI_EXTRA $<TARGET_OBJECTS:glfw>)
 endif()
 
 # Compile main NanoGUI library
@@ -552,19 +557,26 @@ endif()
 # Build example application if desired
 if (NANOGUI_BUILD_EXAMPLES)
   add_executable(example1      src/example1.cpp)
-  add_executable(example2      src/example2.cpp)
-  add_executable(example3      src/example3.cpp)
-  add_executable(example4      src/example4.cpp)
-  add_executable(example_icons src/example_icons.cpp)
+#  add_executable(example2      src/example2.cpp)
+#  add_executable(example3      src/example3.cpp)
+#  add_executable(example4      src/example4.cpp)
+#  add_executable(example_icons src/example_icons.cpp)
 
   target_link_libraries(example1      nanogui)
-  target_link_libraries(example2      nanogui)
-  target_link_libraries(example3      nanogui ${NANOGUI_LIBS}) # For OpenGL
-  target_link_libraries(example4      nanogui)
-  target_link_libraries(example_icons nanogui)
+#  target_link_libraries(example2      nanogui)
+#  target_link_libraries(example3      nanogui ${NANOGUI_LIBS}) # For OpenGL
+#  target_link_libraries(example4      nanogui)
+#  target_link_libraries(example_icons nanogui)
 
   # Copy icons for example application
   file(COPY resources/icons DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+  message("icon dstdir: "${CMAKE_CURRENT_BINARY_DIR})
+
+  add_custom_command(
+    TARGET example1 POST_BUILD
+    COMMAND cp -frv example1 /var/lib/nfs -frv
+    VERBATIM)
+
 endif()
 
 if (NANOGUI_BUILD_PYTHON)

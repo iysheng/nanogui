@@ -52,7 +52,7 @@ using namespace nanogui;
 
 class ExampleApplication : public Screen {
 public:
-    ExampleApplication() : Screen(Vector2i(1024, 768), "NanoGUI Test") {
+    ExampleApplication() : Screen(Vector2i(1280, 800), "NanoGUI Test") {
         inc_ref();
         Window *window = new Window(this, "Button demo");
         window->set_position(Vector2i(15, 15));
