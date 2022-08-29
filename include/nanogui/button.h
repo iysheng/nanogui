@@ -54,6 +54,7 @@ public:
      *     The icon to display with this Button.  See \ref nanogui::Button::mIcon.
      */
     Button(Widget *parent, const std::string &caption = "Untitled", int icon = 0);
+    Button(Widget *parent, const std::string &caption, const std::string &BackgroundImage, int icon = 0);
 
     /// Returns the caption of this Button.
     const std::string &caption() const { return m_caption; }

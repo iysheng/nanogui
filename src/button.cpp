@@ -9,6 +9,7 @@
     BSD-style license that can be found in the LICENSE.txt file.
 */
 
+#include <nanogui/screen.h>
 #include <nanogui/button.h>
 #include <nanogui/popupbutton.h>
 #include <nanogui/theme.h>
@@ -21,6 +22,18 @@ Button::Button(Widget *parent, const std::string &caption, int icon)
       m_icon_position(IconPosition::LeftCentered), m_pushed(false),
       m_flags(NormalButton), m_background_color(Color(0, 0)),
       m_text_color(Color(0, 0)) { }
+
+Button::Button(Widget *parent, const std::string &caption, const std::string &BackgroundImage, int icon)
+    : Widget(parent), m_caption(caption), m_icon(icon),
+      m_icon_position(IconPosition::LeftCentered), m_pushed(false),
+      m_flags(NormalButton), m_background_color(Color(0, 0)),
+      m_text_color(Color(0, 0)) {
+    if (!BackgroundImage.empty())
+    {
+        NVGcontext *ctx = screen()->nvg_context();
+        m_icon = nvgCreateImage(ctx, BackgroundImage.c_str(), 0);
+    }
+}
 
 Vector2i Button::preferred_size(NVGcontext *ctx) const {
     int font_size = m_font_size == -1 ? m_theme->m_button_font_size : m_font_size;
