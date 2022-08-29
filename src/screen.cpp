@@ -229,7 +229,7 @@ Screen::Screen(const Vector2i &size, const std::string &caption, bool resizable,
     glfwMakeContextCurrent(m_glfw_window);
 #endif
 
-    glfwSetInputMode(m_glfw_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    glfwSetInputMode(m_glfw_window, GLFW_TOUCH, GLFW_TRUE);
 
 #if defined(NANOGUI_GLAD)
     if (!glad_initialized) {
@@ -286,6 +286,7 @@ Screen::Screen(const Vector2i &size, const std::string &caption, bool resizable,
         }
     );
 
+    /* 设置鼠标事件的回调函数 */
     glfwSetMouseButtonCallback(m_glfw_window,
         [](GLFWwindow *w, int button, int action, int modifiers) {
             auto it = __nanogui_screens.find(w);
@@ -294,6 +295,20 @@ Screen::Screen(const Vector2i &size, const std::string &caption, bool resizable,
             Screen *s = it->second;
             if (!s->m_process_events)
                 return;
+            s->mouse_button_callback_event(button, action, modifiers);
+        }
+    );
+
+    glfwSetTouchCallback(m_glfw_window,
+        [](GLFWwindow *w, int touch, int type, int action, double x, double y) {
+            int button = GLFW_MOUSE_BUTTON_LEFT, modifiers = 0;
+            auto it = __nanogui_screens.find(w);
+            if (it == __nanogui_screens.end())
+                return;
+            Screen *s = it->second;
+            if (!s->m_process_events)
+                return;
+            s->cursor_pos_callback_event(x, y);
             s->mouse_button_callback_event(button, action, modifiers);
         }
     );
@@ -763,6 +778,7 @@ void Screen::cursor_pos_callback_event(double x, double y) {
     }
 }
 
+/* Screen 的回调函数 */
 void Screen::mouse_button_callback_event(int button, int action, int modifiers) {
     m_modifiers = modifiers;
     m_last_interaction = glfwGetTime();
