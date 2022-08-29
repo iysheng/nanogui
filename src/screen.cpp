@@ -620,7 +620,9 @@ void Screen::draw_all() {
         void *pool = autorelease_init();
 #endif
 
+        /* 初始化 GLFW， 关联窗口 */
         draw_setup();
+        /* 虚函数初始化 */
         draw_contents();
         draw_widgets();
         draw_teardown();
@@ -641,9 +643,11 @@ void Screen::nvg_flush() {
     params->renderViewport(params->userPtr, m_size[0], m_size[1], m_pixel_ratio);
 }
 
+/* 绘制 widgets */
 void Screen::draw_widgets() {
     nvgBeginFrame(m_nvg_context, m_size[0], m_size[1], m_pixel_ratio);
 
+    /* 在这里绘制内容！！！ */
     draw(m_nvg_context);
 
     double elapsed = glfwGetTime() - m_last_interaction;

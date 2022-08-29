@@ -52,10 +52,11 @@ using namespace nanogui;
 
 class ExampleApplication : public Screen {
 public:
+    /* 构造函数 */
     ExampleApplication() : Screen(Vector2i(1280, 800), "NanoGUI Test") {
         inc_ref();
         Window *window = new Window(this, "Button demo");
-        window->set_position(Vector2i(15, 15));
+        window->set_position(Vector2i(0, 0));
         window->set_layout(new GroupLayout());
 
         /* No need to store a pointer, the data structure will be automatically
@@ -452,6 +453,7 @@ public:
         m_render_pass = new RenderPass({ this });
         m_render_pass->set_clear_color(0, Color(0.3f, 0.3f, 0.32f, 1.f));
 
+        /* 创建一个 shader, 着色器 */
         m_shader = new Shader(
             m_render_pass,
 
@@ -543,9 +545,11 @@ public:
         m_progress->set_value(std::fmod((float) glfwGetTime() / 10, 1.0f));
 
         /* Draw the user interface */
+        /* 执行 Screen 的 draw 函数 */
         Screen::draw(ctx);
     }
 
+    /* 函数重载,绘制内容,初始化 m_shader 和 m_render_pass 相关的内容 */
     virtual void draw_contents() {
         Matrix4f mvp = Matrix4f::scale(Vector3f(
                            (float) m_size.y() / (float) m_size.x() * 0.25f, 0.25f, 0.25f)) *
@@ -577,7 +581,9 @@ int main(int /* argc */, char ** /* argv */) {
         nanogui::init();
 
         /* scoped variables */ {
+            /* 赋值的时候，会执行 ref 类模板的符号重载，然后会增加这个引用计数 */
             ref<ExampleApplication> app = new ExampleApplication();
+            /* 减少引用计数 */
             app->dec_ref();
             app->draw_all();
             app->set_visible(true);

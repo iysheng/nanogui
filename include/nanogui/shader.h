@@ -57,8 +57,8 @@ public:
      */
     Shader(RenderPass *render_pass,
            const std::string &name,
-           const std::string &vertex_shader,
-           const std::string &fragment_shader,
+           const std::string &vertex_shader, /* 顶点着色器 */
+           const std::string &fragment_shader, /* 片段着色器 */
            BlendMode blend_mode = BlendMode::None);
 
     /// Return the render pass associated with this shader

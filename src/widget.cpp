@@ -234,6 +234,7 @@ void Widget::request_focus() {
     ((Screen *) widget)->update_focus(this);
 }
 
+/* 绘制窗口!!!, widget 是最小的部件 ??? */
 void Widget::draw(NVGcontext *ctx) {
     #if defined(NANOGUI_SHOW_WIDGET_BOUNDS)
         nvgStrokeWidth(ctx, 1.0f);
@@ -248,6 +249,7 @@ void Widget::draw(NVGcontext *ctx) {
         return;
 
     nvgTranslate(ctx, m_pos.x(), m_pos.y());
+    /* 递归遍历绘制 child widget 的内容 */
     for (auto child : m_children) {
         if (!child->visible())
             continue;

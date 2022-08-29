@@ -66,6 +66,7 @@ private:
  * the reference count is very compactly integrated into the base object
  * itself.
  */
+/* 定义的模板类 */
 template <typename T> class ref {
 public:
     /// Create a ``nullptr``-valued reference
@@ -106,6 +107,7 @@ public:
     }
 
     /// Overwrite this reference with another reference
+    // 函数符 = 重载
     ref& operator=(const ref& r) noexcept {
         if (m_ptr != r.m_ptr) {
             if (r.m_ptr)
@@ -121,6 +123,7 @@ public:
     ref& operator=(T *ptr) noexcept {
         if (m_ptr != ptr) {
             if (ptr)
+                /* 在这里会首先增加引用计数 */
                 ((Object *) ptr)->inc_ref();
             if (m_ptr)
                 ((Object *) m_ptr)->dec_ref();
@@ -142,6 +145,7 @@ public:
     bool operator!=(const T* ptr) const { return m_ptr != ptr; }
 
     /// Access the object referenced by this reference
+    // 函数符号重载
     T* operator->() { return m_ptr; }
 
     /// Access the object referenced by this reference
@@ -165,6 +169,7 @@ public:
     /// Check if the object is defined
     operator bool() const { return m_ptr != nullptr; }
 private:
+    /* 类型指针, 模板实际类型的对象指针 */
     T *m_ptr = nullptr;
 };
 

@@ -298,4 +298,5 @@ protected:
 #endif
 };
 
+#define red_debug_lite(format, ...) {fprintf(stderr, "[%s@%d] " format "\n", __FUNCTION__, __LINE__, ##__VA_ARGS__);}
 NAMESPACE_END(nanogui)
