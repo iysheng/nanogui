@@ -18,20 +18,20 @@
 NAMESPACE_BEGIN(nanogui)
 
 Button::Button(Widget *parent, const std::string &caption, int icon)
-    : Widget(parent), m_caption(caption), m_icon(icon),
+    : Widget(parent), m_caption(caption), m_icon(icon), m_background_image(0),
       m_icon_position(IconPosition::LeftCentered), m_pushed(false),
       m_flags(NormalButton), m_background_color(Color(0, 0)),
       m_text_color(Color(0, 0)) { }
 
 Button::Button(Widget *parent, const std::string &caption, const std::string &BackgroundImage, int icon)
-    : Widget(parent), m_caption(caption), m_icon(icon),
+    : Widget(parent), m_caption(caption), m_icon(icon), m_background_image(0),
       m_icon_position(IconPosition::LeftCentered), m_pushed(false),
       m_flags(NormalButton), m_background_color(Color(0, 0)),
       m_text_color(Color(0, 0)) {
     if (!BackgroundImage.empty())
     {
         NVGcontext *ctx = screen()->nvg_context();
-        m_icon = nvgCreateImage(ctx, BackgroundImage.c_str(), 0);
+        m_background_image = nvgCreateImage(ctx, BackgroundImage.c_str(), 0);
     }
 }
 
@@ -42,7 +42,12 @@ Vector2i Button::preferred_size(NVGcontext *ctx) const {
     float tw = nvgTextBounds(ctx, 0,0, m_caption.c_str(), nullptr, nullptr);
     float iw = 0.0f, ih = font_size;
 
-    if (m_icon) {
+    if (m_background_image)
+    {
+        int w, h;
+        nvgImageSize(ctx, m_background_image, &w, &h);
+        return Vector2i(w, h);
+    } else if (m_icon) {
         if (nvg_is_font_icon(m_icon)) {
             ih *= icon_scale();
             nvgFontFace(ctx, "icons");
@@ -139,28 +144,36 @@ void Button::draw(NVGcontext *ctx) {
     }
 
     nvgBeginPath(ctx);
-
+    
     nvgRoundedRect(ctx, m_pos.x() + 1, m_pos.y() + 1.0f, m_size.x() - 2,
-                   m_size.y() - 2, m_theme->m_button_corner_radius - 1);
-
-    if (m_background_color.w() != 0) {
-        nvgFillColor(ctx, Color(m_background_color[0], m_background_color[1],
-                                m_background_color[2], 1.f));
-        nvgFill(ctx);
-        if (m_pushed) {
-            grad_top.a = grad_bot.a = 0.8f;
-        } else {
-            double v = 1 - m_background_color.w();
-            grad_top.a = grad_bot.a = m_enabled ? v : v * .5f + .5f;
+                       m_size.y() - 2, m_theme->m_button_corner_radius - 1);
+    if (!m_background_image)
+    {
+        if (m_background_color.w() != 0) {
+            nvgFillColor(ctx, Color(m_background_color[0], m_background_color[1],
+                                    m_background_color[2], 1.f));
+            nvgFill(ctx);
+            if (m_pushed) {
+                grad_top.a = grad_bot.a = 0.8f;
+            } else {
+                double v = 1 - m_background_color.w();
+                grad_top.a = grad_bot.a = m_enabled ? v : v * .5f + .5f;
+            }
         }
+    
+        NVGpaint bg = nvgLinearGradient(ctx, m_pos.x(), m_pos.y(), m_pos.x(),
+                                        m_pos.y() + m_size.y(), grad_top, grad_bot);
+    
+        nvgFillPaint(ctx, bg);
+        nvgFill(ctx);
     }
-
-    NVGpaint bg = nvgLinearGradient(ctx, m_pos.x(), m_pos.y(), m_pos.x(),
-                                    m_pos.y() + m_size.y(), grad_top, grad_bot);
-
-    nvgFillPaint(ctx, bg);
-    nvgFill(ctx);
-
+    else
+    {
+        NVGpaint img_paint = nvgImagePattern(ctx, m_pos.x() + 1, m_pos.y() + 1.0f, m_size.x() - 2,
+                   m_size.y() - 2, 0, m_background_image, m_enabled ? 0.5f : 0.25f);
+        nvgFillPaint(ctx, img_paint);
+        nvgFill(ctx);
+    }
     nvgBeginPath(ctx);
     nvgStrokeWidth(ctx, 1.0f);
     nvgRoundedRect(ctx, m_pos.x() + 0.5f, m_pos.y() + (m_pushed ? 0.5f : 1.5f), m_size.x() - 1,
@@ -177,6 +190,7 @@ void Button::draw(NVGcontext *ctx) {
     int font_size = m_font_size == -1 ? m_theme->m_button_font_size : m_font_size;
     nvgFontSize(ctx, font_size);
     nvgFontFace(ctx, "sans-bold");
+    /* 返回显示字体的下一个位置，用来显示 icon 图标 */
     float tw = nvgTextBounds(ctx, 0,0, m_caption.c_str(), nullptr, nullptr);
 
     Vector2f center = Vector2f(m_pos) + Vector2f(m_size) * 0.5f;
@@ -220,9 +234,11 @@ void Button::draw(NVGcontext *ctx) {
             icon_pos.x() = m_pos.x() + m_size.x() - iw - 8;
         }
 
+        /* 如果是一个字体图标 */
         if (nvg_is_font_icon(m_icon)) {
             nvgText(ctx, icon_pos.x(), icon_pos.y()+1, icon.data(), nullptr);
         } else {
+            /* 如果是一副图片 */
             NVGpaint img_paint = nvgImagePattern(ctx,
                     icon_pos.x(), icon_pos.y() - ih/2, iw, ih, 0, m_icon, m_enabled ? 0.5f : 0.25f);
 
@@ -234,8 +250,10 @@ void Button::draw(NVGcontext *ctx) {
     nvgFontSize(ctx, font_size);
     nvgFontFace(ctx, "sans-bold");
     nvgTextAlign(ctx, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
+    /* 显示按键的字体,阴影效果 */
     nvgFillColor(ctx, m_theme->m_text_color_shadow);
     nvgText(ctx, text_pos.x(), text_pos.y(), m_caption.c_str(), nullptr);
+    /* 显示按键的字体 */
     nvgFillColor(ctx, text_color);
     nvgText(ctx, text_pos.x(), text_pos.y() + 1, m_caption.c_str(), nullptr);
 }

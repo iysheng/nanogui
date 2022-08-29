@@ -131,6 +131,11 @@ protected:
      */
     int m_icon;
 
+    /*
+     * 显示背景图片的句柄
+     * */
+    int m_background_image;
+
     /// The position to draw the icon at.
     IconPosition m_icon_position;
 
