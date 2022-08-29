@@ -34,7 +34,6 @@ Vector2i Window::preferred_size(NVGcontext *ctx) const {
     if (m_button_panel)
         m_button_panel->set_visible(true);
 
-
     if (m_background_image)
     {
         int w, h;
@@ -215,6 +214,16 @@ bool Window::scroll_event(const Vector2i &p, const Vector2f &rel) {
 
 void Window::refresh_relative_placement() {
     /* Overridden in \ref Popup */
+}
+
+void Window::set_background_image(const std::string &BackgroundImage)
+{
+    NVGcontext *ctx = screen()->nvg_context();
+    if (m_background_image)
+    {
+        nvgDeleteImage(ctx, m_background_image);
+    }
+    m_background_image = nvgCreateImage(ctx, BackgroundImage.c_str(), 0);
 }
 
 NAMESPACE_END(nanogui)

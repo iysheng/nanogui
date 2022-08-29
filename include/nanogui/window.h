@@ -31,6 +31,9 @@ public:
     /// Set the window title
     void set_title(const std::string &title) { m_title = title; }
 
+    /// Set the background image
+    void set_background_image(const std::string &BackgroundImage);
+
     /// Is this a model dialog?
     bool modal() const { return m_modal; }
     /// Set whether or not this is a modal dialog
