@@ -369,6 +369,17 @@ add_custom_command(
 # Needed to generated files
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
+set(NANOGUI_BUILD_RAPIDJSON ON)
+if (NANOGUI_BUILD_RAPIDJSON)
+include_directories(${CMAKE_SOURCE_DIR}/rapidjson)
+endif()
+
+set(NANOGUI_BUILD_POLYM ON)
+if (NANOGUI_BUILD_POLYM)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/PolyM/include)
+endif()
+
+
 # Set library type
 if (NANOGUI_BUILD_SHARED)
   set(NANOGUI_LIBRARY_TYPE "SHARED")
@@ -383,6 +394,61 @@ endif()
 
 if (NANOGUI_BUILD_GLFW)
   list(APPEND NANOGUI_EXTRA $<TARGET_OBJECTS:glfw>)
+endif()
+
+if (NANOGUI_BUILD_RAPIDJSON)
+message("Build with rapidjson")
+list(APPEND NANOGUI_EXTRA
+    rapidjson/allocators.h
+    rapidjson/cursorstreamwrapper.h
+    rapidjson/document.h
+    rapidjson/encodedstream.h
+    rapidjson/encodings.h
+    rapidjson/error/en.h
+    rapidjson/error/error.h
+    rapidjson/filereadstream.h
+    rapidjson/filewritestream.h
+    rapidjson/fwd.h
+    rapidjson/internal/biginteger.h
+    rapidjson/internal/clzll.h
+    rapidjson/internal/diyfp.h
+    rapidjson/internal/dtoa.h
+    rapidjson/internal/ieee754.h
+    rapidjson/internal/itoa.h
+    rapidjson/internal/meta.h
+    rapidjson/internal/pow10.h
+    rapidjson/internal/regex.h
+    rapidjson/internal/stack.h
+    rapidjson/internal/strfunc.h
+    rapidjson/internal/strtod.h
+    rapidjson/internal/swap.h
+    rapidjson/istreamwrapper.h
+    rapidjson/memorybuffer.h
+    rapidjson/memorystream.h
+    rapidjson/msinttypes/inttypes.h
+    rapidjson/msinttypes/stdint.h
+    rapidjson/ostreamwrapper.h
+    rapidjson/pointer.h
+    rapidjson/prettywriter.h
+    rapidjson/rapidjson.h
+    rapidjson/reader.h
+    rapidjson/schema.h
+    rapidjson/stream.h
+    rapidjson/stringbuffer.h
+    rapidjson/uri.h
+    rapidjson/writer.h
+)
+endif()
+
+set(NANOGUI_BUILD_POLYM ON)
+if (NANOGUI_BUILD_POLYM)
+message("Build with PolyM")
+list(APPEND NANOGUI_EXTRA
+    PolyM/include/polym/Msg.hpp
+    PolyM/include/polym/Queue.hpp
+    PolyM/src/Msg.cpp
+    PolyM/src/Queue.cpp
+)
 endif()
 
 # Compile main NanoGUI library
