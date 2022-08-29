@@ -17,9 +17,15 @@
 
 NAMESPACE_BEGIN(nanogui)
 
-Window::Window(Widget *parent, const std::string &title)
-    : Widget(parent), m_title(title), m_button_panel(nullptr), m_modal(false),
-      m_drag(false) { }
+Window::Window(Widget *parent, const std::string &title, const std::string &BackgroundImage)
+    : Widget(parent), m_title(title), m_button_panel(nullptr), m_modal(false), m_background_image(0),
+      m_drag(false) {
+    if (!BackgroundImage.empty())
+    {
+        NVGcontext *ctx = screen()->nvg_context();
+        m_background_image = nvgCreateImage(ctx, BackgroundImage.c_str(), 0);
+    }
+}
 
 Vector2i Window::preferred_size(NVGcontext *ctx) const {
     if (m_button_panel)
@@ -28,15 +34,25 @@ Vector2i Window::preferred_size(NVGcontext *ctx) const {
     if (m_button_panel)
         m_button_panel->set_visible(true);
 
-    nvgFontSize(ctx, 18.0f);
-    nvgFontFace(ctx, "sans-bold");
-    float bounds[4];
-    nvgTextBounds(ctx, 0, 0, m_title.c_str(), nullptr, bounds);
 
-    return Vector2i(
-        std::max(result.x(), (int) (bounds[2]-bounds[0] + 20)),
-        std::max(result.y(), (int) (bounds[3]-bounds[1]))
-    );
+    if (m_background_image)
+    {
+        int w, h;
+        nvgImageSize(ctx, m_background_image, &w, &h);
+        return Vector2i(
+            std::max(result.x(), w),
+            std::max(result.y(), h)
+        );
+    } else {
+        float bounds[4];
+        nvgFontSize(ctx, 18.0f);
+        nvgFontFace(ctx, "sans-bold");
+        nvgTextBounds(ctx, 0, 0, m_title.c_str(), nullptr, bounds);
+        return Vector2i(
+            std::max(result.x(), (int) (bounds[2]-bounds[0] + 20)),
+            std::max(result.y(), (int) (bounds[3]-bounds[1]))
+        );
+    }
 }
 
 Widget *Window::button_panel() {
@@ -73,9 +89,18 @@ void Window::draw(NVGcontext *ctx) {
     nvgSave(ctx);
     nvgBeginPath(ctx);
     nvgRoundedRect(ctx, m_pos.x(), m_pos.y(), m_size.x(), m_size.y(), cr);
-
-    nvgFillColor(ctx, m_mouse_focus ? m_theme->m_window_fill_focused
+    if (m_background_image)
+    {
+        NVGpaint img_paint = nvgImagePattern(ctx, m_pos.x(), m_pos.y(), m_size.x(),
+                   m_size.y(), 0, m_background_image, m_enabled ? 0.5f : 0.25f);
+        nvgFillPaint(ctx, img_paint);
+        nvgFill(ctx);
+    }
+    else
+    {
+        nvgFillColor(ctx, m_mouse_focus ? m_theme->m_window_fill_focused
                                     : m_theme->m_window_fill_unfocused);
+    }
     nvgFill(ctx);
 
 

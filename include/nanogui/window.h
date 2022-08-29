@@ -24,7 +24,7 @@ NAMESPACE_BEGIN(nanogui)
 class NANOGUI_EXPORT Window : public Widget {
     friend class Popup;
 public:
-    Window(Widget *parent, const std::string &title = "Untitled");
+    Window(Widget *parent, const std::string &title = "Untitled", const std::string &BackgroundImage="");
 
     /// Return the window title
     const std::string &title() const { return m_title; }
@@ -67,6 +67,7 @@ protected:
     Widget *m_button_panel;
     bool m_modal;
     bool m_drag;
+    int m_background_image;
 };
 
 NAMESPACE_END(nanogui)
