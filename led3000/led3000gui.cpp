@@ -564,63 +564,72 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test"),
           ///devBtn->set_fixed_size(Vector2i(165, 30));
         }
 
-#if 0
         /* 转台功能 */
         {
-          auto& turntableWindow = wdg<Window>("转台功能");
+          auto* turntableWindow = new Window(this, "转台功能");
 
           /* 确定了 turntableWindow 的位置 */
-          turntableWindow.withPosition({800, 600});
+          turntableWindow->set_position({800, 600});
           /* 创建一个新的布局 */
           GridLayout * layout = new GridLayout(Orientation::Horizontal, 1,
                                          Alignment::Middle, 5, 5);
           layout->set_col_alignment({ Alignment::Fill, Alignment::Fill });
           /* 定义了这个窗口的布局 */
-          turntableWindow.set_layout(layout);
-          turntableWindow.label("")._and().button("目标检测").withFlags(Button::RadioButton)._and().button("手动").withFlags(Button::RadioButton);
-          turntableWindow.button("复位").withFlags(Button::RadioButton);
+          turntableWindow->set_layout(layout);
+          turntableWindow->add<Button>("目标检测")->set_flags(Button::RadioButton);
+          turntableWindow->add<Button>("手动")->set_flags(Button::RadioButton);
+          turntableWindow->add<Button>("复位")->set_flags(Button::RadioButton);
         }
 
         /* 摄像头功能 */
         {
-          auto& cameraWindow = wdg<Window>("摄像头功能");
+          auto* cameraWindow = new Window(this, "摄像头功能");
 
           /* 确定了 cameraWindow 的位置 */
-          cameraWindow.withPosition({1000, 600});
+          cameraWindow->set_position({1000, 300});
           /* 创建一个新的布局 */
           GridLayout * layout = new GridLayout(Orientation::Horizontal, 1,
                                          Alignment::Middle, 5, 5);
           layout->set_col_alignment({Alignment::Middle, Alignment::Minimum});
           /* 定义了这个窗口的布局 */
-          cameraWindow.set_layout(layout);
-          cameraWindow.add<Label>("摄像头一焦距")->_and()
-              .widget().withLayout<BoxLayout>(Orientation::Horizontal, Alignment::Middle, 15, 30)
-              .button("ﯪ", [](Widget * widget) {
-                  Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
+          cameraWindow->set_layout(layout);
+          cameraWindow->add<Label>("摄像头一焦距");
+          Widget *wdg = cameraWindow->add<Widget>();
+          Button *btn;
+          BoxLayout *box_layout = new BoxLayout(Orientation::Horizontal, Alignment::Middle, 15, 30);
+          wdg->set_layout(box_layout);
+          btn = wdg->add<Button>("ﯪ");
+          btn->set_callback([this]() {
                   cout << "decrease camera 1 focal len" << endl;
-                  led3000Window->getDeviceQueue(0).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "-"));
-              }).withFixedSize(Vector2i(50, 30)).withFontSize(30)._and()
-              .button("ﯫ",  [](Widget * widget) {
-                  Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
-                  led3000Window->getDeviceQueue(0).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "+"));
-                  cout << "increase camera 1 focal len" << endl; })
-              .withFixedSize(Vector2i(50, 30))
-                 .withFontSize(30);
-          cameraWindow.add<Label>("摄像头二焦距")->_and()
-              .widget().withLayout<BoxLayout>(Orientation::Horizontal, Alignment::Middle, 15, 30)
-              .button("ﯪ", [](Widget * widget) {
-                  Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
-                  led3000Window->getDeviceQueue(1).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "-"));
+                  this->getDeviceQueue(0).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "-"));
+           });
+          btn->set_fixed_size(Vector2i(50, 30));
+          btn->set_font_size(30);
+          btn = wdg->add<Button>("ﯫ");
+          btn->set_callback([this]() {
+                  this->getDeviceQueue(0).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "+"));
+                  cout << "increase camera 1 focal len" << endl; });
+          btn->set_fixed_size(Vector2i(50, 30));
+          btn->set_font_size(30);
+          cameraWindow->add<Label>("摄像头二焦距");
+          wdg = cameraWindow->add<Widget>();
+          wdg->set_layout(box_layout);
+          btn = wdg->add<Button>("ﯪ");
+          btn->set_callback([this]() {
+                  this->getDeviceQueue(1).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "-"));
                   cout << "decrease camera 2 focal len" << endl;
-              }).withFixedSize(Vector2i(50, 30)).withFontSize(30)._and()
-              .button("ﯫ",  [](Widget * widget) {
-                  Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
-                  led3000Window->getDeviceQueue(1).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "+"));
-                  cout << "increase camera 2 focal len" << endl; })
-              .withFixedSize(Vector2i(50, 30))
-                 .withFontSize(30);
+              });
+          btn->set_fixed_size(Vector2i(50, 30));
+          btn->set_font_size(30);
+          btn = wdg->add<Button>("ﯫ");
+          btn->set_callback([this]() {
+                  this->getDeviceQueue(1).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "+"));
+                  cout << "increase camera 2 focal len" << endl; });
+          btn->set_fixed_size(Vector2i(50, 30));
+          btn->set_font_size(30);
         }
 
+#if 0
         {
             /* 创建一个新的 window 对象用来显示图片 */
             auto& img_window = window("摄像头一视频", Vector2i(0, 0));

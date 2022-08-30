@@ -654,6 +654,11 @@ if (NANOGUI_BUILD_EXAMPLES)
     COMMAND cp -frv example1 /var/lib/nfs -frv
     VERBATIM)
 
+  add_custom_command(
+    TARGET ledmain POST_BUILD
+    COMMAND cp -frv ledmain /var/lib/nfs -frv
+    VERBATIM)
+
 endif()
 
 if (NANOGUI_BUILD_PYTHON)
