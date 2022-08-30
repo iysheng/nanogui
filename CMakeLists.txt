@@ -456,6 +456,8 @@ include_directories(${CMAKE_SOURCE_DIR}/led3000)
 list(APPEND NANOGUI_EXTRA
   led3000/led3000gui.h
   led3000/led3000gui.cpp
+  led3000/keyboard.h
+  led3000/keyboard.cpp
   led3000/json_thread.cpp
   led3000/devices_thread.cpp
 )
