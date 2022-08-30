@@ -175,6 +175,12 @@ public:
     Label *get_dev_auth_label(int index) {
         return GET_LABEL_WITH_INDEX(m_dev_auth, index);
     }
+    Label *get_green_dev_label(){
+      return m_green_dev;
+    }
+    Label *get_white_dev_label(){
+      return m_white_dev;
+    }
 private:
     /* 设备状态窗口 label 控件 */
     Label *m_dev_state[LED3000_DEVICES_COUNTS];
@@ -182,6 +188,8 @@ private:
     Label *m_dev_angular_speed[LED3000_DEVICES_COUNTS];
     Label *m_dev_morse_code[LED3000_DEVICES_COUNTS];
     Label *m_dev_auth[LED3000_DEVICES_COUNTS];
+    Label *m_green_dev;
+    Label *m_white_dev;
 
     ref<Shader> m_shader;
     ref<RenderPass> m_render_pass;

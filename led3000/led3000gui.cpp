@@ -491,7 +491,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test"),
           layout->set_spacing(0, 10);
           /* 定义了这个窗口的布局 */
           cwindow->set_layout(layout);
-          new Label(cwindow, "绿灯一", "sans-bold");
+          m_green_dev = new Label(cwindow, "绿灯一", "sans-bold");
           Button *test_btn = new Button(cwindow, "关闭");
           test_btn->set_callback([&] {
               new MessageDialog(this, MessageDialog::Type::Question, "绿灯控制", "确认要打开绿光么?", "确认", "取消", do_with_green_light_normal); });
@@ -504,7 +504,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test"),
               MessageDialog *dlg = new MessageDialog(this, MessageDialog::Type::Choose, "莫码发送设置", "准备发送莫码?", "确认", "配置", "取消", true);
               dlg->set_widget_callback(do_with_green_light_mocode); });
 
-          new Label(cwindow, "白灯一", "sans-bold");
+          m_white_dev = new Label(cwindow, "白灯一", "sans-bold");
           new Button(cwindow, "常亮");
           new Button(cwindow, "白闪");
           new Button(cwindow, "莫码");
@@ -532,43 +532,39 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test"),
               new MessageDialog(this, MessageDialog::Type::Choose, "系统参数设置", "准备配置参数", "参数配置", do_with_sysconfig);});
         }
 
-#if 0
         /* 设备选择 */
         {
-          auto& chooseWindow = wdg<Window>("设备选择");
+          auto* chooseWindow = new Window(this, "设备选择");
 
-          chooseWindow.set_background_image("/tmp/abc/red0.jpg");
-          /* 确定了 chooseWindow 的位置 */
-          chooseWindow.withPosition({980, 150});
+          chooseWindow->set_background_image("/tmp/abc/dev.png");
+          /* 确定了chooseWindow 的位置 */
+          chooseWindow->set_position({980, 150});
           /* 创建一个新的布局 */
           GridLayout * layout = new GridLayout(Orientation::Horizontal, 1,
                                          Alignment::Middle, 5, 5);
           layout->set_col_alignment({ Alignment::Fill, Alignment::Fill });
           /* 定义了这个窗口的布局 */
-          chooseWindow.set_layout(layout);
-          Button *devBtn = chooseWindow.add<Button>("灯光装置终端一");
-          devBtn->setWidgetCallback([](Widget *widget) {
+          chooseWindow->set_layout(layout);
+          Button *devBtn = chooseWindow->add<Button>("灯光装置终端一");
+          devBtn->set_callback([this]() {
             cout << "choose device 1" << endl;
-            Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
-            Widget *wdg = led3000Window->gfind("sLedFuncs");
-            wdg->gfind<Label>("sGreen")->setCaption("绿灯一");
-            wdg->gfind<Label>("sWhite")->setCaption("白灯一");
-            led3000Window->setCurrentDevice(0);
+            this->get_green_dev_label()->set_caption("绿灯一");
+            this->get_white_dev_label()->set_caption("白灯一");
+            this->setCurrentDevice(0);
           });
           /* 根据实际系统功能中按键大小，为了保持大小一致，修改设备选择按键大小保持一致 */
-          devBtn->set_fixed_size(Vector2i(165, 30));
-          devBtn = chooseWindow.add<Button>("灯光装置终端二");
-          devBtn->setWidgetCallback([](Widget *widset) {
+          ///devBtn->set_fixed_size(Vector2i(165, 30));
+          devBtn = chooseWindow->add<Button>("灯光装置终端二");
+          devBtn->set_callback([this]() {
             cout << "choose device 2" << endl;
-            Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widset->window()->parent());
-            Widget *wdg = led3000Window->gfind("sLedFuncs");
-            wdg->gfind<Label>("sGreen")->setCaption("绿灯二");
-            wdg->gfind<Label>("sWhite")->setCaption("白灯二");
-            led3000Window->setCurrentDevice(1);
+            this->get_green_dev_label()->set_caption("绿灯二");
+            this->get_white_dev_label()->set_caption("白灯二");
+            this->setCurrentDevice(1);
           });
-          devBtn->set_fixed_size(Vector2i(165, 30));
+          ///devBtn->set_fixed_size(Vector2i(165, 30));
         }
 
+#if 0
         /* 转台功能 */
         {
           auto& turntableWindow = wdg<Window>("转台功能");
