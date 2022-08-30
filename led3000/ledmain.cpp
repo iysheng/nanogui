@@ -30,19 +30,29 @@ using namespace rapidjson;
 int g_test_btn_len;
 int main(int /* argc */, char ** /* argv */)
 {
-    char rendername[256] = {0};
-
     /* 创建了测试窗口类 */
-    Led3000Window *screen = new Led3000Window();
-
-    std::thread sJsonThread(json_thread, screen);
-    sJsonThread.detach();
-
-    std::thread sDevicesThread(devices_thread, screen);
-    sDevicesThread.detach();
-
     try
     {
+        nanogui::init();
+
+        /* scoped variables */ {
+            /* 赋值的时候，会执行 ref 类模板的符号重载，然后会增加这个引用计数 */
+            ref<Led3000Window> app = new Led3000Window();
+
+            std::thread sJsonThread(json_thread, app);
+            sJsonThread.detach();
+        
+            std::thread sDevicesThread(devices_thread, app);
+            sDevicesThread.detach();
+
+            /* 减少引用计数 */
+            app->dec_ref();
+            app->draw_all();
+            app->set_visible(true);
+            nanogui::mainloop(1 / 60.f * 1000);
+        }
+
+        nanogui::shutdown();
         red_debug_lite("test demo");
     }
     catch (const std::runtime_error &e)

@@ -52,6 +52,17 @@ public:
 
     /// Draw the label
     virtual void draw(NVGcontext *ctx) override;
+
+    Label * set_caption_merge(const char * msg1, const char * msg2, char sep) {
+        m_caption = msg1;
+        if (sep)
+        {
+            m_caption += sep;
+        }
+        m_caption += msg2;
+        return this;
+    }
+
 protected:
     std::string m_caption;
     std::string m_font;

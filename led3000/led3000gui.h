@@ -1,13 +1,14 @@
 /******************************************************************************
 * File:             led3000gui.h
 *
-* Author:           yangyongsheng@jair.cn  
-* Created:          08/10/22 
+* Author:           yangyongsheng@jair.cn
+* Created:          08/10/22
 * Description:      led3000 gui 类
 *****************************************************************************/
 
 #pragma once
 
+#include <nanogui/opengl.h>
 #include <nanogui/screen.h>
 #include <nanogui/window.h>
 #include <nanogui/layout.h>
@@ -29,6 +30,8 @@
 #include <nanogui/graph.h>
 #include <nanogui/tabwidget.h>
 #include <nanogui/formhelper.h>
+#include <nanogui/shader.h>
+#include <nanogui/renderpass.h>
 #include <memory>
 
 #include <rapidjson/pointer.h>
@@ -88,44 +91,54 @@ typedef struct {
     } devices[2];
 } led3000_config_t;
 
+#define GET_LABEL_WITH_INDEX(x, i) \
+    (i < LED3000_DEVICES_COUNTS) ? x[i] : NULL
+
 /* 测试窗口类 */
 class NANOGUI_EXPORT Led3000Window : public Screen
 {
 public:
-    Led3000Window(){};
+    Led3000Window();
 
     ~Led3000Window() {
     }
     void init_json_file(void);
-#if 0
-    virtual bool keyboardEvent(int key, int scancode, int action, int modifiers)
-    {
-        if (Screen::keyboardEvent(key, scancode, action, modifiers))
+#if 1
+    virtual bool keyboard_event(int key, int scancode, int action, int modifiers) {
+        if (Screen::keyboard_event(key, scancode, action, modifiers))
             return true;
-
-        //if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        // {
-        //    setVisible(false);
-        //    return true;
-        //}
+        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+            set_visible(false);
+            return true;
+        }
         return false;
     }
 
     virtual void draw(NVGcontext *ctx) {
-    {
-      if (auto pbar = gfind<ProgressBar>("progressbar"))
-      {
-        /* 更新 progressbar 进度条更新 */
-        pbar->setValue(pbar->value() + 0.001f);
-        if (pbar->value() >= 1.f)
-          pbar->setValue(0.f);
-      }
+        /* Animate the scrollbar */
+        //m_progress->set_value(std::fmod((float) glfwGetTime() / 10, 1.0f));
 
-      Screen::draw(renderer);
+        /* Draw the user interface */
+        /* 执行 Screen 的 draw 函数 */
+        Screen::draw(ctx);
     }
 
-    virtual void drawContents()
-    {
+    /* 函数重载,绘制内容,初始化 m_shader 和 m_render_pass 相关的内容 */
+    virtual void draw_contents() {
+        Matrix4f mvp = Matrix4f::scale(Vector3f(
+                           (float) m_size.y() / (float) m_size.x() * 0.25f, 0.25f, 0.25f)) *
+                       Matrix4f::rotate(Vector3f(0, 0, 1), (float) glfwGetTime());
+
+        m_shader->set_uniform("mvp", mvp);
+
+        m_render_pass->resize(framebuffer_size());
+        m_render_pass->begin();
+
+        m_shader->begin();
+        m_shader->draw_array(Shader::PrimitiveType::Triangle, 0, 6, true);
+        m_shader->end();
+
+        m_render_pass->end();
     }
 
     FILE*& getMfp(void){return mFp;};
@@ -146,9 +159,36 @@ public:
     }
     void setCurrentDevice(int index){mCurrentDevice = index;};
     int getCurrentDevice(void){return mCurrentDevice;};
+
+    Label *get_dev_state_label(int index) {
+        return GET_LABEL_WITH_INDEX(m_dev_state, index);
+    }
+    Label *get_dev_angle_label(int index) {
+        return GET_LABEL_WITH_INDEX(m_dev_angle, index);
+    }
+    Label *get_dev_angular_speed_label(int index) {
+        return GET_LABEL_WITH_INDEX(m_dev_angular_speed, index);
+    }
+    Label *get_dev_morse_code_label(int index) {
+        return GET_LABEL_WITH_INDEX(m_dev_morse_code, index);
+    }
+    Label *get_dev_auth_label(int index) {
+        return GET_LABEL_WITH_INDEX(m_dev_auth, index);
+    }
 private:
-    std::vector<SDL_Texture*> mImagesData;
-    int mCurrentImage;
+    /* 设备状态窗口 label 控件 */
+    Label *m_dev_state[LED3000_DEVICES_COUNTS];
+    Label *m_dev_angle[LED3000_DEVICES_COUNTS];
+    Label *m_dev_angular_speed[LED3000_DEVICES_COUNTS];
+    Label *m_dev_morse_code[LED3000_DEVICES_COUNTS];
+    Label *m_dev_auth[LED3000_DEVICES_COUNTS];
+
+    ref<Shader> m_shader;
+    ref<RenderPass> m_render_pass;
+
+    using ImageHolder = std::unique_ptr<uint8_t[], void(*)(void*)>;
+    std::vector<std::pair<ref<Texture>, ImageHolder>> m_images;
+    int m_current_image;
     int mCurrentDevice; /* 当前选定的设备编号 */
     char mjsonBuffer[4096];
     Document mDocument;
