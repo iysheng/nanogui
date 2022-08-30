@@ -150,7 +150,6 @@ void *devices_entry(void *arg)
 
     while(1)
     {
-#if 0
         auto m = screen->getDeviceQueue(led_devp->uart.index).get();
         if (m)
         {
@@ -172,10 +171,6 @@ void *devices_entry(void *arg)
                 red_debug_lite("No support this id:%d", msg_id);
                 break;
         }
-#else
-        red_debug_lite("sth init \n");
-        sleep(1);
-#endif
     }
 }
 

@@ -18,35 +18,45 @@ NAMESPACE_BEGIN(nanogui)
 
 MessageDialog::MessageDialog(Widget *parent, Type type, const std::string &title,
               const std::string &message,
-              const std::string &button_text,
-              const std::string &alt_button_text, bool alt_button) : Window(parent, title) {
+              const std::string &confirmButtonText,
+              const std::string &setButtonText,
+              const std::string &cancleButtonText, bool setButton)
+
+  : Window(parent, title), m_widget_callback(nullptr)
+{
     set_layout(new BoxLayout(Orientation::Vertical,
                             Alignment::Middle, 10, 10));
     set_modal(true);
 
     Widget *panel1 = new Widget(this);
     panel1->set_layout(new BoxLayout(Orientation::Horizontal,
-                                     Alignment::Middle, 10, 15));
+                                    Alignment::Middle, 10, 15));
     int icon = 0;
-    switch (type) {
+    switch (type)
+    {
         case Type::Information: icon = m_theme->m_message_information_icon; break;
         case Type::Question: icon = m_theme->m_message_question_icon; break;
         case Type::Warning: icon = m_theme->m_message_warning_icon; break;
+        case Type::Choose: icon = 0; break;
     }
-    Label *icon_label = new Label(panel1, std::string(utf8(icon).data()), "icons");
-    icon_label->set_font_size(50);
+    Label *iconLabel = new Label(panel1, std::string(utf8(icon).data()), "icons");
+    iconLabel->set_font_size(50);
     m_message_label = new Label(panel1, message);
-    m_message_label->set_fixed_width(200);
     Widget *panel2 = new Widget(this);
     panel2->set_layout(new BoxLayout(Orientation::Horizontal,
-                                     Alignment::Middle, 0, 15));
+                                    Alignment::Middle, 0, 15));
 
-    if (alt_button) {
-        Button *button = new Button(panel2, alt_button_text, m_theme->m_message_alt_button_icon);
-        button->set_callback([&] { if (m_callback) m_callback(1); dispose(); });
+    m_cancel_button = new Button(panel2, cancleButtonText, m_theme->m_message_alt_button_icon);
+    m_cancel_button->set_callback([&] { if (m_widget_callback) m_widget_callback(m_cancel_button, 0); dispose();});
+    if (setButton)
+    {
+        m_set_button = new Button(panel2, setButtonText);
+        m_set_button->set_callback([&] { if (m_widget_callback) m_widget_callback(m_set_button, 2);
+        });
     }
-    Button *button = new Button(panel2, button_text, m_theme->m_message_primary_button_icon);
-    button->set_callback([&] { if (m_callback) m_callback(0); dispose(); });
+    m_confirm_button = new Button(panel2, confirmButtonText, m_theme->m_message_primary_button_icon);
+    m_confirm_button->set_callback([&] { if (m_widget_callback) m_widget_callback(m_confirm_button, 1); dispose(); });
+    /* 居中 */
     center();
     request_focus();
 }

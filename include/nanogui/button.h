@@ -97,6 +97,7 @@ public:
     /// Set the push callback (for any type of button).
     void set_callback(const std::function<void()> &callback) { m_callback = callback; }
 
+    void set_widget_callback(const std::function<void(Widget *)> &callback) { m_widget_callback = callback; }
     /// Return the change callback (for toggle buttons)
     std::function<void(bool)> change_callback() const { return m_change_callback; }
     /// Set the change callback (for toggle buttons).
@@ -153,6 +154,8 @@ protected:
 
     /// The callback issued for all types of buttons.
     std::function<void()> m_callback;
+
+    std::function<void(Widget *)> m_widget_callback;
 
     /// The callback issued for toggle buttons.
     std::function<void(bool)> m_change_callback;

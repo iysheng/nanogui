@@ -239,11 +239,10 @@ void do_with_green_light_mocode(Widget *widget, int choose)
       setWindow->set_background_image("/tmp/abc/red0.jpg");
       Window * mocodeWindow = widget->window();
       /* 标记为 modal winow, 该 window 会提前到最前面图层 */
-      mocodeWindow->set_modal(false);
       setWindow->set_modal(true);
       setWindow->set_layout(new BoxLayout(Orientation::Vertical,
                               Alignment::Middle, 0, 15));
-    
+
       Widget * configWidget = setWindow->add<Widget>();
       GridLayout * layout = new GridLayout(Orientation::Horizontal, 2,
                                      Alignment::Middle, 15, 5);
@@ -261,31 +260,23 @@ void do_with_green_light_mocode(Widget *widget, int choose)
       /////textBox->setSyncCharsValue(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode);
       textBox->set_font_size(16);
       textBox->set_alignment(TextBox::Alignment::Left);
-    
-#if 0
+
       Widget *btWidget = setWindow->add<Widget>();
       btWidget->set_layout(new BoxLayout(Orientation::Horizontal,
                                       Alignment::Middle, 0, 15));
-      btWidget->add<Button>("返回")->setWidgetCallback([](Widget *widget){
-          Window *wnd = widget->window()->parent()->gfind<Window>("莫码发送设置");
-          wnd->set_modal(true);
-          widget->window()->dispose();
+      btWidget->add<Button>("返回")->set_callback([setWindow, mocodeWindow](){
+          setWindow->dispose();
+          //mocodeWindow->set_modal(true);
           std::cout << "返回" << std::endl;
       });
-      btWidget->add<Button>("确认")->setWidgetCallback([](Widget *widget){
-          Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
-          Window *wnd = widget->window()->parent()->gfind<Window>("莫码发送设置");
-          wnd->set_modal(true);
-          widget->window()->dispose();
+      btWidget->add<Button>("确认")->set_callback([setWindow, mocodeWindow](){
+          Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(mocodeWindow->screen());
+          setWindow->dispose();
+          //mocodeWindow->set_modal(true);
           led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
-          led3000Window->gfind<Label>("dev" + std::to_string(led3000Window->getCurrentDevice()) + "Mocode")->setCaptionMerge(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode, led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mocode, '/');
+          led3000Window->get_dev_morse_code_label(led3000Window->getCurrentDevice())->set_caption_merge(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode, led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mocode, '/');
           std::cout << "确认" << std::endl;
       });
-    
-      Screen * screen = dynamic_cast<Screen *>(widget->window()->parent());
-      SDL_Renderer * render = screen->sdlRenderer();
-      screen->performLayout(render);
-#endif
       setWindow->center();
       setWindow->request_focus();
   }
@@ -498,39 +489,40 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test"),
           m_dev_auth[1]->set_caption_merge((mJsonValue.devices[1].green_led.auth ? "已" : "未"), "授权", '\0');
         }
 
-#if 0
-        /* 小部件网格 */
+        /* 设备控制窗口 */
         {
-          auto& cwindow = wdg<Window>("灯光功能 ࿒ ࿓ ࿔");
-          cwindow.setId("sLedFuncs");
-          cwindow.set_background_image("/tmp/abc/red.png");
+          auto* cwindow = new Window(this, "灯光功能 ࿒ ࿓ ࿔");
+          cwindow->set_background_image("/tmp/abc/red.png");
 
           /* 确定了 cwindow 的位置 */
-          cwindow.withPosition({0, 670});
+          cwindow->set_position({0, 670});
           /* 创建一个新的布局 */
           GridLayout * layout = new GridLayout(Orientation::Horizontal, 4,
                                          Alignment::Middle, 15, 5);
           layout->set_col_alignment({ Alignment::Maximum, Alignment::Fill });
           layout->set_spacing(0, 10);
           /* 定义了这个窗口的布局 */
-          cwindow.set_layout(layout);
-          cwindow.add<Label>("绿灯一", "sans-bold")->setId("sGreen");
-          cwindow.add<Button>("关闭", [&] {
-              msgdialog(MessageDialog::Type::Question, "绿灯控制", "确认要打开绿光么?", "确认", "取消", do_with_green_light_normal); });
-          cwindow.add<Button>("绿闪");
+          cwindow->set_layout(layout);
+          new Label(cwindow, "绿灯一", "sans-bold");
+          Button *test_btn = new Button(cwindow, "关闭");
+          test_btn->set_callback([&] {
+              new MessageDialog(this, MessageDialog::Type::Question, "绿灯控制", "确认要打开绿光么?", "确认", "取消", do_with_green_light_normal); });
+          new Button(cwindow, "绿闪");
           /* 这里会弹出来新的 MessageDialog, 新的 MessageDialog 支持弹出新的 Window
            * 测试发现这个 MessageDialog Widget 的 parent 竟然是 Led3000Window * ？？？
            * */
+          test_btn = new Button(cwindow, "莫码");
+          test_btn->set_callback([&] {
+              MessageDialog *dlg = new MessageDialog(this, MessageDialog::Type::Choose, "莫码发送设置", "准备发送莫码?", "确认", "配置", "取消", true);
+              dlg->set_widget_callback(do_with_green_light_mocode); });
 
-          Button * mocodeBtb = cwindow.add<Button>("莫码", [&] {
-              msgdialog(MessageDialog::Type::Choose, "莫码发送设置", "准备发送莫码?",
-              do_with_green_light_mocode); });
-
-          cwindow.add<Label>("白灯一", "sans-bold")->setId("sWhite");
-          cwindow.add<Button>("常亮");
-          cwindow.add<Button>("白闪");
-          cwindow.add<Button>("莫码");
+          new Label(cwindow, "白灯一", "sans-bold");
+          new Button(cwindow, "常亮");
+          new Button(cwindow, "白闪");
+          new Button(cwindow, "莫码");
         }
+
+#if 0
         Button * sysconfigBtb;
         /* 系统窗口 */
         {
