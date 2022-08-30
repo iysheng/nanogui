@@ -371,6 +371,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 set(NANOGUI_BUILD_RAPIDJSON ON)
 if (NANOGUI_BUILD_RAPIDJSON)
+include_directories(${CMAKE_SOURCE_DIR}/)
 include_directories(${CMAKE_SOURCE_DIR}/rapidjson)
 endif()
 
@@ -451,6 +452,13 @@ list(APPEND NANOGUI_EXTRA
 )
 endif()
 
+include_directories(${CMAKE_SOURCE_DIR}/led3000)
+list(APPEND NANOGUI_EXTRA
+  led3000/led3000gui.h
+  led3000/led3000gui.cpp
+  led3000/json_thread.cpp
+  led3000/devices_thread.cpp
+)
 # Compile main NanoGUI library
 add_library(nanogui ${NANOGUI_LIBRARY_TYPE}
   # Merge NanoVG into the NanoGUI library
@@ -623,12 +631,15 @@ endif()
 # Build example application if desired
 if (NANOGUI_BUILD_EXAMPLES)
   add_executable(example1      src/example1.cpp)
+  add_executable(ledmain       led3000/ledmain.cpp)
+
 #  add_executable(example2      src/example2.cpp)
 #  add_executable(example3      src/example3.cpp)
 #  add_executable(example4      src/example4.cpp)
 #  add_executable(example_icons src/example_icons.cpp)
 
-  target_link_libraries(example1      nanogui)
+  target_link_libraries(example1     nanogui)
+  target_link_libraries(ledmain      nanogui ${NANOGUI_LIBS})
 #  target_link_libraries(example2      nanogui)
 #  target_link_libraries(example3      nanogui ${NANOGUI_LIBS}) # For OpenGL
 #  target_link_libraries(example4      nanogui)
