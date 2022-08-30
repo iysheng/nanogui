@@ -37,12 +37,13 @@ public:
                   const std::string &setButtonText,
                   const std::string &cancleButtonText, bool setButton);
 
-#if 0
-    MessageDialog(Widget *parent, Type type, const std::string &title = "Untitled",
-                  const std::string &message = "Message",
-                  const std::string &button_text = "OK",
-                  const std::string &alt_button_text = "Cancel", bool alt_button = false);
-#endif
+    MessageDialog(Widget *parent, Type type, const std::string &title,
+                  const std::string &message,
+                  const std::string &set_button_text,
+                  const std::function<void(Widget *, int)> &callback )
+        : MessageDialog(parent, type, title, message, "确认", set_button_text, "取消", true)
+    {set_widget_callback(callback);}
+
     MessageDialog(Widget *parent, Type type, const std::string &title = "Untitled",
                   const std::string &message = "Message",
                   const std::string &button_text = "OK",

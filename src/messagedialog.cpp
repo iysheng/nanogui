@@ -21,7 +21,6 @@ MessageDialog::MessageDialog(Widget *parent, Type type, const std::string &title
               const std::string &confirmButtonText,
               const std::string &setButtonText,
               const std::string &cancleButtonText, bool setButton)
-
   : Window(parent, title), m_widget_callback(nullptr)
 {
     set_layout(new BoxLayout(Orientation::Vertical,

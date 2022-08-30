@@ -169,34 +169,22 @@ void do_with_sysconfig(Widget *widget, int choose)
       textBox->set_font_size(16);
       textBox->set_alignment(TextBox::Alignment::Left);
 
-#if 0
-      Widget *btWidget = setWindow->add<Widget>();
-      btWidget->set_layout(new BoxLayout(Orientation::Horizontal,
+      Widget *btn_widget = setWindow->add<Widget>();
+      btn_widget->set_layout(new BoxLayout(Orientation::Horizontal,
                                       Alignment::Middle, 0, 150));
-      btWidget->add<Button>("返回")->setWidgetCallback([](Widget *widget){
-          Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
-          Widget *wdg = widget->window()->parent()->gfind("系统参数设置");
-          Window * wnd = dynamic_cast<Window *>(wdg);
-          wnd->set_modal(true);
-          widget->window()->dispose();
+      btn_widget->add<Button>("返回")->set_callback([btn_widget](){
+          Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(btn_widget->window()->parent());
+          btn_widget->window()->dispose();
           led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CANCEL, "config"));
           std::cout << "返回" << std::endl;
       });
-      btWidget->add<Button>("确认")->setWidgetCallback([](Widget *widget){
-          Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
-          Widget *wdg = widget->window()->parent()->gfind("系统参数设置");
-          Window * wnd = dynamic_cast<Window *>(wdg);
-          wnd->set_modal(true);
-          /* sync to json config */
-          widget->window()->dispose();
+      btn_widget->add<Button>("确认")->set_callback([btn_widget](){
+          Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(btn_widget->window()->parent());
+          /* syncto json config */
+          btn_widget->window()->dispose();
           led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "config"));
           std::cout << "确认" << std::endl;
       });
-
-      Screen * screen = dynamic_cast<Screen *>(widget->window()->parent());
-      SDL_Renderer * render = screen->sdlRenderer();
-      screen->performLayout(render);
-#endif
       setWindow->center();
       setWindow->request_focus();
   }
@@ -522,28 +510,29 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test"),
           new Button(cwindow, "莫码");
         }
 
-#if 0
-        Button * sysconfigBtb;
         /* 系统窗口 */
         {
-          auto& swindow = wdg<Window>("系统功能");
+          Button * sysconfig_btn;
+          auto* swindow = new Window(this, "系统功能");
 
           /* 确定了 swindow 的位置 */
-          swindow.withPosition({980, 0});
+          swindow->set_position({980, 0});
           /* 创建一个新的布局 */
           GridLayout * layout = new GridLayout(Orientation::Horizontal, 1,
                                          Alignment::Middle, 5, 5);
           layout->set_col_alignment({ Alignment::Fill, Alignment::Fill });
           //layout->set_spacing(0, 5);
           /* 定义了这个窗口的布局 */
-          swindow.set_layout(layout);
-          swindow.add<Button>("关机⏻ ", [&] {
-              msgdialog(MessageDialog::Type::Question, "关机", "确认要关机么?", "确认", "取消", do_with_power_off); });
-          sysconfigBtb = swindow.add<Button>("系统设置", [&] {
-              msgdialog(MessageDialog::Type::Choose, "系统参数设置", "准备配置参数",
-              do_with_sysconfig); });
+          swindow->set_layout(layout);
+          sysconfig_btn = swindow->add<Button>("关机⏻ ");
+          sysconfig_btn->set_callback([&] {
+              new MessageDialog(this, MessageDialog::Type::Question, "关机", "确认要关机么?", "确认", "取消", do_with_power_off); });
+          sysconfig_btn = swindow->add<Button>("系统设置");
+          sysconfig_btn->set_callback([&] {
+              new MessageDialog(this, MessageDialog::Type::Choose, "系统参数设置", "准备配置参数", "参数配置", do_with_sysconfig);});
         }
 
+#if 0
         /* 设备选择 */
         {
           auto& chooseWindow = wdg<Window>("设备选择");
