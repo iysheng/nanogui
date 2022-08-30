@@ -308,8 +308,12 @@ Screen::Screen(const Vector2i &size, const std::string &caption, bool resizable,
             Screen *s = it->second;
             if (!s->m_process_events)
                 return;
-            s->cursor_pos_callback_event(x, y);
-            s->mouse_button_callback_event(button, action, modifiers);
+            /* 调试发现屏蔽 x == 0.0 和 y == 0.0 坐标才可以正常使用 */
+            if (x != 0.0 || y != 0.0)
+            {
+                s->cursor_pos_callback_event(x, y);
+                s->mouse_button_callback_event(button, action, modifiers);
+            }
         }
     );
 
