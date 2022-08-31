@@ -48,6 +48,7 @@ TextBox::TextBox(Widget *parent, const std::string &value)
     m_keyboard = new Keyboard(screen(), window());
     m_keyboard->set_size(Vector2i(320, 250));
     m_keyboard->set_visible(false);
+    m_keyboard->set_textbox(this);
     m_icon_extra_scale = .8f;
 }
 
