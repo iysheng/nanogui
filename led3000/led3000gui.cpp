@@ -252,13 +252,15 @@ void do_with_green_light_mocode(Widget *widget, int choose)
       Widget *btWidget = setWindow->add<Widget>();
       btWidget->set_layout(new BoxLayout(Orientation::Horizontal,
                                       Alignment::Middle, 0, 15));
-      btWidget->add<Button>("返回")->set_callback([setWindow, mocodeWindow](){
+      btWidget->add<Button>("返回")->set_callback([textBox, setWindow, mocodeWindow](){
+          textBox->keyboard_window()->dispose();
           setWindow->dispose();
           //mocodeWindow->set_modal(true);
           std::cout << "返回" << std::endl;
       });
-      btWidget->add<Button>("确认")->set_callback([setWindow, mocodeWindow](){
+      btWidget->add<Button>("确认")->set_callback([textBox, setWindow, mocodeWindow](){
           Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(mocodeWindow->screen());
+          textBox->keyboard_window()->dispose();
           setWindow->dispose();
           //mocodeWindow->set_modal(true);
           led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));

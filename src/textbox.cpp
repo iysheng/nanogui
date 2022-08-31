@@ -27,6 +27,7 @@ TextBox::TextBox(Widget *parent, const std::string &value)
       m_editable(false),
       m_spinnable(false),
       m_committed(true),
+      m_entered(false),
       m_value(value),
       m_default_value(""),
       m_alignment(Alignment::Center),
@@ -44,6 +45,9 @@ TextBox::TextBox(Widget *parent, const std::string &value)
       m_text_offset(0),
       m_last_click(0) {
     if (m_theme) m_font_size = m_theme->m_text_box_font_size;
+    m_keyboard = new Keyboard(screen(), window());
+    m_keyboard->set_size(Vector2i(320, 250));
+    m_keyboard->set_visible(false);
     m_icon_extra_scale = .8f;
 }
 
@@ -81,6 +85,8 @@ Vector2i TextBox::preferred_size(NVGcontext *ctx) const {
 }
 
 void TextBox::draw(NVGcontext* ctx) {
+    m_keyboard->set_visible(m_entered);
+    m_keyboard->set_modal(m_entered);
     Widget::draw(ctx);
 
     NVGpaint bg = nvgBoxGradient(ctx,
@@ -282,6 +288,7 @@ void TextBox::draw(NVGcontext* ctx) {
 
 bool TextBox::mouse_enter_event(const Vector2i &p, bool enter) {
     Widget::mouse_enter_event(p, enter);
+    m_entered = enter;
     return true;
 }
 
@@ -628,6 +635,34 @@ TextBox::SpinArea TextBox::spin_area(const Vector2i & pos) {
         }
     }
     return SpinArea::None;
+}
+
+void TextBox::perform_layout(NVGcontext *ctx) {
+    m_keyboard->perform_layout(ctx);
+
+    const Window *parent_window = window();
+
+    int anchor_size = m_keyboard->anchor_size();
+
+    if (parent_window) {
+        int pos_y = absolute_position().y() - parent_window->position().y() + m_size.y() / 2;
+        if (m_keyboard->side() == Keyboard::Right)
+            m_keyboard->set_anchor_pos(Vector2i(parent_window->width() + anchor_size, pos_y));
+        else
+            m_keyboard->set_anchor_pos(Vector2i(-anchor_size, pos_y));
+    } else {
+        m_keyboard->set_position(absolute_position() + Vector2i(width() + anchor_size + 1,  m_size.y() / 2 - anchor_size));
+    }
+}
+
+void TextBox::set_side(Keyboard::Side side) {
+    if (m_keyboard->side() == Keyboard::Right &&
+        m_chevron_icon == m_theme->m_popup_chevron_right_icon)
+        set_chevron_icon(m_theme->m_popup_chevron_left_icon);
+    else if (m_keyboard->side() == Keyboard::Left &&
+             m_chevron_icon == m_theme->m_popup_chevron_left_icon)
+        set_chevron_icon(m_theme->m_popup_chevron_right_icon);
+    m_keyboard->set_side(side);
 }
 
 NAMESPACE_END(nanogui)

@@ -16,6 +16,7 @@
 #pragma once
 
 #include <nanogui/widget.h>
+#include <keyboard.h>
 #include <cstdio>
 #include <sstream>
 
@@ -92,6 +93,10 @@ public:
 
     virtual Vector2i preferred_size(NVGcontext *ctx) const override;
     virtual void draw(NVGcontext* ctx) override;
+    virtual void perform_layout(NVGcontext *ctx) override;
+    void set_side(Keyboard::Side keyboard_side);
+    Keyboard::Side side() const { return m_keyboard->side(); }
+    Window *keyboard_window() const { return m_keyboard->window(); }
 protected:
     bool check_format(const std::string &input, const std::string &format);
     bool copy_selection();
@@ -109,10 +114,14 @@ protected:
     enum class SpinArea { None, Top, Bottom };
     SpinArea spin_area(const Vector2i &pos);
 
+    void set_chevron_icon(int icon) { m_chevron_icon = icon; }
+    int chevron_icon() const { return m_chevron_icon; }
+
 protected:
     bool m_editable;
     bool m_spinnable;
     bool m_committed;
+    bool m_entered;
     std::string m_value;
     std::string m_default_value;
     Alignment m_alignment;
@@ -131,6 +140,8 @@ protected:
     int m_mouse_down_modifier;
     float m_text_offset;
     double m_last_click;
+    Keyboard *m_keyboard;
+    int m_chevron_icon;
 };
 
 /**

@@ -23,6 +23,7 @@ NAMESPACE_BEGIN(nanogui)
  */
 class NANOGUI_EXPORT Window : public Widget {
     friend class Popup;
+    friend class Keyboard;
 public:
     Window(Widget *parent, const std::string &title = "Untitled", const std::string &BackgroundImage="");
 
