@@ -66,7 +66,7 @@ void do_with_sysconfig(Widget *widget, int choose)
       /* 设置控件大小 */
       textBox->set_fixed_size(Vector2i(150, 20));
       textBox->set_value(led3000Window->getJsonValue()->eths[0].ip);
-      /////textBox->setSyncCharsValue(led3000Window->getJsonValue()->eths[0].ip);
+      textBox->setSyncCharsValue(led3000Window->getJsonValue()->eths[0].ip);
       /* 设置字体大小 */
       textBox->set_font_size(16);
       //textBox->setFormat("[-]?[0-9]*\\.?[0-9]+");
@@ -76,7 +76,7 @@ void do_with_sysconfig(Widget *widget, int choose)
       textBox->set_editable(true);
       textBox->set_fixed_size(Vector2i(150, 20));
       textBox->set_value(led3000Window->getJsonValue()->eths[0].netmask);
-      /////textBox->setSyncCharsValue(led3000Window->getJsonValue()->eths[0].netmask);
+      textBox->setSyncCharsValue(led3000Window->getJsonValue()->eths[0].netmask);
       textBox->set_font_size(16);
       textBox->set_alignment(TextBox::Alignment::Left);
       configWidget->add<Label>("网卡0网关:", "sans-bold");
@@ -84,7 +84,7 @@ void do_with_sysconfig(Widget *widget, int choose)
       textBox->set_editable(true);
       textBox->set_fixed_size(Vector2i(150, 20));
       textBox->set_value(led3000Window->getJsonValue()->eths[0].gateway);
-      /////textBox->setSyncCharsValue(led3000Window->getJsonValue()->eths[0].gateway);
+      textBox->setSyncCharsValue(led3000Window->getJsonValue()->eths[0].gateway);
       textBox->set_font_size(16);
       textBox->set_alignment(TextBox::Alignment::Left);
 
@@ -100,7 +100,7 @@ void do_with_sysconfig(Widget *widget, int choose)
       textBox->set_editable(true);
       textBox->set_fixed_size(Vector2i(150, 20));
       textBox->set_value(led3000Window->getJsonValue()->eths[1].ip);
-      /////textBox->setSyncCharsValue(led3000Window->getJsonValue()->eths[1].ip);
+      textBox->setSyncCharsValue(led3000Window->getJsonValue()->eths[1].ip);
       textBox->set_font_size(16);
       textBox->set_alignment(TextBox::Alignment::Left);
       eth1Widget->add<Label>("网卡1子网掩码:", "sans-bold");
@@ -108,7 +108,7 @@ void do_with_sysconfig(Widget *widget, int choose)
       textBox->set_editable(true);
       textBox->set_fixed_size(Vector2i(150, 20));
       textBox->set_value(led3000Window->getJsonValue()->eths[1].netmask);
-      /////textBox->setSyncCharsValue(led3000Window->getJsonValue()->eths[1].netmask);
+      textBox->setSyncCharsValue(led3000Window->getJsonValue()->eths[1].netmask);
       textBox->set_font_size(16);
       textBox->set_alignment(TextBox::Alignment::Left);
       eth1Widget->add<Label>("网卡1网关:", "sans-bold");
@@ -116,7 +116,7 @@ void do_with_sysconfig(Widget *widget, int choose)
       textBox->set_editable(true);
       textBox->set_fixed_size(Vector2i(150, 20));
       textBox->set_value(led3000Window->getJsonValue()->eths[1].gateway);
-/////      textBox->setSyncCharsValue(led3000Window->getJsonValue()->eths[1].gateway);
+      textBox->setSyncCharsValue(led3000Window->getJsonValue()->eths[1].gateway);
       textBox->set_font_size(16);
       textBox->set_alignment(TextBox::Alignment::Left);
 
@@ -130,7 +130,7 @@ void do_with_sysconfig(Widget *widget, int choose)
       textBox->set_editable(true);
       textBox->set_fixed_size(Vector2i(150, 20));
       textBox->set_value(led3000Window->getJsonValue()->server.ip);
-      /////textBox->setSyncCharsValue(led3000Window->getJsonValue()->server.ip);
+      textBox->setSyncCharsValue(led3000Window->getJsonValue()->server.ip);
       textBox->set_font_size(16);
       textBox->set_alignment(TextBox::Alignment::Left);
 
@@ -141,7 +141,7 @@ void do_with_sysconfig(Widget *widget, int choose)
       textBox->set_editable(true);
       textBox->set_fixed_size(Vector2i(150, 20));
       textBox->set_value(std::to_string(led3000Window->getJsonValue()->server.port));
-      /////textBox->setSyncUshortValue(&(led3000Window->getJsonValue()->server.port));
+      textBox->setSyncUshortValue(&(led3000Window->getJsonValue()->server.port));
       textBox->set_font_size(16);
       textBox->set_alignment(TextBox::Alignment::Left);
 
@@ -153,7 +153,7 @@ void do_with_sysconfig(Widget *widget, int choose)
       textBox->set_editable(true);
       textBox->set_fixed_size(Vector2i(350, 20));
       textBox->set_value(led3000Window->getJsonValue()->devices[0].camera_url);
-//////////      textBox->setSyncCharsValue(&(led3000Window->getJsonValue()->devices[0].camera_url[0]));
+      textBox->setSyncCharsValue(&(led3000Window->getJsonValue()->devices[0].camera_url[0]));
       textBox->set_font_size(16);
       textBox->set_alignment(TextBox::Alignment::Left);
 
@@ -165,7 +165,7 @@ void do_with_sysconfig(Widget *widget, int choose)
       textBox->set_editable(true);
       textBox->set_fixed_size(Vector2i(350, 20));
       textBox->set_value(led3000Window->getJsonValue()->devices[1].camera_url);
-      /////textBox->setSyncCharsValue(&(led3000Window->getJsonValue()->devices[1].camera_url[0]));
+      textBox->setSyncCharsValue(&(led3000Window->getJsonValue()->devices[1].camera_url[0]));
       textBox->set_font_size(16);
       textBox->set_alignment(TextBox::Alignment::Left);
 

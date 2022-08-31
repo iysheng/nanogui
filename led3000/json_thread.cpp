@@ -32,7 +32,7 @@ using std::endl;
 
 using namespace nanogui;
 using namespace std;
-#if 0
+
 void just_show_sysinfo(led3000_config_t *config)
 {
 	int i;
@@ -145,11 +145,9 @@ static void do_with_confirm(std::string message, Led3000Window * window)
 		red_debug_lite("wow invalid confirm info");
 	}
 }
-#endif
 
 void *json_thread(void *arg)
 {
-#if 0
     Led3000Window *screen = (Led3000Window *)arg;
 	red_debug_lite("Hello Json Thread json file path:%s", screen->getFileName().c_str());
 
@@ -173,5 +171,4 @@ void *json_thread(void *arg)
 				break;
 		}
 	}
-#endif
 }

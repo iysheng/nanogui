@@ -50,10 +50,14 @@ public:
     void set_spinnable(bool spinnable) { m_spinnable = spinnable; }
 
     const std::string &value() const { return m_value; }
-    void set_value(const std::string &value) { m_value = value; }
+    void set_value(const std::string &value) { m_value = value; syncValue();}
 
     const std::string &default_value() const { return m_default_value; }
     void set_default_value(const std::string &default_value) { m_default_value = default_value; }
+
+    void syncValue() const { if (mSyncChars) {memcpy(mSyncChars, m_value.c_str(), 1 + m_value.length());} else if (mSyncUshort && m_value.size() > 0) {*mSyncUshort = (unsigned short)stoi(m_value);}}
+    void setSyncCharsValue(char *syncChars) { mSyncChars = syncChars;}
+    void setSyncUshortValue(unsigned short *syncShort) { mSyncUshort = syncShort;}
 
     Alignment alignment() const { return m_alignment; }
     void set_alignment(Alignment align) { m_alignment = align; }
@@ -122,6 +126,8 @@ protected:
     bool m_spinnable;
     bool m_committed;
     bool m_entered;
+    char *mSyncChars = nullptr;
+    unsigned short *mSyncUshort = nullptr;
     std::string m_value;
     std::string m_default_value;
     Alignment m_alignment;
