@@ -37,7 +37,7 @@ int main(int /* argc */, char ** /* argv */)
 
         /* scoped variables */ {
             /* 赋值的时候，会执行 ref 类模板的符号重载，然后会增加这个引用计数 */
-            ref<Led3000Window> app = new Led3000Window();
+            nanogui::ref<Led3000Window> app = new Led3000Window();
 
             std::thread sJsonThread(json_thread, app);
             sJsonThread.detach();
