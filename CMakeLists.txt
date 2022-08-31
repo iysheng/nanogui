@@ -30,6 +30,12 @@ project(nanogui
     ${NANOGUI_VERSION}
 )
 
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+
+find_package(FFmpeg REQUIRED)
+
+include_directories(${FFmpeg_INCLUDE_DIR})
+
 if (NOT IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw/src")
   message(FATAL_ERROR "The NanoGUI dependency repositories (GLFW, etc.) are missing! "
     "You probably did not clone the project with --recursive. It is possible to recover "
@@ -458,6 +464,8 @@ list(APPEND NANOGUI_EXTRA
   led3000/led3000gui.cpp
   led3000/keyboard.h
   led3000/keyboard.cpp
+  led3000/videoview.h
+  led3000/videoview.cpp
   led3000/json_thread.cpp
   led3000/devices_thread.cpp
 )
@@ -641,7 +649,7 @@ if (NANOGUI_BUILD_EXAMPLES)
 #  add_executable(example_icons src/example_icons.cpp)
 
   target_link_libraries(example1     nanogui)
-  target_link_libraries(ledmain      nanogui ${NANOGUI_LIBS})
+  target_link_libraries(ledmain      nanogui ${NANOGUI_LIBS} ${FFmpeg_LIBRARY})
 #  target_link_libraries(example2      nanogui)
 #  target_link_libraries(example3      nanogui ${NANOGUI_LIBS}) # For OpenGL
 #  target_link_libraries(example4      nanogui)
