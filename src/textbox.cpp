@@ -22,7 +22,7 @@
 
 NAMESPACE_BEGIN(nanogui)
 
-TextBox::TextBox(Widget *parent, const std::string &value)
+TextBox::TextBox(Widget *parent, const std::string &value, KeyboardType type)
     : Widget(parent),
       m_editable(false),
       m_spinnable(false),
@@ -45,8 +45,7 @@ TextBox::TextBox(Widget *parent, const std::string &value)
       m_text_offset(0),
       m_last_click(0) {
     if (m_theme) m_font_size = m_theme->m_text_box_font_size;
-    m_keyboard = new Keyboard(screen(), window());
-    m_keyboard->set_size(Vector2i(320, 250));
+    m_keyboard = new Keyboard(screen(), window(), type);
     m_keyboard->set_visible(false);
     m_keyboard->set_textbox(this);
     m_icon_extra_scale = .8f;
@@ -86,8 +85,13 @@ Vector2i TextBox::preferred_size(NVGcontext *ctx) const {
 }
 
 void TextBox::draw(NVGcontext* ctx) {
+  if (m_entered)
+  {
     m_keyboard->set_visible(m_entered);
-    m_keyboard->set_modal(m_entered);
+    m_keyboard->get_textbox()->window()->set_modal(!m_entered);
+    m_keyboard->window()->set_modal(m_entered);
+    m_keyboard->window()->request_focus();
+  }
     Widget::draw(ctx);
 
     NVGpaint bg = nvgBoxGradient(ctx,
@@ -639,11 +643,10 @@ TextBox::SpinArea TextBox::spin_area(const Vector2i & pos) {
 }
 
 void TextBox::perform_layout(NVGcontext *ctx) {
-    m_keyboard->perform_layout(ctx);
-
     const Window *parent_window = window();
 
     int anchor_size = m_keyboard->anchor_size();
+    m_keyboard->perform_layout(ctx);
 
     if (parent_window) {
         int pos_y = absolute_position().y() - parent_window->position().y() + m_size.y() / 2;

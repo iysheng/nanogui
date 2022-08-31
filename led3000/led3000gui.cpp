@@ -149,7 +149,7 @@ void do_with_sysconfig(Widget *widget, int choose)
       cameraWidget->set_layout(new BoxLayout(Orientation::Horizontal,
                                       Alignment::Middle, 0, 15));
       cameraWidget->add<Label>("摄像头1路径:", "sans-bold");
-      /////textBox = cameraWidget->add<TextBox>("", "", KeyboardType::Full);
+      textBox = cameraWidget->add<TextBox>("", KeyboardType::Full);
       textBox->set_editable(true);
       textBox->set_fixed_size(Vector2i(350, 20));
       textBox->set_value(led3000Window->getJsonValue()->devices[0].camera_url);
@@ -161,7 +161,7 @@ void do_with_sysconfig(Widget *widget, int choose)
       cameraWidget->set_layout(new BoxLayout(Orientation::Horizontal,
                                       Alignment::Middle, 0, 15));
       cameraWidget->add<Label>("摄像头2路径:", "sans-bold");
-      /////textBox = cameraWidget->add<TextBox>("", "", KeyboardType::Full);
+      textBox = cameraWidget->add<TextBox>("", KeyboardType::Full);
       textBox->set_editable(true);
       textBox->set_fixed_size(Vector2i(350, 20));
       textBox->set_value(led3000Window->getJsonValue()->devices[1].camera_url);

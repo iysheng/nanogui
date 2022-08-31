@@ -70,7 +70,7 @@ Keyboard::Keyboard(Widget *parent, Window *parent_window, KeyboardType type)
   {
     AdvancedGridLayout *layout = new AdvancedGridLayout({34,34,34}, {34,34,34,34,34});
     layout->set_margin(5);
-    this->set_layout(layout);
+    set_layout(layout);
     this->add<Button>("1")->set_callback([this]() {KEYBOARD_BUTTON('1')});
     this->add<Button>("2")->set_callback([this]() {KEYBOARD_BUTTON('2')});
     this->add<Button>("3")->set_callback([this]() {KEYBOARD_BUTTON('3')});
@@ -194,6 +194,8 @@ Keyboard::Keyboard(Widget *parent, Window *parent_window, KeyboardType type)
 
 void Keyboard::perform_layout(NVGcontext *ctx) {
     if (m_layout || m_children.size() != 1) {
+        /* 自动调整窗口大小 */
+        set_size(preferred_size(ctx));
         Widget::perform_layout(ctx);
     } else {
         m_children[0]->set_position(Vector2i(0));
