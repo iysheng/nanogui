@@ -240,12 +240,11 @@ void do_with_green_light_mocode(Widget *widget, int choose)
       configWidget->set_layout(layout);
       /* 创建 textBox */
       configWidget->add<Label>("莫码信息:", "sans-bold");
-      /////auto& textBox = configWidget->wdg<TextBox>("", "", KeyboardType::Full);
-      auto* textBox = new TextBox(configWidget);/////configWidget->add<TextBox>("", "");////// 这个只是为了编译通过，上述一行需要被取消注释，需要修改 , KeyboardType::Full);
+      auto* textBox = configWidget->add<TextBox>("", KeyboardType::Full);
       textBox->set_editable(true);
       textBox->set_fixed_size(Vector2i(150, 20));
       textBox->set_value(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode);
-      /////textBox->setSyncCharsValue(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode);
+      textBox->setSyncCharsValue(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode);
       textBox->set_font_size(16);
       textBox->set_alignment(TextBox::Alignment::Left);
 
