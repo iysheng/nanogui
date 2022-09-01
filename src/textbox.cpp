@@ -85,7 +85,7 @@ Vector2i TextBox::preferred_size(NVGcontext *ctx) const {
 }
 
 void TextBox::draw(NVGcontext* ctx) {
-  if (m_entered)
+  if (m_entered && window()->modal())
   {
     m_keyboard->set_visible(m_entered);
     m_keyboard->get_textbox()->window()->set_modal(!m_entered);
