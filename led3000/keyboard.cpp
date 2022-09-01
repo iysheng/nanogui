@@ -97,7 +97,7 @@ Keyboard::Keyboard(Widget *parent, Window *parent_window, KeyboardType type)
     button_ok->set_callback([this]() {
                 red_debug_lite("num ok pushed:%s\n", this->mKeyboardValue.c_str());
                 this->window()->set_visible(false);
-                this->parent()->window()->request_focus();
+                this->get_textbox()->window()->request_focus();
                 this->get_textbox()->set_value(this->mKeyboardValue);
         });
     /* 测试发现大小是 29，30 这里直接固定大小,但是随着字体大小的改变
