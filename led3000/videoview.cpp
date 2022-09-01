@@ -155,7 +155,6 @@ re_open:
     Vector2i top_left = Vector2i(p_video_obj->pixel_to_pos(Vector2f(0.f, 0.f))),
              size     = Vector2i(p_video_obj->pixel_to_pos(Vector2f(p_video_obj->size())) - Vector2f(top_left));
 
-    red_debug_lite("sws w=%d h=%d raw w=%d h=%d", size[0], size[1], p_video_obj->size()[0], p_video_obj->size()[1]);
     sws_clx = sws_getContext(
         p_avcodec_context->width,
         p_avcodec_context->height,
@@ -168,8 +167,6 @@ re_open:
         NULL,
         NULL);
 
-
-    red_debug_lite("w=%d h=%d", size[0], size[1]);
 
     value = av_image_alloc(p_video_obj->m_pixels, p_video_obj->m_pitch, size[0], size[1], dst_fix_fmt, 1);
     if (value < 0)
@@ -210,7 +207,6 @@ just_draw:
                 if (p_video_obj->mStatus != R_VIDEO_RUNNING)
                     p_video_obj->mStatus = R_VIDEO_INITLED;
                 av_packet_unref(&packet);
-                ///red_debug_lite("new frame=%p", p_video_obj->m_pixels[0]);
             }
             else
             {
@@ -258,7 +254,6 @@ VideoView::VideoView(Widget* parent):ImageView(parent), m_texture(nullptr),
            m_size,
            Texture::InterpolationMode::Trilinear,
            Texture::InterpolationMode::Nearest);
-        red_debug_lite("w=%d h=%d", m_size[0], m_size[1]);
     }
 
     m_thread = new std::thread(VideoView::video_draw_handler, this);
@@ -281,7 +276,6 @@ void VideoView::draw(NVGcontext *ctx)
             m_texture->upload(m_pixels[0]);
             ImageView::set_image(m_texture);
             mStatus = R_VIDEO_RUNNING; 
-            red_debug_lite("size=%d.%d", m_texture->size()[0], m_texture->size()[1]);
         }
     }
     else if (mStatus == R_VIDEO_RUNNING)
