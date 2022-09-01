@@ -52,7 +52,7 @@ int VideoView::video_draw_handler(void *object)
     int value;
     Vector2i sdl_rect;
 
-    p_video_obj->mStatus = R_VIDEO_RUNNING;
+    ///p_video_obj->mStatus = R_VIDEO_RUNNING;
 
     if (!strlen(p_video_obj->mSrcUrl))
     {
@@ -83,7 +83,7 @@ re_open:
     if (value)
     {
         av_strerror(value, errbuf, sizeof(errbuf));
-        red_debug_lite("Failed open av input:%d  %s\n", value, errbuf);
+        red_debug_lite("Failed open av input:%d  %s src=%s\n", value, errbuf, p_video_obj->mSrcUrl);
         sleep(1);
         goto re_open;
         return -3;
@@ -143,7 +143,7 @@ re_open:
     av_dump_format(p_avformat_context, 0, p_video_obj->mSrcUrl, 0);
 
     src_fix_fmt = p_avcodec_context->pix_fmt;
-    dst_fix_fmt = AV_PIX_FMT_RGB32;//AVCOL_PRI_BT709;//AV_PIX_FMT_RGB32;//AVCOL_PRI_BT709;
+    dst_fix_fmt = AV_PIX_FMT_0BGR32;///AV_PIX_FMT_RGB32_1;//AV_PIX_FMT_RGB32;//AVCOL_PRI_BT709;//AV_PIX_FMT_RGB32;//AVCOL_PRI_BT709;
     p_frame = av_frame_alloc();
 
     if (!p_frame)
@@ -153,8 +153,9 @@ re_open:
     }
 
     Vector2i top_left = Vector2i(p_video_obj->pixel_to_pos(Vector2f(0.f, 0.f))),
-             size     = Vector2i(p_video_obj->pixel_to_pos(Vector2f(p_video_obj->image()->size())) - Vector2f(top_left));
+             size     = Vector2i(p_video_obj->pixel_to_pos(Vector2f(p_video_obj->size())) - Vector2f(top_left));
 
+    red_debug_lite("sws w=%d h=%d raw w=%d h=%d", size[0], size[1], p_video_obj->size()[0], p_video_obj->size()[1]);
     sws_clx = sws_getContext(
         p_avcodec_context->width,
         p_avcodec_context->height,
@@ -181,7 +182,6 @@ re_open:
         red_debug_lite("dst memory size=%d\n", value);
     }
 
-    p_video_obj->mStatus = R_VIDEO_INITLED;
 just_draw:
     while (1)
     {
@@ -205,8 +205,12 @@ just_draw:
 
             if (!frame_finished)
             {
+                /* 转换像素和分辨率,存储到 m_pixels 和 m_pitch 中 */
                 sws_scale(sws_clx, (const uint8_t * const *)p_frame->data, p_frame->linesize, 0, p_avcodec_context->height, p_video_obj->m_pixels, p_video_obj->m_pitch);
+                if (p_video_obj->mStatus != R_VIDEO_RUNNING)
+                    p_video_obj->mStatus = R_VIDEO_INITLED;
                 av_packet_unref(&packet);
+                ///red_debug_lite("new frame=%p", p_video_obj->m_pixels[0]);
             }
             else
             {
@@ -238,31 +242,26 @@ exit:
     return 0;
 }
 
-VideoView::VideoView(Widget* parent):ImageView(parent),
+VideoView::VideoView(Widget* parent):ImageView(parent), m_texture(nullptr),
     m_thread(nullptr), mSrcUrl("rtsp://admin:jariled123@192.168.100.64")
 {
     Window * wnd = parent->window();
     int hh = wnd->theme()->m_window_header_height;
     Screen* screen = dynamic_cast<Screen*>(wnd->parent());
     assert(screen);
-    /* TODO create a thread to get image data */
-#if 0
-    if (!mTexture)
+    if (!m_texture)
     {
         /* 默认创建一个 window size - 20 大小的窗口 */
-        mTexture = SDL_CreateTexture(screen->sdlRenderer(), SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, wnd->size().x, wnd->size().y - hh);
-        red_debug_lite("w=%d h=%d", wnd->size().x - 10, wnd->size().y - hh);
+        m_texture = new Texture(
+           Texture::PixelFormat::RGBA,
+           Texture::ComponentFormat::UInt8,
+           m_size,
+           Texture::InterpolationMode::Trilinear,
+           Texture::InterpolationMode::Nearest);
+        red_debug_lite("w=%d h=%d", m_size[0], m_size[1]);
     }
-#endif
 
-    if (m_thread)
-    {
-        red_debug_lite("wait previous thread done");
-        ///SDL_WaitThread(m_thread, NULL);
-        red_debug_lite("new thread start");
-        return;
-    }
-    m_thread = new std::thread(VideoView::video_draw_handler, mSrcUrl);
+    m_thread = new std::thread(VideoView::video_draw_handler, this);
     m_thread->detach();
 }
 
@@ -271,91 +270,25 @@ VideoView::~VideoView() {}
 /* 图像绘制函数 */
 void VideoView::draw(NVGcontext *ctx)
 {
-    ImageView::draw(ctx);
-
-#if 0
-    SDL_Point ap = getAbsolutePos();
-
-    const Screen* screen = dynamic_cast<const Screen*>(this->window()->parent());
-    assert(screen);
-    Vector2f screenSize = screen->size().tofloat();
-    Vector2f scaleFactor = imageSizeF().cquotient(screenSize) * mScale;
-    /* 转换为浮点数 */
-    Vector2f positionInScreen = absolutePosition().tofloat();
-    Vector2f positionAfterOffset = positionInScreen + mOffset;
-    /* 计算系数 */
-    Vector2f imagePosition = positionAfterOffset.cquotient(screenSize);
-
-    /* 测试打印为 0 */
-    //red_debug_lite("mOffset(%f,%f)", mOffset.x, mOffset.y);
     if (mStatus == R_VIDEO_INITLED)
     {
-        if (mTexture)
+        if (m_texture)
         {
-          Vector2i borderPosition = Vector2i{ ap.x, ap.y } + mOffset.toint();
-          /* 图像大小 */
-          Vector2i borderSize = scaledImageSizeF().toint();
-
-          SDL_Rect br{ borderPosition.x + 1, borderPosition.y + 1,  borderSize.x - 2, borderSize.y - 2 };
-
-          PntRect r = srect2pntrect(br);
-          PntRect wr = { ap.x, ap.y, ap.x + width(), ap.y + height() };
-
-          if (r.x1 <= wr.x1) r.x1 = wr.x1;
-          if (r.x2 >= wr.x2) r.x2 = wr.x2;
-          if (r.y1 <= wr.y1) r.y1 = wr.y1;
-          if (r.y2 >= wr.y2) r.y2 = wr.y2;
-
-          int ix = 0, iy = 0;
-          int iw = r.x2 - r.x1;
-          int ih = r.y2 - r.y1;
-          if (positionAfterOffset.x <= ap.x)
-          {
-            ix = ap.x - positionAfterOffset.x;
-            iw = mImageSize.x- ix;
-            positionAfterOffset.x = absolutePosition().x;
-          }
-          if (positionAfterOffset.y <= ap.y)
-          {
-            iy = ap.y - positionAfterOffset.y;
-            ih = mImageSize.y - iy;
-            positionAfterOffset.y = absolutePosition().y;
-          }
-          SDL_Rect imgrect{ix, iy, iw, ih};
-          SDL_Rect rect{
-              (int)std::round(positionAfterOffset.x),
-              (int)std::round(positionAfterOffset.y),
-           mImageSize.x,
-           mImageSize.y,
-         };
-          //red_debug_lite("%d %d %d %d", rect.x, rect.y, rect.w, rect.h);
-          /* 绘制一帧的数据信息 */
-          SDL_UpdateTexture(mTexture, NULL, m_pixels[0], m_pitch[0]);
-          SDL_RenderCopy(renderer, mTexture, NULL, &rect);
-          return;
+            if (m_fixed_size != Vector2i(0))
+            {
+                m_texture->resize(m_fixed_size);
+            }
+            m_texture->upload(m_pixels[0]);
+            ImageView::set_image(m_texture);
+            mStatus = R_VIDEO_RUNNING; 
+            red_debug_lite("size=%d.%d", m_texture->size()[0], m_texture->size()[1]);
         }
     }
-    else if (mStatus == R_VIDEO_UNINITLED)
+    else if (mStatus == R_VIDEO_RUNNING)
     {
-        if (m_thread)
-        {
-            red_debug_lite("wait previous thread done");
-            SDL_WaitThread(m_thread, NULL);
-            red_debug_lite("new thread start");
-        }
-        m_thread = SDL_CreateThread(VideoView::video_draw_handler, mSrcUrl, this);
+        m_texture->upload(m_pixels[0]);
     }
-    else
-    {
-        return;
-    }
-
-    drawWidgetBorder(renderer, ap);
-    drawImageBorder(renderer, ap);
-
-    if (helpersVisible())
-        drawHelpers(renderer);
-#endif
+    ImageView::draw(ctx);
 }
 
 NAMESPACE_END(nanogui)

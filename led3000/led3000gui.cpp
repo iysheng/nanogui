@@ -630,13 +630,13 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test"),
           btn->set_font_size(30);
         }
 
-#if 1
         {
             /* 创建一个新的 window 对象用来显示图片 */
             auto* img_window = new Window(this, "摄像头一视频");
             /* 设置各个方向的 margin 为 0 */
             img_window->set_layout(new GroupLayout(0,0,0,0));
             img_window->set_size(Vector2i(400, 300));
+            img_window->set_position(Vector2i(0, 0));
 
             /* 在这个 window 上创建一个 img_window 控件 */
             img_window->add<VideoView>(mJsonValue.devices[0].camera_url);
@@ -644,12 +644,12 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test"),
             auto* img2_window = new Window(this, "摄像头二视频");
             /* 设置各个方向的 margin 为 0 */
             img2_window->set_layout(new GroupLayout(0,0,0,0));
-            img2_window->set_size(Vector2i(400, 300));
+            img2_window->set_position(Vector2i(400, 0));
 
             /* 在这个 window 上创建一个 img2_window 控件 */
-            img2_window->add<VideoView>(mJsonValue.devices[1].camera_url);
+            auto * video_image = img2_window->add<VideoView>(mJsonValue.devices[1].camera_url);
+            video_image->set_fixed_size(Vector2i(400, 300));
         }
-#endif
 
         /* 确定每一个部件的大小 */
         perform_layout();

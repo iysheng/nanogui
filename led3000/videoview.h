@@ -55,6 +55,7 @@ public:
     static int video_draw_handler(void *object);
 
     int setSrcUrl(const char *srcurl) {memcpy(mSrcUrl, srcurl, strlen(srcurl) + 1);return 0;}
+    Texture * get_texture(){return m_texture;};
 
 protected:
     char mSrcUrl[SRCURL_MAX];
@@ -62,6 +63,7 @@ protected:
     VideoViewStatus mStatus;
     uint8_t* m_pixels[4];
     int m_pitch[4];
+    Texture *m_texture;
 };
 
 NAMESPACE_END(nanogui)

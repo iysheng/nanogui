@@ -63,7 +63,7 @@ public:
            freed when the parent window is deleted */
         new Label(window, "Push buttons", "sans-bold");
 
-        Button *b = new Button(window, "Plain button");
+        Button *b = new Button(window, "Plain button", "/tmp/abc/btn.bmp");
         b->set_callback([] { std::cout << "pushed!" << std::endl; });
         b->set_tooltip("short tooltip");
 
@@ -162,6 +162,7 @@ public:
         img_panel->set_images(icons);
         popup->set_fixed_size(Vector2i(245, 150));
 
+        /* 显示 image 的窗口 */
         auto image_window = new Window(this, "Selected image");
         image_window->set_position(Vector2i(710, 15));
         image_window->set_layout(new GroupLayout(3));
@@ -170,11 +171,16 @@ public:
         for (auto& icon : icons) {
             Vector2i size;
             int n = 0;
+            /* 构造了一个 texture_data 对象
+             * 分别是 uint8_t * 这个是像素信息首地址么 ?
+             * void (*)(void *) 释放内存的函数
+             * */
             ImageHolder texture_data(
                 stbi_load((icon.second + ".png").c_str(), &size.x(), &size.y(), &n, 0),
                 stbi_image_free);
             assert(n == 4);
 
+            /* 创建一个 Texture */
             Texture *tex = new Texture(
                 Texture::PixelFormat::RGBA,
                 Texture::ComponentFormat::UInt8,
@@ -182,23 +188,30 @@ public:
                 Texture::InterpolationMode::Trilinear,
                 Texture::InterpolationMode::Nearest);
 
+            /* 将 ImageHolder 推送到 Texture */
             tex->upload(texture_data.get());
 
+            /* 构建一个对象，并添加到 m_images 向量的尾部 */
             m_images.emplace_back(tex, std::move(texture_data));
         }
 
+        /* 创建一个显示 image 的控件 */
         ImageView *image_view = new ImageView(image_window);
+        /* 如果 m_images 不为空，那么显示这个向量的第一个元素的第一个成员 */
         if (!m_images.empty())
+            /* 设置关联的图像，推送的是 Texture */
             image_view->set_image(m_images[0].first);
         image_view->center();
         m_current_image = 0;
 
         img_panel->set_callback([this, image_view](int i) {
             std::cout << "Selected item " << i << std::endl;
+            /* 修改 image view window 显示的内容 */
             image_view->set_image(m_images[i].first);
             m_current_image = i;
         });
 
+#if 0
         image_view->set_pixel_callback(
             [this](const Vector2i& index, char **out, size_t size) {
                 const Texture *texture = m_images[m_current_image].first.get();
@@ -209,6 +222,7 @@ public:
                 }
             }
         );
+#endif
 
         new Label(window, "File dialog", "sans-bold");
         tools = new Widget(window);
@@ -343,6 +357,7 @@ public:
         });
 
         window = new Window(this, "Grid of small widgets");
+        window->set_background_image("/tmp/abc/icons/icon1.png");
         window->set_position(Vector2i(425, 300));
         GridLayout *layout =
             new GridLayout(Orientation::Horizontal, 2,
@@ -571,7 +586,14 @@ private:
     ref<Shader> m_shader;
     ref<RenderPass> m_render_pass;
 
+    /*
+     * std::unique_ptr 是一个类模板，包含了一个管理的对象和一个删除方法
+     * get 成员函数，返回管理的对象
+     * */
     using ImageHolder = std::unique_ptr<uint8_t[], void(*)(void*)>;
+    /*
+     * 定义了一个向量对象
+     * */
     std::vector<std::pair<ref<Texture>, ImageHolder>> m_images;
     int m_current_image;
 };
