@@ -601,12 +601,14 @@ void Screen::draw_setup() {
 #endif
 
 #if defined(NANOGUI_USE_OPENGL) || defined(NANOGUI_USE_GLES)
+	/* 这里有点重复调用的意思，在这里 Screen 对象的构造函数中已经调用过了 */
     CHK(glViewport(0, 0, m_fbsize[0], m_fbsize[1]));
 #endif
 }
 
 void Screen::draw_teardown() {
 #if defined(NANOGUI_USE_OPENGL) || defined(NANOGUI_USE_GLES)
+	/* 这个函数是进行交换 buffers ？？？ */
     glfwSwapBuffers(m_glfw_window);
 #elif defined(NANOGUI_USE_METAL)
     mnvgSetColorTexture(m_nvg_context, nullptr);
@@ -626,7 +628,8 @@ void Screen::draw_all() {
 
         /* 初始化 GLFW， 关联窗口 */
         draw_setup();
-        /* 虚函数初始化 */
+        /* 虚函数初始化, Screen 的 draw_contents 就是清屏
+		 * */
         draw_contents();
         draw_widgets();
         draw_teardown();
@@ -637,6 +640,7 @@ void Screen::draw_all() {
     }
 }
 
+/* 清屏 */
 void Screen::draw_contents() {
     clear();
 }
@@ -651,7 +655,9 @@ void Screen::nvg_flush() {
 void Screen::draw_widgets() {
     nvgBeginFrame(m_nvg_context, m_size[0], m_size[1], m_pixel_ratio);
 
-    /* 在这里绘制内容！！！ */
+    /* 在这里绘制内容！！！
+	 * 绘制 screen 的 child widget 的 draw 成员函数
+	 * */
     draw(m_nvg_context);
 
     double elapsed = glfwGetTime() - m_last_interaction;

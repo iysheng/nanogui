@@ -609,6 +609,7 @@ int main(int /* argc */, char ** /* argv */) {
             app->dec_ref();
             app->draw_all();
             app->set_visible(true);
+			/* 设置刷新速率,是每秒 60 帧么 */
             nanogui::mainloop(1 / 60.f * 1000);
         }
 
