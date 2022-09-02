@@ -44,6 +44,7 @@ extern std::map<GLFWwindow *, Screen *> __nanogui_screens;
   extern void disable_saved_application_state_osx();
 #endif
 
+  /* nanogui 的初始化函数 */
 void init() {
     #if !defined(_WIN32)
         /* Avoid locale-related number parsing issues */
@@ -55,6 +56,7 @@ void init() {
         glfwInitHint(GLFW_COCOA_CHDIR_RESOURCES, GLFW_FALSE);
     #endif
 
+        /* 设置出错的回调函数 */
     glfwSetErrorCallback(
         [](int error, const char *descr) {
             if (error == GLFW_NOT_INITIALIZED)
@@ -63,6 +65,7 @@ void init() {
         }
     );
 
+    /* glfw 初始化 */
     if (!glfwInit())
         throw std::runtime_error("Could not initialize GLFW!");
 

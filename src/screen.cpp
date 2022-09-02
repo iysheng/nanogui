@@ -147,6 +147,7 @@ Screen::Screen(const Vector2i &size, const std::string &caption, bool resizable,
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #elif defined(NANOGUI_USE_GLES)
+    /* 初始化 openGL ES 相关配置 */
     glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
     glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, NANOGUI_GLES_VERSION);
@@ -193,6 +194,7 @@ Screen::Screen(const Vector2i &size, const std::string &caption, bool resizable,
         if (fullscreen) {
             GLFWmonitor *monitor = glfwGetPrimaryMonitor();
             const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+            /* 创建 glfw 窗口 */
             m_glfw_window = glfwCreateWindow(mode->width, mode->height,
                                              caption.c_str(), monitor, nullptr);
         } else {
@@ -432,6 +434,7 @@ void Screen::initialize(GLFWwindow *window, bool shutdown_glfw) {
     m_shutdown_glfw = shutdown_glfw;
     glfwGetWindowSize(m_glfw_window, &m_size[0], &m_size[1]);
     glfwGetFramebufferSize(m_glfw_window, &m_fbsize[0], &m_fbsize[1]);
+    red_debug_lite("size=%d,%d", m_fbsize[0], m_fbsize[1]);
 
     m_pixel_ratio = get_pixel_ratio(window);
 
@@ -569,6 +572,9 @@ void Screen::clear() {
 #endif
 }
 
+/* 针对编译的配置选项初始化 glfw 相关的显示配置，具体包括
+ * openGL ES、openGL 等的初始化
+ * */
 void Screen::draw_setup() {
 #if defined(NANOGUI_USE_OPENGL) || defined(NANOGUI_USE_GLES)
     glfwMakeContextCurrent(m_glfw_window);
@@ -618,6 +624,7 @@ void Screen::draw_teardown() {
 #endif
 }
 
+/* 绘制函数,在初始化的时候会执行该函数 */
 void Screen::draw_all() {
     if (m_redraw) {
         m_redraw = false;

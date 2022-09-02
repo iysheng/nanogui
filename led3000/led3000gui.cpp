@@ -271,7 +271,7 @@ void do_with_green_light_mocode(Widget *widget, int choose)
   }
 }
 
-Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test"),
+Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false, true),
         mFileName("/opt/led3000.json"), mFp(nullptr)
       {
           /* 系统配置参数初始化 */
