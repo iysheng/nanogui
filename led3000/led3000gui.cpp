@@ -61,7 +61,7 @@ void do_with_sysconfig(Widget *widget, int choose)
       configWidget->set_layout(layout);
       configWidget->add<Label>("网卡0IP:", "sans-bold");
       /* 创建 textBox */
-      auto* textBox = configWidget->add<TextBox>();
+      auto* textBox = configWidget->add<TextBox>("",KeyboardType::NumberIP);
       textBox->set_editable(true);
       /* 设置控件大小 */
       textBox->set_fixed_size(Vector2i(150, 20));
@@ -72,7 +72,7 @@ void do_with_sysconfig(Widget *widget, int choose)
       //textBox->setFormat("[-]?[0-9]*\\.?[0-9]+");
       textBox->set_alignment(TextBox::Alignment::Left);
       configWidget->add<Label>("网卡0子网掩码:", "sans-bold");
-      textBox = configWidget->add<TextBox>();
+      textBox = configWidget->add<TextBox>("",KeyboardType::NumberIP);
       textBox->set_editable(true);
       textBox->set_fixed_size(Vector2i(150, 20));
       textBox->set_value(led3000Window->getJsonValue()->eths[0].netmask);
@@ -80,7 +80,7 @@ void do_with_sysconfig(Widget *widget, int choose)
       textBox->set_font_size(16);
       textBox->set_alignment(TextBox::Alignment::Left);
       configWidget->add<Label>("网卡0网关:", "sans-bold");
-      textBox = configWidget->add<TextBox>();
+      textBox = configWidget->add<TextBox>("",KeyboardType::NumberIP);
       textBox->set_editable(true);
       textBox->set_fixed_size(Vector2i(150, 20));
       textBox->set_value(led3000Window->getJsonValue()->eths[0].gateway);
@@ -96,7 +96,7 @@ void do_with_sysconfig(Widget *widget, int choose)
       /* 定义了这个窗口的布局 */
       eth1Widget->set_layout(layout);
       eth1Widget->add<Label>("网卡1IP:", "sans-bold");
-      textBox = eth1Widget->add<TextBox>();
+      textBox = eth1Widget->add<TextBox>("",KeyboardType::NumberIP);
       textBox->set_editable(true);
       textBox->set_fixed_size(Vector2i(150, 20));
       textBox->set_value(led3000Window->getJsonValue()->eths[1].ip);
@@ -104,7 +104,7 @@ void do_with_sysconfig(Widget *widget, int choose)
       textBox->set_font_size(16);
       textBox->set_alignment(TextBox::Alignment::Left);
       eth1Widget->add<Label>("网卡1子网掩码:", "sans-bold");
-      textBox = eth1Widget->add<TextBox>();
+      textBox = eth1Widget->add<TextBox>("",KeyboardType::NumberIP);
       textBox->set_editable(true);
       textBox->set_fixed_size(Vector2i(150, 20));
       textBox->set_value(led3000Window->getJsonValue()->eths[1].netmask);
@@ -112,7 +112,7 @@ void do_with_sysconfig(Widget *widget, int choose)
       textBox->set_font_size(16);
       textBox->set_alignment(TextBox::Alignment::Left);
       eth1Widget->add<Label>("网卡1网关:", "sans-bold");
-      textBox = eth1Widget->add<TextBox>();
+      textBox = eth1Widget->add<TextBox>("",KeyboardType::NumberIP);
       textBox->set_editable(true);
       textBox->set_fixed_size(Vector2i(150, 20));
       textBox->set_value(led3000Window->getJsonValue()->eths[1].gateway);
@@ -126,7 +126,7 @@ void do_with_sysconfig(Widget *widget, int choose)
       Widget *serveripWidget = serverWidget->add<Widget>();
       serveripWidget->set_layout(layout);
       serveripWidget->add<Label>("服务器IP:", "sans-bold");
-      textBox = serveripWidget->add<TextBox>();
+      textBox = serveripWidget->add<TextBox>("", KeyboardType::NumberIP);
       textBox->set_editable(true);
       textBox->set_fixed_size(Vector2i(150, 20));
       textBox->set_value(led3000Window->getJsonValue()->server.ip);

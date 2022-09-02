@@ -23,6 +23,7 @@ using std::endl;
 
 extern void *devices_thread(void *arg);
 extern void *json_thread(void *arg);
+extern void *network_thread(void *arg);
 
 using namespace nanogui;
 using namespace rapidjson;
@@ -39,11 +40,14 @@ int main(int /* argc */, char ** /* argv */)
             /* 赋值的时候，会执行 ref 类模板的符号重载，然后会增加这个引用计数 */
             nanogui::ref<Led3000Window> app = new Led3000Window();
 
-            std::thread sJsonThread(json_thread, app);
-            sJsonThread.detach();
-        
-            std::thread sDevicesThread(devices_thread, app);
-            sDevicesThread.detach();
+            std::thread s_json_thread(json_thread, app);
+            s_json_thread.detach();
+
+            std::thread s_device_thread(devices_thread, app);
+            s_device_thread.detach();
+
+            std::thread s_network_thread(network_thread, app);
+            s_network_thread.detach();
 
             /* 减少引用计数 */
             app->dec_ref();

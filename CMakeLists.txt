@@ -468,6 +468,7 @@ list(APPEND NANOGUI_EXTRA
   led3000/videoview.cpp
   led3000/json_thread.cpp
   led3000/devices_thread.cpp
+  led3000/network_thread.cpp
 )
 # Compile main NanoGUI library
 add_library(nanogui ${NANOGUI_LIBRARY_TYPE}
