@@ -91,6 +91,9 @@ void mainloop(float refresh) {
     auto mainloop_iteration = []() {
         int num_screens = 0;
 
+		/*
+		 * EMSCRIPTEN 和 webUI 有关系
+		 * */
         #if defined(EMSCRIPTEN)
             double emscripten_now = glfwGetTime();
             bool emscripten_redraw = false;
@@ -102,11 +105,19 @@ void mainloop(float refresh) {
 
         /* Run async functions */ {
             std::lock_guard<std::mutex> guard(m_async_mutex);
+			/* 执行所有的 m_async_functions 函数类 */
             for (auto &f : m_async_functions)
                 f();
+			/* 清除所有的 m_async_functions 成员，
+			 * m_async_functions 是一个 vector
+			 * */
             m_async_functions.clear();
         }
 
+		/* 检查所有的 screen 对象
+		 * __nanogui_screens 是一个 map 类型，具体为
+		 * std::map<GLFWwindow *, Screen *> __nanogui_screens
+		 * */
         for (auto kv : __nanogui_screens) {
             Screen *screen = kv.second;
             if (!screen->visible()) {
@@ -119,7 +130,11 @@ void mainloop(float refresh) {
                 if (emscripten_redraw || screen->tooltip_fade_in_progress())
                     screen->redraw();
             #endif
+				/* 执行这个 screen 的 draw_all 成员函数
+				 * 这个已经在 main 函数中执行过一次了啊，为什么要重复 draw_all 呢
+				 * */
             screen->draw_all();
+			/* 更新显示的屏幕数量 */
             num_screens++;
         }
 
@@ -149,9 +164,21 @@ void mainloop(float refresh) {
     std::chrono::microseconds quantum;
     size_t quantum_count = 1;
     if (refresh >= 0) {
+		/* 定义了 us 的一个对象
+		 * 1'000 在 c++ 中表示 1000
+		 * 1'123 表示 1123
+		 * */
         quantum = std::chrono::microseconds((int64_t)(refresh * 1'000));
+		/* 如果这个数量超过 50000 */
         while (quantum.count() > 50'000) {
+			/* 将单位缩小
+			 * 因为重载了 / 符号，所有只会将数量除以2, 单位不会变
+			 * */
             quantum /= 2;
+			/* 将数值放大
+			 * 举例子： 表示 10ms 可以是数值 == 10, 单位 == 1ms
+			 *                    也可以是数值 == 20, 单位 == 0.5ms
+			 * */
             quantum_count *= 2;
         }
     } else {
@@ -163,6 +190,7 @@ void mainloop(float refresh) {
        view roughly every 50 ms (default); this is to support animations
        such as progress bars while keeping the system load
        reasonably low */
+	/* 构造了一个刷新线程 */
     refresh_thread = std::thread(
         [quantum, quantum_count]() {
             while (true) {
@@ -172,6 +200,7 @@ void mainloop(float refresh) {
                     std::this_thread::sleep_for(quantum);
                     for (auto kv : __nanogui_screens) {
                         if (kv.second->tooltip_fade_in_progress())
+						/* 执行 screen 对象的 redraw() 成员函数 */
                             kv.second->redraw();
                     }
                 }
