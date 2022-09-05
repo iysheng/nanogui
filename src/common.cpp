@@ -38,6 +38,7 @@
 
 NAMESPACE_BEGIN(nanogui)
 
+/* 实例化了一个 map 的模板类 */
 extern std::map<GLFWwindow *, Screen *> __nanogui_screens;
 
 #if defined(__APPLE__)

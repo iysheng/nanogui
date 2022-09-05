@@ -28,6 +28,7 @@ NAMESPACE_BEGIN(nanogui)
  */
 class NANOGUI_EXPORT Theme : public Object {
 public:
+    /* 需要 nanovg 上下文来加载字体 */
     Theme(NVGcontext *ctx);
 
     /* Fonts */

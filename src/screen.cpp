@@ -78,6 +78,9 @@ static float get_pixel_ratio(GLFWwindow *window) {
     return emscripten_get_device_pixel_ratio();
 #else
     float xscale, yscale;
+    /*
+     * 获取窗口内容的比例， 内容比例是当前的 DPI 和平台默认的 DPI 的比值
+     * */
     glfwGetWindowContentScale(window, &xscale, &yscale);
     return xscale;
 #endif
@@ -147,7 +150,9 @@ Screen::Screen(const Vector2i &size, const std::string &caption, bool resizable,
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #elif defined(NANOGUI_USE_GLES)
-    /* 初始化 openGL ES 相关配置 */
+    /* 初始化 openGL ES 相关配置,为创建对应的 window 做准备
+     * 这些配置的 hints 参数会一直持续，直到再次被修改或者调用函数 glfwDefaultWindowHints()
+     * */
     glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
     glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, NANOGUI_GLES_VERSION);
@@ -187,6 +192,7 @@ Screen::Screen(const Vector2i &size, const std::string &caption, bool resizable,
 #endif
 
     glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
+    /* 配置窗口是否支持缩放 */
     glfwWindowHint(GLFW_RESIZABLE, resizable ? GL_TRUE : GL_FALSE);
     glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
 
@@ -194,7 +200,7 @@ Screen::Screen(const Vector2i &size, const std::string &caption, bool resizable,
         if (fullscreen) {
             GLFWmonitor *monitor = glfwGetPrimaryMonitor();
             const GLFWvidmode *mode = glfwGetVideoMode(monitor);
-            /* 创建 glfw 窗口 */
+            /* 创建 glfw 窗口,保存到 m_glfw_window 变量 */
             m_glfw_window = glfwCreateWindow(mode->width, mode->height,
                                              caption.c_str(), monitor, nullptr);
         } else {
@@ -228,10 +234,13 @@ Screen::Screen(const Vector2i &size, const std::string &caption, bool resizable,
     }
 
 #if defined(NANOGUI_USE_OPENGL) || defined(NANOGUI_USE_GLES)
+    /* 设置上下文关联的窗口 */
     glfwMakeContextCurrent(m_glfw_window);
 #endif
 
     glfwSetInputMode(m_glfw_window, GLFW_TOUCH, GLFW_TRUE);
+    /* 禁用光标 */
+    glfwSetInputMode(m_glfw_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 #if defined(NANOGUI_GLAD)
     if (!glad_initialized) {
@@ -253,15 +262,21 @@ Screen::Screen(const Vector2i &size, const std::string &caption, bool resizable,
     }
 #endif
 
+    /* 获取显存的大小,用来配置 glViewport 函数 */
     glfwGetFramebufferSize(m_glfw_window, &m_fbsize[0], &m_fbsize[1]);
 
 #if defined(NANOGUI_USE_OPENGL) || defined(NANOGUI_USE_GLES)
+    /* 设置 viewport https://docs.gl/gl4/glViewport
+     * 设置的参数会影响 glfw 坐标系到 window 坐标系之间的转换,一般地 x 和 y 都设置为 0
+     * width 和 height 设置为窗口的宽度和高度
+     * */
     CHK(glViewport(0, 0, m_fbsize[0], m_fbsize[1]));
     CHK(glClearColor(m_background[0], m_background[1],
                      m_background[2], m_background[3]));
     CHK(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
                 GL_STENCIL_BUFFER_BIT));
 
+    /* 设置 glfw 立即进行 buffer 的 swap */
     glfwSwapInterval(0);
     glfwSwapBuffers(m_glfw_window);
 #endif
@@ -276,6 +291,7 @@ Screen::Screen(const Vector2i &size, const std::string &caption, bool resizable,
 #endif
 
     /* Propagate GLFW events to the appropriate Screen instance */
+    /* 设置光标回调函数 */
     glfwSetCursorPosCallback(m_glfw_window,
         [](GLFWwindow *w, double x, double y) {
             auto it = __nanogui_screens.find(w);
@@ -301,6 +317,7 @@ Screen::Screen(const Vector2i &size, const std::string &caption, bool resizable,
         }
     );
 
+    /* 设置触摸回调函数 */
     glfwSetTouchCallback(m_glfw_window,
         [](GLFWwindow *w, int touch, int type, int action, double x, double y) {
             int button = GLFW_MOUSE_BUTTON_LEFT, modifiers = 0;
@@ -319,6 +336,7 @@ Screen::Screen(const Vector2i &size, const std::string &caption, bool resizable,
         }
     );
 
+    /* 设置按键的回调函数 */
     glfwSetKeyCallback(m_glfw_window,
         [](GLFWwindow *w, int key, int scancode, int action, int mods) {
             auto it = __nanogui_screens.find(w);
@@ -410,6 +428,7 @@ Screen::Screen(const Vector2i &size, const std::string &caption, bool resizable,
         }
     );
 
+    /* 继续初始化，在这个函数中会创建 nanovg 的上下文 */
     initialize(m_glfw_window, true);
 
 #if defined(NANOGUI_USE_METAL)
@@ -482,6 +501,7 @@ void Screen::initialize(GLFWwindow *window, bool shutdown_glfw) {
 #if defined(NANOGUI_USE_OPENGL)
     m_nvg_context = nvgCreateGL3(flags);
 #elif defined(NANOGUI_USE_GLES)
+    /* 创建 nanovg 的上下文 */
     m_nvg_context = nvgCreateGLES2(flags);
 #elif defined(NANOGUI_USE_METAL)
     void *nswin = glfwGetCocoaWindow(window);
@@ -496,6 +516,7 @@ void Screen::initialize(GLFWwindow *window, bool shutdown_glfw) {
         throw std::runtime_error("Could not initialize NanoVG!");
 
     m_visible = glfwGetWindowAttrib(window, GLFW_VISIBLE) != 0;
+    /* 设置 theme */
     set_theme(new Theme(m_nvg_context));
     m_mouse_pos = Vector2i(0);
     m_mouse_state = m_modifiers = 0;
