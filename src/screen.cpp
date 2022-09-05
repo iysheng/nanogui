@@ -597,6 +597,11 @@ void Screen::clear() {
  * openGL ES、openGL 等的初始化
  * */
 void Screen::draw_setup() {
+    static bool s_draw_setup_flag = false;
+    if (s_draw_setup_flag)
+    {
+        return;
+    }
 #if defined(NANOGUI_USE_OPENGL) || defined(NANOGUI_USE_GLES)
     glfwMakeContextCurrent(m_glfw_window);
 #elif defined(NANOGUI_USE_METAL)
@@ -631,6 +636,7 @@ void Screen::draw_setup() {
 	/* 这里有点重复调用的意思，在这里 Screen 对象的构造函数中已经调用过了 */
     CHK(glViewport(0, 0, m_fbsize[0], m_fbsize[1]));
 #endif
+    s_draw_setup_flag = true;
 }
 
 void Screen::draw_teardown() {
@@ -781,6 +787,7 @@ void Screen::redraw() {
     if (!m_redraw) {
         m_redraw = true;
         #if !defined(EMSCRIPTEN)
+        /* 发送空的 event,可以让阻塞着的 glfwWaitEvents 和 glfwWaitEventsTimeout 函数返回 */
             glfwPostEmptyEvent();
         #endif
     }
