@@ -288,6 +288,10 @@ protected:
      * accepted.  For example, when ``m_enabled == false``, the state of a
      * CheckBox cannot be changed, or a TextBox will not allow new input.
      */
+    /* 用来定义当前 widget 是否使能，
+     * 比如输入框，使能了才能输入内容，或者
+     * checkbox : 检验框使能了才可以选中
+     * */
     bool m_enabled;
     bool m_focused, m_mouse_focus;
     std::string m_tooltip;

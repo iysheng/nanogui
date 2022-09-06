@@ -152,7 +152,7 @@ void mainloop(float refresh) {
             /* Wait for mouse/keyboard or empty refresh events */
             glfwWaitEvents();
         #endif
-    };
+    }; /* 定义的 mainloop_iteration 匿名函数  */
 
 #if defined(EMSCRIPTEN)
     emscripten_refresh = refresh;
@@ -194,8 +194,9 @@ void mainloop(float refresh) {
        view roughly every 50 ms (default); this is to support animations
        such as progress bars while keeping the system load
        reasonably low */
-	/* 构造了一个刷新线程 */
+	/* 构造了一个刷新线程,周期性地重新绘制界面 */
     refresh_thread = std::thread(
+            /* lambda 表达式，匿名函数 */
         [quantum, quantum_count]() {
             while (true) {
                 for (size_t i = 0; i < quantum_count; ++i) {
@@ -203,8 +204,13 @@ void mainloop(float refresh) {
                         return;
                     std::this_thread::sleep_for(quantum);
                     for (auto kv : __nanogui_screens) {
+                    /*
+                     * fade: 淡入淡出
+                     * */
                         if (kv.second->tooltip_fade_in_progress())
-						/* 执行 screen 对象的 redraw() 成员函数 */
+                        /* 执行 screen 对象的 redraw() 成员函数
+                         * 发送空信号，触发重新绘制
+                         * */
                             kv.second->redraw();
                     }
                 }
@@ -216,9 +222,14 @@ void mainloop(float refresh) {
 
     try {
         while (mainloop_active)
+            /*  如果定义了 mainloop_iteration 这个迭代函数，执行这个函数
+             *  实际测试，一直在循环执行 mainloop_iteration 对应的匿名函数
+             *  */
             mainloop_iteration();
 
-        /* Process events once more */
+        /* Process events once more
+         * 因为定义了 mainloop_iteration 实际测试这个函数未执行到这里
+         * */
         glfwPollEvents();
     } catch (const std::exception &e) {
         std::cerr << "Caught exception in main loop: " << e.what() << std::endl;

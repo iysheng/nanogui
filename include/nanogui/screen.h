@@ -273,6 +273,9 @@ protected:
     NVGcontext *m_nvg_context = nullptr;
     GLFWcursor *m_cursors[(size_t) Cursor::CursorCount];
     Cursor m_cursor;
+    /* 向量，保存已经聚焦的 widgets
+     * 可以认为 vector 是一个可以保存任意类型的动态数组
+     * */
     std::vector<Widget *> m_focus_path;
     Vector2i m_fbsize;
     float m_pixel_ratio;

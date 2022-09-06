@@ -178,6 +178,7 @@ void Window::center() {
     Widget *widget = this;
     while (widget->parent())
         widget = widget->parent();
+    /* 使用 screen 来居中这个 window */
     ((Screen *) widget)->center_window(this);
 }
 

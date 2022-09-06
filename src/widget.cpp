@@ -67,14 +67,18 @@ Vector2i Widget::preferred_size(NVGcontext *ctx) const {
 
 void Widget::perform_layout(NVGcontext *ctx) {
     if (m_layout) {
+        /* 如果这个控件自己有 m_layout 定义，那么执行这个 layout */
         m_layout->perform_layout(ctx, this);
     } else {
+        /* 否则直接遍历所有的 child 控件 */
         for (auto c : m_children) {
             Vector2i pref = c->preferred_size(ctx), fix = c->fixed_size();
+            /* 确定控件的大小 */
             c->set_size(Vector2i(
                 fix[0] ? fix[0] : pref[0],
                 fix[1] ? fix[1] : pref[1]
             ));
+            /* 执行 child 的 perform_layout 函数 */
             c->perform_layout(ctx);
         }
     }
@@ -234,7 +238,7 @@ void Widget::request_focus() {
     ((Screen *) widget)->update_focus(this);
 }
 
-/* 绘制窗口!!!, widget 是最小的部件 ??? */
+/* 绘制窗口!!!, widget 是最小的部件 */
 void Widget::draw(NVGcontext *ctx) {
     #if defined(NANOGUI_SHOW_WIDGET_BOUNDS)
         nvgStrokeWidth(ctx, 1.0f);
@@ -248,13 +252,16 @@ void Widget::draw(NVGcontext *ctx) {
     if (m_children.empty())
         return;
 
+    /* 当前坐标系的转换 */
     nvgTranslate(ctx, m_pos.x(), m_pos.y());
     /* 递归遍历绘制 child widget 的内容 */
     for (auto child : m_children) {
         if (!child->visible())
             continue;
         #if !defined(NANOGUI_SHOW_WIDGET_BOUNDS)
+        /* 没有定义显示 widget 的边框 */
             nvgSave(ctx);
+            /* 当前矩形和 child 矩形相交,结果始终是一个矩形 */
             nvgIntersectScissor(ctx, child->m_pos.x(), child->m_pos.y(),
                                 child->m_size.x(), child->m_size.y());
         #endif

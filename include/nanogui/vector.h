@@ -248,6 +248,7 @@ using Vector4i     = Array<int32_t, 4>;
  * +---------+-------------+----------------+-------------+
  * \endrst
  */
+/* Color 类 */
 class Color : public Vector4f {
 public:
     using Vector4f::Vector4f;
@@ -325,6 +326,7 @@ public:
      * \param alpha
      * The alpha component of the color.
      */
+    /* 构造函数 */
     Color(float intensity, float alpha)
         : Color(Vector3f(intensity), alpha) { }
 

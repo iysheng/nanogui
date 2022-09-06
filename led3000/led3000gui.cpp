@@ -651,7 +651,10 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
             video_image->set_fixed_size(Vector2i(400, 300));
         }
 
-        /* 确定每一个部件的大小 */
+        /* 确定每一个部件的大小
+         * 这个函数使用 layout 布局来计算每一个控件的大小的位置, 一般地这个函数只会执行一次，所以新
+         * 弹出来的窗口，需要主动执行 perform_layout() 重新计算新弹出来的窗口上的部件的位置和大小信息
+         * */
         perform_layout();
 
         /* All NanoGUI widgets are initialized at this point. Now

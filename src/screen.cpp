@@ -349,6 +349,11 @@ Screen::Screen(const Vector2i &size, const std::string &caption, bool resizable,
         }
     );
 
+    /*
+     * char 回调，表示的是 character events: 是一些物理按键触发导致的 unicode 代码
+     * 按键和 character 并不是一一对应的，单个 key 可能会产生多个 characters 或者
+     * 一个 character 可能由多个 key 才能触发, 这些是按键、输入法和操作系统影响的
+     * */
     glfwSetCharCallback(m_glfw_window,
         [](GLFWwindow *w, unsigned int codepoint) {
             auto it = __nanogui_screens.find(w);
@@ -412,10 +417,12 @@ Screen::Screen(const Vector2i &size, const std::string &caption, bool resizable,
 
             Screen *s = it->second;
             // focus_event: 0 when false, 1 when true
+            // 回调这个 screen 的 focus_event 回调函数
             s->focus_event(focused != 0);
         }
     );
 
+#if 0 /* 不涉及到窗口缩放 */
     glfwSetWindowContentScaleCallback(m_glfw_window,
         [](GLFWwindow* w, float, float) {
             auto it = __nanogui_screens.find(w);
@@ -427,6 +434,7 @@ Screen::Screen(const Vector2i &size, const std::string &caption, bool resizable,
             s->resize_callback_event(s->m_size.x(), s->m_size.y());
         }
     );
+#endif
 
     /* 继续初始化，在这个函数中会创建 nanovg 的上下文 */
     initialize(m_glfw_window, true);
@@ -523,7 +531,9 @@ void Screen::initialize(GLFWwindow *window, bool shutdown_glfw) {
     m_drag_active = false;
     m_last_interaction = glfwGetTime();
     m_process_events = true;
+    /* 初始化的时候，默认为 true */
     m_redraw = true;
+    /* 关联 window 和 screen 指针到这个 map */
     __nanogui_screens[m_glfw_window] = this;
 
     for (size_t i = 0; i < (size_t) Cursor::CursorCount; ++i)
@@ -660,11 +670,14 @@ void Screen::draw_all() {
         void *pool = autorelease_init();
 #endif
 
-        /* 初始化 GLFW， 关联窗口 */
+        /* 初始化 GLFW， 关联窗口
+         * 感觉好多setup 的操作在 screen 的构造函数中就以及初始化过了
+         * */
         draw_setup();
         /* 虚函数初始化, Screen 的 draw_contents 就是清屏
-		 * */
+         * */
         draw_contents();
+        /* 绘制所有的 child widget */
         draw_widgets();
         draw_teardown();
 
@@ -694,11 +707,13 @@ void Screen::draw_widgets() {
 	 * */
     draw(m_nvg_context);
 
+    /* 单位是 s */
     double elapsed = glfwGetTime() - m_last_interaction;
 
     if (elapsed > 0.5f) {
-        /* Draw tooltips */
+        /* Draw tooltips 绘制控件的提示信息 */
         const Widget *widget = find_widget(m_mouse_pos);
+        /* 如果当前悬停在某个 widget 并且这个 widget 有 tooltip 信息可供显示 */
         if (widget && !widget->tooltip().empty()) {
             int tooltip_width = 150;
 
@@ -959,10 +974,12 @@ void Screen::resize_callback_event(int, int) {
     redraw();
 }
 
+/* 更新 focus 到指定的 widget 部件 */
 void Screen::update_focus(Widget *widget) {
     for (auto w: m_focus_path) {
         if (!w->focused())
             continue;
+        /* 取消之前已经 focus 的部件 */
         w->focus_event(false);
     }
     m_focus_path.clear();
@@ -973,9 +990,11 @@ void Screen::update_focus(Widget *widget) {
             window = widget;
         widget = widget->parent();
     }
+    /* 回调所有 widgets 的 focus_event 函数 */
     for (auto it = m_focus_path.rbegin(); it != m_focus_path.rend(); ++it)
         (*it)->focus_event(true);
 
+    /* 如果是一个 window，那么将这个 window 提到前面 */
     if (window)
         move_window_to_front((Window *) window);
 }
@@ -988,14 +1007,20 @@ void Screen::dispose_window(Window *window) {
     remove_child(window);
 }
 
+/* 居中指定 window 的过程中会主动调用 perform_layout() 函数完成对部件的重新布局 */
 void Screen::center_window(Window *window) {
     if (window->size() == 0) {
+        /*
+         * 执行部件的 preferred_size() 函数计算部件自己期望的大小
+         * */
         window->set_size(window->preferred_size(m_nvg_context));
         window->perform_layout(m_nvg_context);
     }
+    /* 设置 window 窗口的位置 */
     window->set_position((m_size - window->size()) / 2);
 }
 
+/* 这里没有看太懂 */
 void Screen::move_window_to_front(Window *window) {
     m_children.erase(std::remove(m_children.begin(), m_children.end(), window), m_children.end());
     m_children.push_back(window);
@@ -1004,12 +1029,18 @@ void Screen::move_window_to_front(Window *window) {
     do {
         size_t base_index = 0;
         for (size_t index = 0; index < m_children.size(); ++index)
+            /* 找到了 child window 的编号,赋值给 base_index */
             if (m_children[index] == window)
                 base_index = index;
         changed = false;
         for (size_t index = 0; index < m_children.size(); ++index) {
             Popup *pw = dynamic_cast<Popup *>(m_children[index]);
+            /* 如果是一个 Popup 弹窗
+             *     并且弹窗的 parent window 就是当前的 window
+             *     并且 index 比 base_index 小, 为什么要比较这个 index
+             * */
             if (pw && pw->parent_window() == window && index < base_index) {
+                /* 将这个弹窗也提到前面 */
                 move_window_to_front(pw);
                 changed = true;
                 break;
@@ -1023,6 +1054,7 @@ bool Screen::tooltip_fade_in_progress() const {
     if (elapsed < 0.25f || elapsed > 1.25f)
         return false;
     /* Temporarily increase the frame rate to fade in the tooltip */
+    /* 暂时增加帧率，以在工具提示中淡入淡出 */
     const Widget *widget = find_widget(m_mouse_pos);
     return widget && !widget->tooltip().empty();
 }

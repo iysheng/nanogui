@@ -54,7 +54,7 @@ class ExampleApplication : public Screen {
 public:
     /* 构造函数 */
     ExampleApplication() : Screen(Vector2i(1280, 800), "NanoGUI Test") {
-        inc_ref();
+        inc_ref(); /* 这里首先会增加一次引用计数 */
         Window *window = new Window(this, "Button demo");
         window->set_position(Vector2i(0, 0));
         window->set_layout(new GroupLayout());
@@ -80,6 +80,7 @@ public:
         b->set_change_callback([](bool state) { std::cout << "Toggle button state: " << state << std::endl; });
 
         new Label(window, "Radio buttons", "sans-bold");
+        /* 创建单选按键 */
         b = new Button(window, "Radio button 1");
         b->set_flags(Button::RadioButton);
         b = new Button(window, "Radio button 2");

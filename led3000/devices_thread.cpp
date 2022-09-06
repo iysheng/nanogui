@@ -6,6 +6,7 @@
 * Description:      灯光装置控制线程
 *****************************************************************************/
 
+#include <sys/prctl.h>
 #include <nanogui/common.h>
 #include <led3000gui.h>
 #include <PolyM/include/polym/Msg.hpp>
@@ -140,7 +141,11 @@ void *devices_entry(void *arg)
     Led3000Window * screen = led_devp->screen;
     std::string msg_payload;
     int msg_id;
+    char thread_name[16] = {0};
+    /* 修改线程名 */
+    snprintf(thread_name, sizeof(thread_name), "devices%d", led_devp->uart.index);
 
+    prctl(PR_SET_NAME, thread_name);
     /* TODO init uart */
     if (init_uart_port(&led_devp->uart) != 0)
     {

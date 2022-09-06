@@ -96,6 +96,7 @@ public:
     }
 
     /// Move another reference into the current one
+    // 移动拷贝构造函数
     ref& operator=(ref&& r) noexcept {
         if (&r != this) {
             if (m_ptr)

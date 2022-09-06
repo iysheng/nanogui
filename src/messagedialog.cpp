@@ -55,8 +55,9 @@ MessageDialog::MessageDialog(Widget *parent, Type type, const std::string &title
     }
     m_confirm_button = new Button(panel2, confirmButtonText, m_theme->m_message_primary_button_icon);
     m_confirm_button->set_callback([&] { if (m_widget_callback) m_widget_callback(m_confirm_button, 1); dispose(); });
-    /* 居中 */
+    /* 使自己保持居中，在 center 执行过程中会主动执行 screen 的 perform layout 函数重新计算 screen 所有部件的大小和位置信息 */
     center();
+    /* 使 screen 聚焦 focus 到自身 */
     request_focus();
 }
 

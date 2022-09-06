@@ -6,6 +6,7 @@
 * Description:      rapidjson 后台线程
 *****************************************************************************/
 
+#include <sys/prctl.h>
 #include "PolyM/include/polym/Msg.hpp"
 #include <nanogui/common.h>
 #include <led3000gui.h>
@@ -149,6 +150,8 @@ static void do_with_confirm(std::string message, Led3000Window * window)
 void *json_thread(void *arg)
 {
     Led3000Window *screen = (Led3000Window *)arg;
+
+    prctl(PR_SET_NAME, "json");
 	red_debug_lite("Hello Json Thread json file path:%s", screen->getFileName().c_str());
 
 	memcpy(&gs_json_value_backend, screen->getJsonValue(), sizeof(gs_json_value_backend));
