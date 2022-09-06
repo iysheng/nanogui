@@ -331,12 +331,17 @@ Screen::Screen(const Vector2i &size, const std::string &caption, bool resizable,
             if (x != 0.0 || y != 0.0)
             {
                 s->cursor_pos_callback_event(x, y);
+            }
+            if (action != GLFW_MOVE)
+            {
                 s->mouse_button_callback_event(button, action, modifiers);
             }
         }
     );
 
-    /* 设置按键的回调函数 */
+    /* 设置按键的回调函数
+     * 表示真实的物理按键
+     * */
     glfwSetKeyCallback(m_glfw_window,
         [](GLFWwindow *w, int key, int scancode, int action, int mods) {
             auto it = __nanogui_screens.find(w);
