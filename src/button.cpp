@@ -19,8 +19,8 @@ NAMESPACE_BEGIN(nanogui)
 
 Button::Button(Widget *parent, const std::string &caption, int icon)
     : Widget(parent), m_caption(caption), m_icon(icon), m_background_image(0),
-      m_icon_position(IconPosition::LeftCentered), m_pushed(false),
-      m_flags(NormalButton), m_background_color(Color(0, 0)),
+      m_pushed_background_image(0), m_icon_position(IconPosition::LeftCentered), m_pushed(false),
+      m_flags(NormalButton), m_background_color(Color(0x31, 0x57, 0x97, 255)),
       m_text_color(Color(0, 0)) { }
 
 Button::Button(Widget *parent, const std::string &caption, const std::string &BackgroundImage, int icon)
@@ -32,6 +32,22 @@ Button::Button(Widget *parent, const std::string &caption, const std::string &Ba
     {
         NVGcontext *ctx = screen()->nvg_context();
         m_background_image = nvgCreateImage(ctx, BackgroundImage.c_str(), 0);
+    }
+}
+
+Button::Button(Widget *parent, const std::string &caption, const std::string &BackgroundImage, const std::string &PushedBackgroundImage, int icon)
+    : Widget(parent), m_caption(caption), m_icon(icon), m_background_image(0),
+      m_icon_position(IconPosition::LeftCentered), m_pushed(false),
+      m_flags(NormalButton), m_background_color(Color(0, 0)),
+      m_text_color(Color(0, 0)) {
+    NVGcontext *ctx = screen()->nvg_context();
+    if (!BackgroundImage.empty())
+    {
+        m_background_image = nvgCreateImage(ctx, BackgroundImage.c_str(), 0);
+    }
+    if (!PushedBackgroundImage.empty())
+    {
+        m_pushed_background_image = nvgCreateImage(ctx, PushedBackgroundImage.c_str(), 0);
     }
 }
 
@@ -130,7 +146,7 @@ bool Button::mouse_button_event(const Vector2i &p, int button, bool down, int mo
         } else if (m_pushed || (m_flags & MenuButton)) {
             if (contains(p) && m_callback)
                 m_callback();
-            /* 标记按键弹出，即鼠标松开 */
+            /* 如果是常规的按钮，执行完回调函数后就标记按键弹出，即鼠标松开 */
             if (m_flags & NormalButton)
                 m_pushed = false;
         }
@@ -146,13 +162,19 @@ bool Button::mouse_button_event(const Vector2i &p, int button, bool down, int mo
 void Button::draw(NVGcontext *ctx) {
     /* 执行 child 的 widgets 的 draw() */
     Widget::draw(ctx);
+    int background_image = 0;
 
     NVGcolor grad_top = m_theme->m_button_gradient_top_unfocused;
     NVGcolor grad_bot = m_theme->m_button_gradient_bot_unfocused;
+    background_image = m_background_image;
 
     if (m_pushed || (m_mouse_focus && (m_flags & MenuButton))) {
         grad_top = m_theme->m_button_gradient_top_pushed;
         grad_bot = m_theme->m_button_gradient_bot_pushed;
+        if(m_pushed_background_image)
+        {
+            background_image = m_pushed_background_image;
+        }
     } else if (m_mouse_focus && m_enabled) {
         grad_top = m_theme->m_button_gradient_top_focused;
         grad_bot = m_theme->m_button_gradient_bot_focused;
@@ -162,7 +184,7 @@ void Button::draw(NVGcontext *ctx) {
     
     nvgRoundedRect(ctx, m_pos.x() + 1, m_pos.y() + 1.0f, m_size.x() - 2,
                        m_size.y() - 2, m_theme->m_button_corner_radius - 1);
-    if (!m_background_image)
+    if (!background_image)
     {
         /* 初始化的时候 m_background_color 是为 0 的 */
         if (m_background_color.w() != 0) {
@@ -185,11 +207,13 @@ void Button::draw(NVGcontext *ctx) {
     }
     else
     {
+        /* 绘制按键的背景图片 */
         NVGpaint img_paint = nvgImagePattern(ctx, m_pos.x() + 1, m_pos.y() + 1.0f, m_size.x() - 2,
-                   m_size.y() - 2, 0, m_background_image, m_enabled ? 0.5f : 0.25f);
+                   m_size.y() - 2, 0, background_image, m_enabled ? 0.5f : 0.25f);
         nvgFillPaint(ctx, img_paint);
         nvgFill(ctx);
     }
+    /* 描边 */
     nvgBeginPath(ctx);
     nvgStrokeWidth(ctx, 1.0f);
     nvgRoundedRect(ctx, m_pos.x() + 0.5f, m_pos.y() + (m_pushed ? 0.5f : 1.5f), m_size.x() - 1,
@@ -197,6 +221,7 @@ void Button::draw(NVGcontext *ctx) {
     nvgStrokeColor(ctx, m_theme->m_border_light);
     nvgStroke(ctx);
 
+    /* 继续描边 */
     nvgBeginPath(ctx);
     nvgRoundedRect(ctx, m_pos.x() + 0.5f, m_pos.y() + 0.5f, m_size.x() - 1,
                    m_size.y() - 2, m_theme->m_button_corner_radius);

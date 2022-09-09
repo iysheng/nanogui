@@ -466,8 +466,8 @@ void Screen::initialize(GLFWwindow *window, bool shutdown_glfw) {
     m_shutdown_glfw = shutdown_glfw;
     glfwGetWindowSize(m_glfw_window, &m_size[0], &m_size[1]);
     glfwGetFramebufferSize(m_glfw_window, &m_fbsize[0], &m_fbsize[1]);
-    red_debug_lite("size=%d,%d", m_fbsize[0], m_fbsize[1]);
 
+    /* 计算当前的 dpi 和默认 dpi 的比值， glfw 内部计算 */
     m_pixel_ratio = get_pixel_ratio(window);
 
 #if defined(EMSCRIPTEN)

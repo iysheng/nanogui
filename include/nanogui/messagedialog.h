@@ -51,13 +51,18 @@ public:
       : MessageDialog(parent, type, title, message, button_text, "", alt_button_text, false)
     {}
 
+    /*
+     * 临时修改，保证函数重载异常，需要进一步分析 2022-09-09
+     * new MessageDialog(this, MessageDialog::Type::Question, "绿灯控制", "确认要打开绿光么?", "确认", "取消", do_with_green_light_normal, false); });
+     * 不再尾部加一个参数，上述函数不会执行下属构造函数，奇怪 ！！！
+     * */
     MessageDialog(Widget *parent, Type type, const std::string &title,
                   const std::string &message,
                   const std::string &confirmButtonText,
                   const std::string &cancleButtonText,
-                  const std::function<void(Widget *, int)> &callback )
+                  const std::function<void(Widget *, int)> &callback, bool)
       : MessageDialog(parent, type, title, message, confirmButtonText, "", cancleButtonText, false)
-    { set_widget_callback(callback); }
+    { set_widget_callback(callback);}
 
     Label *message_label() { return m_message_label; }
     const Label *message_label() const { return m_message_label; }

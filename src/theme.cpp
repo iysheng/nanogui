@@ -19,15 +19,15 @@
 NAMESPACE_BEGIN(nanogui)
 
 Theme::Theme(NVGcontext *ctx) {
-    m_standard_font_size                 = 16;
+    m_standard_font_size                 = 18;
     m_button_font_size                   = 20;
     m_text_box_font_size                 = 20;
     m_icon_scale                         = 0.60f;
 
-    m_window_corner_radius               = 2;
+    m_window_corner_radius               = 0;
     m_window_header_height               = 30;
-    m_window_drop_shadow_size            = 10;
-    m_button_corner_radius               = 2;
+    m_window_drop_shadow_size            = 0;
+    m_button_corner_radius               = 5;
     m_tab_border_width                   = 0.75f;
     m_tab_inner_margin                   = 5;
     m_tab_min_button_width               = 20;
@@ -38,24 +38,24 @@ Theme::Theme(NVGcontext *ctx) {
 
     m_drop_shadow                        = Color(0, 128);
     m_transparent                        = Color(0, 0);
-    m_border_dark                        = Color(29, 255);
-    m_border_light                       = Color(92, 255);
+    m_border_dark                        = Color(29, 0);
+    m_border_light                       = Color(92, 0);
     m_border_medium                      = Color(35, 255);
-    m_text_color                         = Color(255, 160);
+    m_text_color                         = Color(0xfa, 0xfc, 0xff, 0xff);
     m_disabled_text_color                = Color(255, 80);
     m_text_color_shadow                  = Color(0, 160);
     m_icon_color                         = m_text_color;
 
     m_button_gradient_top_focused        = Color(64, 255);
     m_button_gradient_bot_focused        = Color(48, 255);
-    m_button_gradient_top_unfocused      = Color(74, 255);
-    m_button_gradient_bot_unfocused      = Color(58, 255);
-    m_button_gradient_top_pushed         = Color(41, 255);
-    m_button_gradient_bot_pushed         = Color(29, 255);
+    m_button_gradient_top_unfocused      = Color(0x31, 0x57, 0x97, 255);
+    m_button_gradient_bot_unfocused      = Color(0x31, 0x57, 0x97, 255);
+    m_button_gradient_top_pushed         = Color(0x2b, 0x5c, 0xd0, 255);
+    m_button_gradient_bot_pushed         = Color(0x0f, 0x98, 0xe8, 255);
 
     /* Window-related */
-    m_window_fill_unfocused              = Color(43, 230);
-    m_window_fill_focused                = Color(45, 230);
+    m_window_fill_unfocused              = Color(0x26, 0x48, 0x87, 230);
+    m_window_fill_focused                = Color(0x26, 0x48, 0x87, 230);
     m_window_title_unfocused             = Color(220, 160);
     m_window_title_focused               = Color(255, 190);
 

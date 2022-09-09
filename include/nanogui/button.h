@@ -55,6 +55,7 @@ public:
      */
     Button(Widget *parent, const std::string &caption = "Untitled", int icon = 0);
     Button(Widget *parent, const std::string &caption, const std::string &BackgroundImage, int icon = 0);
+    Button(Widget *parent, const std::string &caption, const std::string &BackgroundImage, const std::string &PushedBackgroundImage, int icon);
 
     /// Returns the caption of this Button.
     const std::string &caption() const { return m_caption; }
@@ -103,6 +104,8 @@ public:
     /// Set the change callback (for toggle buttons).
     void set_change_callback(const std::function<void(bool)> &callback) { m_change_callback = callback; }
 
+    /// Add the button to group (for radio buttons)
+    void push_button_group(Button * btn) { m_button_group.push_back(btn); }
     /// Return the button group (for radio buttons)
     const std::vector<Button *> &button_group() const { return m_button_group; }
     /// Set the button group (for radio buttons)
@@ -136,6 +139,7 @@ protected:
      * 显示背景图片的句柄
      * */
     int m_background_image;
+    int m_pushed_background_image; /* 触发 pushed 的显示图片 */
 
     /// The position to draw the icon at.
     IconPosition m_icon_position;
