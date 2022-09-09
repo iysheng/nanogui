@@ -181,6 +181,9 @@ public:
     Label *get_white_dev_label(){
       return m_white_dev;
     }
+    Label *get_turntable_label(){
+      return m_turntable_dev;
+    }
 
     void set_green_dev_control_btns(const std::vector<Button *> *btns)
     {
@@ -200,6 +203,7 @@ private:
     Label *m_dev_auth[LED3000_DEVICES_COUNTS];
     Label *m_green_dev;
     Label *m_white_dev;
+    Label *m_turntable_dev;
 
     const std::vector<Button *> *m_green_dev_control_btns;
 
