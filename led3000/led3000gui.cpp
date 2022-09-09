@@ -205,15 +205,32 @@ void do_with_power_off(Widget *widget, int choose)
 void do_with_green_light_normal(Widget *widget, int choose)
 {
   std::cout << "green light normal:" << choose << std::endl;
+  Led3000Window * window = dynamic_cast<Led3000Window *>(widget->screen());
+  const std::vector<Button *> * green_dev_btns = window->get_green_dev_control_btns();
   if (choose != 2)
   {
     /* TODO change green light status */
+
+      switch(choose)
+      {
+        case 0:
+            red_debug_lite("choose 0 \n");
+            break;
+        case 1:
+            red_debug_lite("choose 1 \n");
+            green_dev_btns->at(0)->set_pushed(true);
+            green_dev_btns->at(1)->set_pushed(false);
+            green_dev_btns->at(2)->set_pushed(false);
+            break;
+        default:
+            break;
+      }
   }
 }
 
 void do_with_green_light_mocode(Widget *widget, int choose)
 {
-  std::cout << "mocode light normal:" << choose << std::endl;
+  red_debug_lite("mocode light normal:%d\n", choose);
   if (choose == 1)
   {
     Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());

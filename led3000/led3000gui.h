@@ -181,6 +181,16 @@ public:
     Label *get_white_dev_label(){
       return m_white_dev;
     }
+
+    void set_green_dev_control_btns(const std::vector<Button *> *btns)
+    {
+      m_green_dev_control_btns = btns;
+    }
+
+    const std::vector<Button *> * get_green_dev_control_btns(void)
+    {
+      return m_green_dev_control_btns;
+    }
 private:
     /* 设备状态窗口 label 控件 */
     Label *m_dev_state[LED3000_DEVICES_COUNTS];
@@ -190,6 +200,8 @@ private:
     Label *m_dev_auth[LED3000_DEVICES_COUNTS];
     Label *m_green_dev;
     Label *m_white_dev;
+
+    const std::vector<Button *> *m_green_dev_control_btns;
 
     ref<Shader> m_shader;
     ref<RenderPass> m_render_pass;
