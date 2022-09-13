@@ -51,6 +51,7 @@ int main(int /* argc */, char ** /* argv */)
 
             /* 减少引用计数 */
             app->dec_ref();
+            app->set_background(Color(0x17, 0x30, 0x69, 0xff));
             /* 调用基类的 draw_all 函数 */
             app->draw_all();
             app->set_visible(true);

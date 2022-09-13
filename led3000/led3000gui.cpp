@@ -668,56 +668,6 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           btn->set_position({270, 48});
         }
 
-#if 0
-        /* 摄像头功能 */
-        {
-          auto* cameraWindow = new Window(this, "摄像头功能");
-
-          /* 确定了 cameraWindow 的位置 */
-          cameraWindow->set_position({1000, 300});
-          /* 创建一个新的布局 */
-          GridLayout * layout = new GridLayout(Orientation::Horizontal, 1,
-                                         Alignment::Middle, 5, 5);
-          layout->set_col_alignment({Alignment::Middle, Alignment::Minimum});
-          /* 定义了这个窗口的布局 */
-          cameraWindow->set_layout(layout);
-          cameraWindow->add<Label>("摄像头一焦距");
-          Widget *wdg = cameraWindow->add<Widget>();
-          Button *btn;
-          BoxLayout *box_layout = new BoxLayout(Orientation::Horizontal, Alignment::Middle, 15, 30);
-          wdg->set_layout(box_layout);
-          btn = wdg->add<Button>("ﯪ");
-          btn->set_callback([this]() {
-                  cout << "decrease camera 1 focal len" << endl;
-                  this->getDeviceQueue(0).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "-"));
-           });
-          btn->set_fixed_size(Vector2i(50, 30));
-          btn->set_font_size(30);
-          btn = wdg->add<Button>("ﯫ");
-          btn->set_callback([this]() {
-                  this->getDeviceQueue(0).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "+"));
-                  cout << "increase camera 1 focal len" << endl; });
-          btn->set_fixed_size(Vector2i(50, 30));
-          btn->set_font_size(30);
-          cameraWindow->add<Label>("摄像头二焦距");
-          wdg = cameraWindow->add<Widget>();
-          wdg->set_layout(box_layout);
-          btn = wdg->add<Button>("ﯪ");
-          btn->set_callback([this]() {
-                  this->getDeviceQueue(1).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "-"));
-                  cout << "decrease camera 2 focal len" << endl;
-              });
-          btn->set_fixed_size(Vector2i(50, 30));
-          btn->set_font_size(30);
-          btn = wdg->add<Button>("ﯫ");
-          btn->set_callback([this]() {
-                  this->getDeviceQueue(1).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "+"));
-                  cout << "increase camera 2 focal len" << endl; });
-          btn->set_fixed_size(Vector2i(50, 30));
-          btn->set_font_size(30);
-        }
-#endif
-
         {
             /* 创建一个新的 window 对象用来显示图片 */
             auto* img_window = new Window(this, "");
@@ -747,6 +697,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
             auto* img2_window = new Window(this, "");
             img2_window->set_fixed_size({610, 326});
             img2_window->set_position(Vector2i(650, 98));
+            img2_window->set_background_image("/tmp/abc/huiyuan/video.png");
 
             btn = img2_window->add<Button>("", "/tmp/abc/huiyuan/dec_focal.png", 0);
             btn->set_fixed_size({30, 30});

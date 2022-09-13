@@ -684,6 +684,7 @@ void Screen::draw_all() {
         draw_contents();
         /* 绘制所有的 child widget */
         draw_widgets();
+        /* 这个函数特别重要，注释后无法正常显示 */
         draw_teardown();
 
 #if defined(NANOGUI_USE_METAL)

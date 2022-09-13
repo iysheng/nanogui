@@ -109,12 +109,16 @@ void mainloop(float refresh) {
 
         /* Run async functions */ {
             std::lock_guard<std::mutex> guard(m_async_mutex);
-			/* 执行所有的 m_async_functions 函数类 */
+            /* 执行所有的 m_async_functions 函数类
+             * 调试打印没有这些函数执行
+             * */
             for (auto &f : m_async_functions)
+            {
                 f();
-			/* 清除所有的 m_async_functions 成员，
-			 * m_async_functions 是一个 vector
-			 * */
+            }
+            /* 清除所有的 m_async_functions 成员，
+             * m_async_functions 是一个 vector
+             * */
             m_async_functions.clear();
         }
 

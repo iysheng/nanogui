@@ -125,20 +125,8 @@ public:
 
     /* 函数重载,绘制内容,初始化 m_shader 和 m_render_pass 相关的内容 */
     virtual void draw_contents() {
-        Matrix4f mvp = Matrix4f::scale(Vector3f(
-                           (float) m_size.y() / (float) m_size.x() * 0.25f, 0.25f, 0.25f)) *
-                       Matrix4f::rotate(Vector3f(0, 0, 1), (float) glfwGetTime());
-
-        m_shader->set_uniform("mvp", mvp);
-
-        m_render_pass->resize(framebuffer_size());
-        m_render_pass->begin();
-
-        m_shader->begin();
-        m_shader->draw_array(Shader::PrimitiveType::Triangle, 0, 6, true);
-        m_shader->end();
-
-        m_render_pass->end();
+        glClearColor(m_background[0], m_background[1], m_background[2], m_background[3]);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     }
 
     FILE*& getMfp(void){return mFp;};
