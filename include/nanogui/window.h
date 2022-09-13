@@ -71,6 +71,7 @@ protected:
     Widget *m_button_panel;
     bool m_modal;
     bool m_drag;
+    bool m_drag_enable;
     int m_background_image;
 };
 

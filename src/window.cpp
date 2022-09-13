@@ -19,7 +19,7 @@ NAMESPACE_BEGIN(nanogui)
 
 Window::Window(Widget *parent, const std::string &title, const std::string &BackgroundImage)
     : Widget(parent), m_title(title), m_button_panel(nullptr), m_modal(false), m_background_image(0),
-      m_drag(false) {
+      m_drag(false), m_drag_enable(false) {
     if (!BackgroundImage.empty())
     {
         NVGcontext *ctx = screen()->nvg_context();
@@ -193,7 +193,7 @@ bool Window::mouse_enter_event(const Vector2i &p, bool enter) {
 
 bool Window::mouse_drag_event(const Vector2i &, const Vector2i &rel,
                             int button, int /* modifiers */) {
-    if (m_drag && (button & (1 << GLFW_MOUSE_BUTTON_1)) != 0) {
+    if (m_drag_enable && m_drag && (button & (1 << GLFW_MOUSE_BUTTON_1)) != 0) {
         m_pos += rel;
         m_pos = max(m_pos, Vector2i(0));
         m_pos = min(m_pos, parent()->size() - m_size);
