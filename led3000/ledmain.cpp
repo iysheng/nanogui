@@ -24,6 +24,7 @@ using std::endl;
 extern void *devices_thread(void *arg);
 extern void *json_thread(void *arg);
 extern void *network_thread(void *arg);
+extern void *joystick_thread(void *arg);
 
 using namespace nanogui;
 using namespace rapidjson;
@@ -45,6 +46,9 @@ int main(int /* argc */, char ** /* argv */)
 
             std::thread s_device_thread(devices_thread, app);
             s_device_thread.detach();
+
+            std::thread s_joystick_thread(joystick_thread, app);
+            s_joystick_thread.detach();
 
             std::thread s_network_thread(network_thread, app);
             s_network_thread.detach();
