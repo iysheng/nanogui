@@ -469,6 +469,7 @@ list(APPEND NANOGUI_EXTRA
   led3000/json_thread.cpp
   led3000/devices_thread.cpp
   led3000/network_thread.cpp
+  led3000/joystick_thread.cpp
 )
 # Compile main NanoGUI library
 add_library(nanogui ${NANOGUI_LIBRARY_TYPE}
@@ -524,6 +525,7 @@ target_compile_definitions(nanogui
   PRIVATE
     -DNANOGUI_BUILD
     -DNVG_STB_IMAGE_IMPLEMENTATION
+    -DRED_LED3000_ASSETS_DIR="/tmp/abc/huiyuan"
 )
 
 target_include_directories(nanogui
