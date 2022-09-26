@@ -31,26 +31,6 @@ public:
         Choose
     };
 
-    MessageDialog(Widget *parent, Type type, const std::string &title,
-                  const std::string &message,
-                  const std::string &confirmButtonText,
-                  const std::string &setButtonText,
-                  const std::string &cancleButtonText, bool setButton);
-
-    MessageDialog(Widget *parent, Type type, const std::string &title,
-                  const std::string &message,
-                  const std::string &set_button_text,
-                  const std::function<void(Widget *, int)> &callback )
-        : MessageDialog(parent, type, title, message, "确认", set_button_text, "取消", true)
-    {set_widget_callback(callback);}
-
-    MessageDialog(Widget *parent, Type type, const std::string &title = "Untitled",
-                  const std::string &message = "Message",
-                  const std::string &button_text = "OK",
-                  const std::string &alt_button_text = "Cancel", bool alt_button = false)
-      : MessageDialog(parent, type, title, message, button_text, "", alt_button_text, false)
-    {}
-
     /*
      * 临时修改，保证函数重载异常，需要进一步分析 2022-09-09
      * new MessageDialog(this, MessageDialog::Type::Question, "绿灯控制", "确认要打开绿光么?", "确认", "取消", do_with_green_light_normal, false); });
@@ -58,11 +38,10 @@ public:
      * */
     MessageDialog(Widget *parent, Type type, const std::string &title,
                   const std::string &message,
-                  const std::string &confirmButtonText,
-                  const std::string &cancleButtonText,
-                  const std::function<void(Widget *, int)> &callback, bool)
-      : MessageDialog(parent, type, title, message, confirmButtonText, "", cancleButtonText, false)
-    { set_widget_callback(callback);}
+                  const std::string &confirmButtonText = "确认",
+                  const std::string &cancleButtonText = "取消",
+                  const std::string &set_text = "配置",
+                  const std::function<void(Widget *, int)> &callback = nullptr);
 
     Label *message_label() { return m_message_label; }
     const Label *message_label() const { return m_message_label; }

@@ -17,12 +17,15 @@
 NAMESPACE_BEGIN(nanogui)
 
 MessageDialog::MessageDialog(Widget *parent, Type type, const std::string &title,
-              const std::string &message,
-              const std::string &confirmButtonText,
-              const std::string &setButtonText,
-              const std::string &cancleButtonText, bool setButton)
-  : Window(parent, title), m_widget_callback(nullptr)
+                const std::string &message,
+                const std::string &confirmButtonText,
+                const std::string &cancleButtonText,
+                const std::string &setButtonText,
+                const std::function<void(Widget *, int)> &callback)
+  : Window(parent, title), m_widget_callback(callback)
 {
+    bool setButton = false;
+    printf("show sys config window\n");
     set_layout(new BoxLayout(Orientation::Vertical,
                             Alignment::Middle, 10, 10));
     set_modal(true);
@@ -36,7 +39,7 @@ MessageDialog::MessageDialog(Widget *parent, Type type, const std::string &title
         case Type::Information: icon = m_theme->m_message_information_icon; break;
         case Type::Question: icon = m_theme->m_message_question_icon; break;
         case Type::Warning: icon = m_theme->m_message_warning_icon; break;
-        case Type::Choose: icon = 0; break;
+        case Type::Choose: icon = 0; setButton = true; break;
     }
     Label *iconLabel = new Label(panel1, std::string(utf8(icon).data()), "icons");
     iconLabel->set_font_size(50);
@@ -46,7 +49,7 @@ MessageDialog::MessageDialog(Widget *parent, Type type, const std::string &title
                                     Alignment::Middle, 0, 15));
 
     m_cancel_button = new Button(panel2, cancleButtonText, m_theme->m_message_alt_button_icon);
-    m_cancel_button->set_callback([&] { if (m_widget_callback) m_widget_callback(m_cancel_button, 0); dispose();});
+    m_cancel_button->set_callback([&] { if (m_widget_callback) m_widget_callback(m_cancel_button, 0); else printf("it's null\n"); dispose();});
     if (setButton)
     {
         m_set_button = new Button(panel2, setButtonText);

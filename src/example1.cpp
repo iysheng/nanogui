@@ -134,7 +134,7 @@ public:
         });
         b = new Button(tools, "Ask");
         b->set_callback([&] {
-            auto dlg = new MessageDialog(this, MessageDialog::Type::Warning, "Title", "This is a question message", "Yes", "No", true);
+            auto dlg = new MessageDialog(this, MessageDialog::Type::Warning, "Title", "This is a question message", "Yes", "No", "");
             dlg->set_callback([](int result) { std::cout << "Dialog result: " << result << std::endl; });
         });
 

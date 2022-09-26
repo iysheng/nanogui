@@ -517,7 +517,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           btn_green_led->set_fixed_size({120, 92});
           btn_green_led->set_position({10, 48});
           btn_green_led->set_callback([&] {
-              new MessageDialog(this, MessageDialog::Type::Question, "绿灯控制", "确认要打开绿光么?", "确认", "取消", do_with_green_light_normal, false); });
+              new MessageDialog(this, MessageDialog::Type::Question, "绿灯控制", "确认要打开绿光么?", "确认", "取消", "", do_with_green_light_normal); });
 
           Button *btn_green_blink = new Button(cwindow, "绿闪");
           btn_green_blink->set_fixed_size({120, 92});
@@ -529,8 +529,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           btn_green_mocode->set_fixed_size({120, 92});
           btn_green_mocode->set_position({270, 48});
           btn_green_mocode->set_callback([&] {
-              MessageDialog *dlg = new MessageDialog(this, MessageDialog::Type::Choose, "莫码发送设置", "准备发送莫码?", "确认", "配置", "取消", true);
-              dlg->set_widget_callback(do_with_green_light_mocode); });
+              MessageDialog *dlg = new MessageDialog(this, MessageDialog::Type::Choose, "莫码发送设置", "准备发送莫码?", "确认", "取消", "配置", do_with_green_light_mocode);});
 
           btn_green_led->push_button_group(btn_green_led);
           btn_green_led->push_button_group(btn_green_blink);
@@ -571,12 +570,12 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           sysconfig_btn->set_position({1219, 15});
           sysconfig_btn->set_fixed_size({46, 46});
           sysconfig_btn->set_callback([&] {
-              new MessageDialog(this, MessageDialog::Type::Question, "关机", "确认要关机么?", "确认", "取消", do_with_power_off); });
+              new MessageDialog(this, MessageDialog::Type::Question, "关机", "确认要关机么?", "确认", "取消", "", do_with_power_off); });
           sysconfig_btn = swindow->add<Button>("", "/tmp/abc/huiyuan/sys.png", 0);
           sysconfig_btn->set_position({15, 15});
           sysconfig_btn->set_fixed_size({46, 46});
           sysconfig_btn->set_callback([&] {
-              new MessageDialog(this, MessageDialog::Type::Choose, "系统参数设置", "准备配置参数", "参数配置", do_with_sysconfig);});
+              new MessageDialog(this, MessageDialog::Type::Choose, "系统参数设置", "准备配置参数", "确认", "取消", "参数配置", do_with_sysconfig);});
 
           Button *devBtn = swindow->add<Button>("    灯光装置终端一", "/tmp/abc/huiyuan/dev_unchoose.png", "/tmp/abc/huiyuan/dev_choose.png", 0);
           devBtn->set_flags(Button::RadioButton);
