@@ -41,7 +41,8 @@ public:
                   const std::string &confirmButtonText = "确认",
                   const std::string &cancleButtonText = "取消",
                   const std::string &set_text = "配置",
-                  const std::function<void(Widget *, int)> &callback = nullptr);
+                  const std::function<void(Widget *, int)> &callback = nullptr,
+                  const std::function<void (Widget *)> &paint = nullptr);
 
     Label *message_label() { return m_message_label; }
     const Label *message_label() const { return m_message_label; }

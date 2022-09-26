@@ -9,6 +9,7 @@
     BSD-style license that can be found in the LICENSE.txt file.
 */
 
+#include <functional>
 #include <nanogui/messagedialog.h>
 #include <nanogui/layout.h>
 #include <nanogui/button.h>
@@ -21,7 +22,7 @@ MessageDialog::MessageDialog(Widget *parent, Type type, const std::string &title
                 const std::string &confirmButtonText,
                 const std::string &cancleButtonText,
                 const std::string &setButtonText,
-                const std::function<void(Widget *, int)> &callback)
+                const std::function<void(Widget *, int)> &callback, const std::function<void (Widget *)> &paint)
   : Window(parent, title, RED_LED3000_ASSETS_DIR"/set_msgdlg2.png"), m_widget_callback(callback)
 {
     bool setButton = false;
@@ -71,6 +72,10 @@ MessageDialog::MessageDialog(Widget *parent, Type type, const std::string &title
         m_cancel_button->set_position(Vector2i(245, 254));
     }
 
+    if (paint)
+    {
+        paint(this);
+    }
     /* 使自己保持居中，在 center 执行过程中会主动执行 screen 的 perform layout 函数重新计算 screen 所有部件的大小和位置信息 */
     center();
     /* 使 screen 聚焦 focus 到自身 */
