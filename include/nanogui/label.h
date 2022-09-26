@@ -29,6 +29,7 @@ public:
     Label(Widget *parent, const std::string &caption,
           const std::string &font = "sans", int font_size = -1);
 
+    void set_icon(const std::string &icon_path);
     /// Get the label's text caption
     const std::string &caption() const { return m_caption; }
     /// Set the label's text caption
@@ -66,6 +67,7 @@ public:
 protected:
     std::string m_caption;
     std::string m_font;
+    int m_icon;
     Color m_color;
 };
 
