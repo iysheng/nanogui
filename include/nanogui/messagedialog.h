@@ -56,6 +56,7 @@ protected:
     Button *m_cancel_button;
     Button *m_set_button;
     Button *m_confirm_button;
+    Label *m_label_icon;
 };
 
 NAMESPACE_END(nanogui)

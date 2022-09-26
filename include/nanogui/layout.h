@@ -22,6 +22,10 @@
 
 NAMESPACE_BEGIN(nanogui)
 
+#ifndef RED_LED3000_ASSETS_DIR
+#define RED_LED3000_ASSETS_DIR "/tmp/abc/huiyuan"
+#endif
+
 /// The different kinds of alignments a layout can perform.
 enum class Alignment : uint8_t {
     Minimum = 0, ///< Take only as much space as is required.

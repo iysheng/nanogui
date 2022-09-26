@@ -17,17 +17,6 @@ using std::endl;
 #define LED3000_VERSION    9u
 #define LED3000_ID         11000001u
 
-void hexdump(unsigned char * addr, int len)
-{
-    int i = 0, g = len / 8;
-
-    for (i = 0; i < g ; i++)
-        printf("%x %x %x %x %x %x %x %x\n", addr[i<<3], addr[i<<3 + 1], addr[i<<3 + 2], addr[i<<3 + 3], addr[i<<3 + 4], addr[i<<3 + 5], addr[i<<3 + 6], addr[i<<3 + 7]);
-    for (i = 0; i < len % 8; i++)
-        printf("%x ", addr[i<<3]);
-    printf("\n");
-}
-
 void do_with_sysconfig(Widget *widget, int choose)
 {
   std::cout << "do with sysconfig :" << choose << std::endl;
@@ -517,7 +506,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           btn_green_led->set_fixed_size({120, 92});
           btn_green_led->set_position({10, 48});
           btn_green_led->set_callback([&] {
-              new MessageDialog(this, MessageDialog::Type::Question, "绿灯控制", "确认要打开绿光么?", "确认", "取消", "", do_with_green_light_normal); });
+              new MessageDialog(this, MessageDialog::Type::Warning, "", "确认要打开绿光么?", "确认", "取消", "", do_with_green_light_normal); });
 
           Button *btn_green_blink = new Button(cwindow, "绿闪");
           btn_green_blink->set_fixed_size({120, 92});
@@ -529,7 +518,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           btn_green_mocode->set_fixed_size({120, 92});
           btn_green_mocode->set_position({270, 48});
           btn_green_mocode->set_callback([&] {
-              MessageDialog *dlg = new MessageDialog(this, MessageDialog::Type::Choose, "莫码发送设置", "准备发送莫码?", "确认", "取消", "配置", do_with_green_light_mocode);});
+              MessageDialog *dlg = new MessageDialog(this, MessageDialog::Type::Choose, "", "开启绿光莫码模式？", "确认", "取消", "配置", do_with_green_light_mocode);});
 
           btn_green_led->push_button_group(btn_green_led);
           btn_green_led->push_button_group(btn_green_blink);
