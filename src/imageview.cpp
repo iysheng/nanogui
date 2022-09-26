@@ -101,16 +101,16 @@ bool ImageView::keyboard_event(int key, int /* scancode */, int action, int /* m
 
 bool ImageView::mouse_drag_event(const Vector2i & /* p */, const Vector2i &rel,
                                  int /* button */, int /* modifiers */) {
-    if (!m_enabled || !m_image)
+    if (!m_enabled || !m_image )
         return false;
-
-    m_offset += rel * screen()->pixel_ratio();
+    if (m_moveable)
+        m_offset += rel * screen()->pixel_ratio();
 
     return true;
 }
 
 bool ImageView::scroll_event(const Vector2i &p, const Vector2f &rel) {
-    if (!m_enabled || !m_image)
+    if (!m_enabled || !m_image || !m_moveable)
         return false;
 
     Vector2f p1 = pos_to_pixel(p - m_pos);

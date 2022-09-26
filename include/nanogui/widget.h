@@ -293,6 +293,7 @@ protected:
      * checkbox : 检验框使能了才可以选中
      * */
     bool m_enabled;
+    bool m_moveable;
     bool m_focused, m_mouse_focus;
     std::string m_tooltip;
     int m_font_size;
