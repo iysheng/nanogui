@@ -320,6 +320,7 @@ Screen::Screen(const Vector2i &size, const std::string &caption, bool resizable,
     /* 设置触摸回调函数 */
     glfwSetTouchCallback(m_glfw_window,
         [](GLFWwindow *w, int touch, int type, int action, double x, double y) {
+            static float xx, yy;
             int button = GLFW_MOUSE_BUTTON_LEFT, modifiers = 0;
             auto it = __nanogui_screens.find(w);
             if (it == __nanogui_screens.end())
@@ -327,11 +328,22 @@ Screen::Screen(const Vector2i &size, const std::string &caption, bool resizable,
             Screen *s = it->second;
             if (!s->m_process_events)
                 return;
+            //red_debug_lite("%f %f @ %d", x, y, action);
             /* 调试发现屏蔽 x == 0.0 和 y == 0.0 坐标才可以正常使用 */
             if (x != 0.0 || y != 0.0)
             {
+                if (action == GLFW_PRESS)
+                {
                 s->cursor_pos_callback_event(x, y);
-                s->mouse_button_callback_event(button, (action == GLFW_PRESS) ? GLFW_PRESS : GLFW_RELEASE, modifiers);
+                    s->mouse_button_callback_event(button, GLFW_PRESS, modifiers);
+            xx = x;
+            yy = y;
+                }
+            }
+            else
+            {
+                s->cursor_pos_callback_event(xx, yy);
+                s->mouse_button_callback_event(button, GLFW_RELEASE, modifiers);
             }
         }
     );
