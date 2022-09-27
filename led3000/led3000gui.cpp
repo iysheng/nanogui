@@ -70,32 +70,37 @@ void do_paint_sysconfig(Widget *widget)
       textBox->setSyncCharsValue(led3000Window->getJsonValue()->eths[0].gateway);
       textBox->set_font_size(16);
       textBox->set_alignment(TextBox::Alignment::Left);
-#if 0
-      Widget * eth1Widget = ethsWidget->add<Widget>();
-      layout = new GridLayout(Orientation::Horizontal, 2,
-                                     Alignment::Middle, 15, 5);
-      layout->set_col_alignment({Alignment::Maximum, Alignment::Fill });
-      layout->set_spacing(0, 10);
+
       /* 定义了这个窗口的布局 */
-      eth1Widget->set_layout(layout);
-      eth1Widget->add<Label>("网卡1IP:", "sans-bold");
-      textBox = eth1Widget->add<TextBox>("",KeyboardType::NumberIP);
+      label = widget->add<Label>("网卡1IP:", "sans-bold");
+      label->set_position(Vector2i(49, 252));
+      label->set_font_size(20);
+      textBox = widget->add<TextBox>("",KeyboardType::NumberIP);
       textBox->set_editable(true);
       textBox->set_fixed_size(Vector2i(150, 20));
+      textBox->set_position(Vector2i(166, 252));
       textBox->set_value(led3000Window->getJsonValue()->eths[1].ip);
       textBox->setSyncCharsValue(led3000Window->getJsonValue()->eths[1].ip);
       textBox->set_font_size(16);
       textBox->set_alignment(TextBox::Alignment::Left);
-      eth1Widget->add<Label>("网卡1子网掩码:", "sans-bold");
-      textBox = eth1Widget->add<TextBox>("",KeyboardType::NumberIP);
+
+      label = widget->add<Label>("网卡1子网掩码:", "sans-bold");
+      label->set_position(Vector2i(29, 308));
+      label->set_font_size(20);
+      textBox = widget->add<TextBox>("",KeyboardType::NumberIP);
+      textBox->set_position(Vector2i(166, 308));
       textBox->set_editable(true);
       textBox->set_fixed_size(Vector2i(150, 20));
       textBox->set_value(led3000Window->getJsonValue()->eths[1].netmask);
       textBox->setSyncCharsValue(led3000Window->getJsonValue()->eths[1].netmask);
       textBox->set_font_size(16);
       textBox->set_alignment(TextBox::Alignment::Left);
-      eth1Widget->add<Label>("网卡1网关:", "sans-bold");
-      textBox = eth1Widget->add<TextBox>("",KeyboardType::NumberIP);
+
+      label = widget->add<Label>("网卡1网关:", "sans-bold");
+      label->set_position(Vector2i(44, 364));
+      label->set_font_size(20);
+      textBox = widget->add<TextBox>("", KeyboardType::NumberIP);
+      textBox->set_position(Vector2i(166, 364));
       textBox->set_editable(true);
       textBox->set_fixed_size(Vector2i(150, 20));
       textBox->set_value(led3000Window->getJsonValue()->eths[1].gateway);
@@ -103,13 +108,11 @@ void do_paint_sysconfig(Widget *widget)
       textBox->set_font_size(16);
       textBox->set_alignment(TextBox::Alignment::Left);
 
-      Widget *serverWidget = setWindow->add<Widget>();
-      serverWidget->set_layout(new BoxLayout(Orientation::Horizontal,
-                                      Alignment::Middle, 0, 15));
-      Widget *serveripWidget = serverWidget->add<Widget>();
-      serveripWidget->set_layout(layout);
-      serveripWidget->add<Label>("服务器IP:", "sans-bold");
-      textBox = serveripWidget->add<TextBox>("", KeyboardType::NumberIP);
+      label = widget->add<Label>("服务器IP:", "sans-bold");
+      label->set_position(Vector2i(44, 420));
+      label->set_font_size(20);
+      textBox = widget->add<TextBox>("", KeyboardType::NumberIP);
+      textBox->set_position(Vector2i(166, 420));
       textBox->set_editable(true);
       textBox->set_fixed_size(Vector2i(150, 20));
       textBox->set_value(led3000Window->getJsonValue()->server.ip);
@@ -117,33 +120,29 @@ void do_paint_sysconfig(Widget *widget)
       textBox->set_font_size(16);
       textBox->set_alignment(TextBox::Alignment::Left);
 
-      Widget *serverPortWidget = serverWidget->add<Widget>();
-      serverPortWidget->set_layout(layout);
-      serverPortWidget->add<Label>("服务器端口:", "sans-bold");
-      textBox = serverPortWidget->add<TextBox>();
+      label = widget->add<Label>("服务器端口:", "sans-bold");
+      label->set_position(Vector2i(42, 476));
+      label->set_font_size(20);
+      textBox = widget->add<TextBox>(std::to_string(led3000Window->getJsonValue()->server.port), KeyboardType::NumberIP);
       textBox->set_editable(true);
+      textBox->set_position(Vector2i(166, 476));
       textBox->set_fixed_size(Vector2i(150, 20));
-      textBox->set_value(std::to_string(led3000Window->getJsonValue()->server.port));
       textBox->setSyncUshortValue(&(led3000Window->getJsonValue()->server.port));
       textBox->set_font_size(16);
       textBox->set_alignment(TextBox::Alignment::Left);
 
-      Widget *cameraWidget = setWindow->add<Widget>();
-      cameraWidget->set_layout(new BoxLayout(Orientation::Horizontal,
-                                      Alignment::Middle, 0, 15));
-      cameraWidget->add<Label>("摄像头1路径:", "sans-bold");
-      textBox = cameraWidget->add<TextBox>("", KeyboardType::Full);
+      label = widget->add<Label>("摄像头1路径:", "sans-bold");
+      label->set_position(Vector2i(37, 541));
+      label->set_font_size(20);
+      textBox = widget->add<TextBox>("", KeyboardType::Full);
       textBox->set_editable(true);
-      textBox->set_fixed_size(Vector2i(350, 20));
+      textBox->set_position(Vector2i(156, 525));
+      textBox->set_fixed_size(Vector2i(157, 52));
       textBox->set_value(led3000Window->getJsonValue()->devices[0].camera_url);
       textBox->setSyncCharsValue(&(led3000Window->getJsonValue()->devices[0].camera_url[0]));
       textBox->set_font_size(16);
       textBox->set_alignment(TextBox::Alignment::Left);
 
-      cameraWidget = setWindow->add<Widget>();
-      cameraWidget->set_layout(new BoxLayout(Orientation::Horizontal,
-                                      Alignment::Middle, 0, 15));
-#endif
       label = widget->add<Label>("摄像头2路径:", "sans-bold");
       label->set_position(Vector2i(37, 615));
       label->set_font_size(20);
@@ -155,27 +154,6 @@ void do_paint_sysconfig(Widget *widget)
       textBox->setSyncCharsValue(&(led3000Window->getJsonValue()->devices[1].camera_url[0]));
       textBox->set_font_size(16);
       textBox->set_alignment(TextBox::Alignment::Left);
-
-#if 0
-      Widget *btn_widget = setWindow->add<Widget>();
-      btn_widget->set_layout(new BoxLayout(Orientation::Horizontal,
-                                      Alignment::Middle, 0, 150));
-      btn_widget->add<Button>("返回")->set_callback([btn_widget](){
-          Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(btn_widget->window()->parent());
-          btn_widget->window()->dispose();
-          led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CANCEL, "config"));
-          std::cout << "返回" << std::endl;
-      });
-      btn_widget->add<Button>("确认")->set_callback([btn_widget](){
-          Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(btn_widget->window()->parent());
-          /* syncto json config */
-          btn_widget->window()->dispose();
-          led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "config"));
-          std::cout << "确认" << std::endl;
-      });
-      setWindow->center();
-      setWindow->request_focus();
-#endif
   }
 }
 
@@ -256,75 +234,67 @@ void do_with_green_light_blink(Widget *widget, int choose)
 
 void do_paint_green_light_mocode(Widget *widget)
 {
+    MessageDialog * msg_dlg = dynamic_cast<MessageDialog *>(widget);
+    Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
     auto * mocode_value_title = widget->add<Label>("莫码参数为：", "sans-bold");
     mocode_value_title->set_font_size(20);
+    widget->window()->set_background_image(RED_LED3000_ASSETS_DIR"/set_msgdlg1.png");
+    auto *textBox = widget->add<TextBox>("", KeyboardType::Full);
+    textBox->set_position(Vector2i(174, 167));
+    textBox->set_fixed_size(Vector2i(138, 46));
+    textBox->set_editable(true);
+    textBox->set_value(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode);
+    textBox->setSyncCharsValue(&(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode[0]));
+    textBox->set_font_size(16);
+    textBox->set_alignment(TextBox::Alignment::Left);
+
     auto * mocode_counts_title = widget->add<Label>("莫码发送次数为：", "sans-bold");
     mocode_counts_title->set_font_size(20);
+    textBox = widget->add<TextBox>("", KeyboardType::NumberIP);
+    textBox->set_position(Vector2i(174, 223));
+    textBox->set_fixed_size(Vector2i(138, 46));
+    textBox->set_editable(true);
+    textBox->set_value(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode);
+    textBox->setSyncCharsValue(&(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode[0]));
+    textBox->set_font_size(16);
+    textBox->set_alignment(TextBox::Alignment::Left);
+
     auto * mocode_period_title = widget->add<Label>("莫码发送间隔为：", "sans-bold");
     mocode_period_title->set_font_size(20);
+    textBox = widget->add<TextBox>("", KeyboardType::NumberIP);
+    textBox->set_fixed_size(Vector2i(138, 46));
+    textBox->set_position(Vector2i(174, 279));
+    textBox->set_editable(true);
+    textBox->set_value(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode);
+    textBox->setSyncCharsValue(&(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode[0]));
+    textBox->set_font_size(16);
+    textBox->set_alignment(TextBox::Alignment::Left);
 
     mocode_value_title->set_position(Vector2i(61, 180));
     mocode_counts_title->set_position(Vector2i(46, 236));
     mocode_period_title->set_position(Vector2i(46, 292));
+
+    msg_dlg->label_icon()->set_position(Vector2i(148, 91));
+    msg_dlg->message_label()->set_position(Vector2i(104, 394));
+    msg_dlg->confirm_button()->set_position(Vector2i(10, 462));
+    msg_dlg->confirm_button()->set_fixed_size(Vector2i(156, 60));
+    msg_dlg->cancel_button()->set_position(Vector2i(176, 462));
+    msg_dlg->cancel_button()->set_fixed_size(Vector2i(156, 60));
 }
 
 void do_with_green_light_mocode(Widget *widget, int choose)
 {
-  red_debug_lite("mocode light normal:%d\n", choose);
+  Led3000Window * window = dynamic_cast<Led3000Window *>(widget->screen());
+  const std::vector<Button *> * green_dev_btns = window->get_green_dev_control_btns();
   if (choose == 1)
   {
     Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
     led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_GREEN_MOCODE_SETTING, led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode));
+
+    green_dev_btns->at(0)->set_pushed(false);
+    green_dev_btns->at(1)->set_pushed(false);
+    green_dev_btns->at(2)->set_pushed(true);
     return;
-  }
-  else if (choose == 2)
-  {
-      Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
-      Window * setWindow = new Window(widget->window()->parent(), "莫码参数配置");
-      setWindow->set_background_image("/tmp/abc/red0.jpg");
-      Window * mocodeWindow = widget->window();
-      /* 标记为 modal winow, 该 window 会提前到最前面图层 */
-      setWindow->set_modal(true);
-      setWindow->set_layout(new BoxLayout(Orientation::Vertical,
-                              Alignment::Middle, 0, 15));
-
-      Widget * configWidget = setWindow->add<Widget>();
-      GridLayout * layout = new GridLayout(Orientation::Horizontal, 2,
-                                     Alignment::Middle, 15, 5);
-      layout->set_col_alignment({ Alignment::Maximum, Alignment::Fill });
-      layout->set_spacing(0, 10);
-      /* 定义了这个窗口的布局 */
-      configWidget->set_layout(layout);
-      /* 创建 textBox */
-      configWidget->add<Label>("莫码信息:", "sans-bold");
-      auto* textBox = configWidget->add<TextBox>("", KeyboardType::Full);
-      textBox->set_editable(true);
-      textBox->set_fixed_size(Vector2i(150, 20));
-      textBox->set_value(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode);
-      textBox->setSyncCharsValue(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode);
-      textBox->set_font_size(16);
-      textBox->set_alignment(TextBox::Alignment::Left);
-
-      Widget *btWidget = setWindow->add<Widget>();
-      btWidget->set_layout(new BoxLayout(Orientation::Horizontal,
-                                      Alignment::Middle, 0, 15));
-      btWidget->add<Button>("返回")->set_callback([textBox, setWindow, mocodeWindow](){
-          textBox->keyboard_window()->dispose();
-          setWindow->dispose();
-          //mocodeWindow->set_modal(true);
-          std::cout << "返回" << std::endl;
-      });
-      btWidget->add<Button>("确认")->set_callback([textBox, setWindow, mocodeWindow](){
-          Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(mocodeWindow->screen());
-          textBox->keyboard_window()->dispose();
-          setWindow->dispose();
-          //mocodeWindow->set_modal(true);
-          led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
-          led3000Window->get_dev_morse_code_label(led3000Window->getCurrentDevice())->set_caption_merge(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode, led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mocode, '/');
-          std::cout << "确认" << std::endl;
-      });
-      setWindow->center();
-      setWindow->request_focus();
   }
 }
 
@@ -572,7 +542,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           btn_green_mocode->set_fixed_size({120, 92});
           btn_green_mocode->set_position({270, 48});
           btn_green_mocode->set_callback([&] {
-              MessageDialog *dlg = new MessageDialog(this, MessageDialog::Type::Choose, "", "开启绿光莫码模式？", "确认", "取消", "配置", do_with_green_light_mocode, do_paint_green_light_mocode);});
+              MessageDialog *dlg = new MessageDialog(this, MessageDialog::Type::Question, "", "开启绿光莫码模式？", "确认", "取消", "", do_with_green_light_mocode, do_paint_green_light_mocode);});
 
           btn_green_led->push_button_group(btn_green_led);
           btn_green_led->push_button_group(btn_green_blink);
