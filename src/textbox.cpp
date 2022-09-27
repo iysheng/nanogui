@@ -649,6 +649,7 @@ void TextBox::perform_layout(NVGcontext *ctx) {
     m_keyboard->perform_layout(ctx);
 
     if (parent_window) {
+      /* 修正了显示键盘的位置 */
         int pos_y = absolute_position().y() - parent_window->position().y() + m_size.y() / 2;
         if (m_keyboard->side() == Keyboard::Right)
             m_keyboard->set_anchor_pos(Vector2i(parent_window->width() + anchor_size, pos_y));

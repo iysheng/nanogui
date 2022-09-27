@@ -50,7 +50,7 @@ public:
     void set_spinnable(bool spinnable) { m_spinnable = spinnable; }
 
     const std::string &value() const { return m_value; }
-    void set_value(const std::string &value) { m_value = value; syncValue();}
+    void set_value(const std::string &value) { m_value = value; m_keyboard->set_value(value); syncValue();}
 
     const std::string &default_value() const { return m_default_value; }
     void set_default_value(const std::string &default_value) { m_default_value = default_value; }

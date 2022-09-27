@@ -17,66 +17,60 @@ using std::endl;
 #define LED3000_VERSION    9u
 #define LED3000_ID         11000001u
 
-void do_with_sysconfig(Widget *widget, int choose)
+void do_paint_sysconfig(Widget *widget)
 {
-  std::cout << "do with sysconfig :" << choose << std::endl;
-  if (choose != 2)
   {
+      MessageDialog * msg_dlg = dynamic_cast<MessageDialog *>(widget);
+      msg_dlg->message_label()->set_position(Vector2i(30, 15));
+      msg_dlg->confirm_button()->set_position(Vector2i(10, 677));
+      msg_dlg->confirm_button()->set_fixed_size(Vector2i(156, 60));
+      msg_dlg->cancel_button()->set_position(Vector2i(176, 677));
+      msg_dlg->cancel_button()->set_fixed_size(Vector2i(156, 60));
+      msg_dlg->label_icon()->set_icon("");
+      widget->window()->set_fixed_size(Vector2i(342, 747));
+      widget->window()->set_background_image(RED_LED3000_ASSETS_DIR"/set_msgdlg3.png");
       Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
-      /* "json"  消息表示更新配置文件 */
-      led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(choose == 1 ? POLYM_BUTTON_CONFIRM : POLYM_BUTTON_CANCEL, "json"));
-  }
-  else
-  {
-      Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
-      Window * setWindow = new Window(widget->window()->parent(), "系统参数配置");
-      Window * sysWindow = widget->window();
-      /* 标记 sysconfig winow 为 no Modal, 并修改 setWindow 为 Modal,setWindow 会提前到最前面图层 */
-      sysWindow->set_modal(false);
-      setWindow->set_modal(true);
-      setWindow->set_layout(new BoxLayout(Orientation::Vertical,
-                              Alignment::Middle, 0, 15));
 
-      Widget * ethsWidget = setWindow->add<Widget>();
-      ethsWidget->set_layout(new BoxLayout(Orientation::Horizontal,
-                              Alignment::Middle, 0, 15));
-
-      Widget * configWidget = ethsWidget->add<Widget>();
-      GridLayout * layout = new GridLayout(Orientation::Horizontal, 2,
-                                     Alignment::Middle, 15, 5);
-      layout->set_col_alignment({ Alignment::Maximum, Alignment::Fill });
-      layout->set_spacing(0, 10);
       /* 定义了这个窗口的布局 */
-      configWidget->set_layout(layout);
-      configWidget->add<Label>("网卡0IP:", "sans-bold");
+      auto *label = widget->add<Label>("网卡0IP:", "sans-bold");
+      label->set_position(Vector2i(51, 84));
+      label->set_font_size(20);
       /* 创建 textBox */
-      auto* textBox = configWidget->add<TextBox>("",KeyboardType::NumberIP);
+      auto* textBox = widget->add<TextBox>("",KeyboardType::NumberIP);
       textBox->set_editable(true);
+      textBox->set_position(Vector2i(166, 84));
       /* 设置控件大小 */
       textBox->set_fixed_size(Vector2i(150, 20));
       textBox->set_value(led3000Window->getJsonValue()->eths[0].ip);
       textBox->setSyncCharsValue(led3000Window->getJsonValue()->eths[0].ip);
       /* 设置字体大小 */
       textBox->set_font_size(16);
+
       //textBox->setFormat("[-]?[0-9]*\\.?[0-9]+");
       textBox->set_alignment(TextBox::Alignment::Left);
-      configWidget->add<Label>("网卡0子网掩码:", "sans-bold");
-      textBox = configWidget->add<TextBox>("",KeyboardType::NumberIP);
+      label = widget->add<Label>("网卡0子网掩码:", "sans-bold");
+      label->set_position(Vector2i(29, 140));
+      label->set_font_size(20);
+      textBox = widget->add<TextBox>("",KeyboardType::NumberIP);
+      textBox->set_position(Vector2i(166, 144));
       textBox->set_editable(true);
       textBox->set_fixed_size(Vector2i(150, 20));
       textBox->set_value(led3000Window->getJsonValue()->eths[0].netmask);
       textBox->setSyncCharsValue(led3000Window->getJsonValue()->eths[0].netmask);
       textBox->set_font_size(16);
       textBox->set_alignment(TextBox::Alignment::Left);
-      configWidget->add<Label>("网卡0网关:", "sans-bold");
-      textBox = configWidget->add<TextBox>("",KeyboardType::NumberIP);
+      label = widget->add<Label>("网卡0网关:", "sans-bold");
+      label->set_position(Vector2i(44, 196));
+      label->set_font_size(20);
+      textBox = widget->add<TextBox>("",KeyboardType::NumberIP);
+      textBox->set_position(Vector2i(166, 196));
       textBox->set_editable(true);
       textBox->set_fixed_size(Vector2i(150, 20));
       textBox->set_value(led3000Window->getJsonValue()->eths[0].gateway);
       textBox->setSyncCharsValue(led3000Window->getJsonValue()->eths[0].gateway);
       textBox->set_font_size(16);
       textBox->set_alignment(TextBox::Alignment::Left);
-
+#if 0
       Widget * eth1Widget = ethsWidget->add<Widget>();
       layout = new GridLayout(Orientation::Horizontal, 2,
                                      Alignment::Middle, 15, 5);
@@ -149,15 +143,20 @@ void do_with_sysconfig(Widget *widget, int choose)
       cameraWidget = setWindow->add<Widget>();
       cameraWidget->set_layout(new BoxLayout(Orientation::Horizontal,
                                       Alignment::Middle, 0, 15));
-      cameraWidget->add<Label>("摄像头2路径:", "sans-bold");
-      textBox = cameraWidget->add<TextBox>("", KeyboardType::Full);
+#endif
+      label = widget->add<Label>("摄像头2路径:", "sans-bold");
+      label->set_position(Vector2i(37, 615));
+      label->set_font_size(20);
+      textBox = widget->add<TextBox>("", KeyboardType::Full);
+      textBox->set_position(Vector2i(156, 599));
+      textBox->set_fixed_size(Vector2i(157, 52));
       textBox->set_editable(true);
-      textBox->set_fixed_size(Vector2i(350, 20));
       textBox->set_value(led3000Window->getJsonValue()->devices[1].camera_url);
       textBox->setSyncCharsValue(&(led3000Window->getJsonValue()->devices[1].camera_url[0]));
       textBox->set_font_size(16);
       textBox->set_alignment(TextBox::Alignment::Left);
 
+#if 0
       Widget *btn_widget = setWindow->add<Widget>();
       btn_widget->set_layout(new BoxLayout(Orientation::Horizontal,
                                       Alignment::Middle, 0, 150));
@@ -176,6 +175,18 @@ void do_with_sysconfig(Widget *widget, int choose)
       });
       setWindow->center();
       setWindow->request_focus();
+#endif
+  }
+}
+
+void do_with_sysconfig(Widget *widget, int choose)
+{
+  std::cout << "do with sysconfig :" << choose << std::endl;
+  if (choose != 2)
+  {
+      Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
+      /* "json"  消息表示更新配置文件 */
+      led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(choose == 1 ? POLYM_BUTTON_CONFIRM : POLYM_BUTTON_CANCEL, "json"));
   }
 }
 
@@ -607,7 +618,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           sysconfig_btn->set_position({15, 15});
           sysconfig_btn->set_fixed_size({46, 46});
           sysconfig_btn->set_callback([&] {
-              new MessageDialog(this, MessageDialog::Type::Choose, "系统参数设置", "准备配置参数", "确认", "取消", "参数配置", do_with_sysconfig, do_paint_sysconfig);});
+              new MessageDialog(this, MessageDialog::Type::Question, "", "准备配置参数", "确认", "取消", "", do_with_sysconfig, do_paint_sysconfig);});
 
           Button *devBtn = swindow->add<Button>("    灯光装置终端一", "/tmp/abc/huiyuan/dev_unchoose.png", "/tmp/abc/huiyuan/dev_choose.png", 0);
           devBtn->set_flags(Button::RadioButton);

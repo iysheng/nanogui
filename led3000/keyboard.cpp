@@ -30,165 +30,290 @@ NAMESPACE_BEGIN(nanogui)
 
 Keyboard::Keyboard(Widget *parent, Window *parent_window, KeyboardType type)
     : Window(parent, ""), mKeyboardType(type), mTextBox(nullptr), m_parent_window(parent_window), m_anchor_pos(Vector2i(0)),
-      m_anchor_offset(30), m_anchor_size(15), m_side(Side::Right)
+      m_anchor_offset(30), m_anchor_size(10), m_side(Side::Right)
 {
-  if (type == KeyboardType::Number)
+  if (type == KeyboardType::NumberIP)
   {
-    set_layout(new GridLayout(Orientation::Horizontal, 3, Alignment::Middle, 5, 5));
-    this->add<Button>("1")->set_callback([this]() {KEYBOARD_BUTTON('1')});
-    this->add<Button>("2")->set_callback([this]() {KEYBOARD_BUTTON('2')});
-    this->add<Button>("3")->set_callback([this]() {KEYBOARD_BUTTON('3')});
-    this->add<Button>("4")->set_callback([this]() {KEYBOARD_BUTTON('4')});
-    this->add<Button>("5")->set_callback([this]() {KEYBOARD_BUTTON('5')});
-    this->add<Button>("6")->set_callback([this]() {KEYBOARD_BUTTON('6')});
-    this->add<Button>("7")->set_callback([this]() {KEYBOARD_BUTTON('7')});
-    this->add<Button>("8")->set_callback([this]() {KEYBOARD_BUTTON('8')});
-    this->add<Button>("9")->set_callback([this]() {KEYBOARD_BUTTON('9')});
-    Button *button_del = new Button(this, "-");
-    button_del->set_callback([this](){
+    set_fixed_size(Vector2i(200, 325));
+    set_background_image(RED_LED3000_ASSETS_DIR"/keyboard_numip.png");
+    Button * btn = this->add<Button>("1");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('1')});
+    btn->set_fixed_size(Vector2i(50, 50));
+    btn->set_position(Vector2i(20, 20));
+    btn = this->add<Button>("2");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('2')});
+    btn->set_fixed_size(Vector2i(50, 50));
+    btn->set_position(Vector2i(75, 20));
+    btn = this->add<Button>("3");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('3')});
+    btn->set_fixed_size(Vector2i(50, 50));
+    btn->set_position(Vector2i(130, 20));
+
+    btn = this->add<Button>("4");
+    btn->set_fixed_size(Vector2i(50, 50));
+    btn->set_position(Vector2i(20, 75));
+    btn->set_callback([this]() {KEYBOARD_BUTTON('4')});
+    btn = this->add<Button>("5");
+    btn->set_fixed_size(Vector2i(50, 50));
+    btn->set_position(Vector2i(75, 75));
+    btn->set_callback([this]() {KEYBOARD_BUTTON('5')});
+    btn = this->add<Button>("6");
+    btn->set_fixed_size(Vector2i(50, 50));
+    btn->set_position(Vector2i(130, 75));
+    btn->set_callback([this]() {KEYBOARD_BUTTON('6')});
+
+    btn = this->add<Button>("7");
+    btn->set_fixed_size(Vector2i(50, 50));
+    btn->set_position(Vector2i(20, 130));
+    btn->set_callback([this]() {KEYBOARD_BUTTON('7')});
+    btn = this->add<Button>("8");
+    btn->set_fixed_size(Vector2i(50, 50));
+    btn->set_position(Vector2i(75, 130));
+    btn->set_callback([this]() {KEYBOARD_BUTTON('8')});
+    btn = this->add<Button>("9");
+    btn->set_fixed_size(Vector2i(50, 50));
+    btn->set_position(Vector2i(130, 130));
+    btn->set_callback([this]() {KEYBOARD_BUTTON('9')});
+
+    btn = new Button(this, "ఀ"); /* 0xc00 -> del 按键 */
+    btn->set_callback([this](){
       if (this->mKeyboardValue.length())
       {
         this->mKeyboardValue.pop_back();
         this->get_textbox()->set_value(this->mKeyboardValue);
       }
     });
-    this->add<Button>("0")->set_callback([this]() {KEYBOARD_BUTTON('0')});
-    Button *button_ok = new Button(this, "↵");
-    button_ok->set_callback([this]() {
-                red_debug_lite("num ok pushed:%s\n", this->mKeyboardValue.c_str());
-                this->window()->set_visible(false);
-                this->get_textbox()->window()->request_focus();
-                this->get_textbox()->set_value(this->mKeyboardValue);
-        });
-    /* 测试发现大小是 29，30 这里直接固定大小,但是随着字体大小的改变
-     * 这个大小应该也要变化
-     * */
-    button_ok->set_fixed_size(Vector2i(29, 30));
-    button_del->set_fixed_size(Vector2i(29, 30));
-  }
-  else if (type == KeyboardType::NumberIP)
-  {
-    AdvancedGridLayout *layout = new AdvancedGridLayout({34,34,34}, {34,34,34,34,34});
-    layout->set_margin(5);
-    set_layout(layout);
-    this->add<Button>("1")->set_callback([this]() {KEYBOARD_BUTTON('1')});
-    this->add<Button>("2")->set_callback([this]() {KEYBOARD_BUTTON('2')});
-    this->add<Button>("3")->set_callback([this]() {KEYBOARD_BUTTON('3')});
-    this->add<Button>("4")->set_callback([this]() {KEYBOARD_BUTTON('4')});
-    this->add<Button>("5")->set_callback([this]() {KEYBOARD_BUTTON('5')});
-    this->add<Button>("6")->set_callback([this]() {KEYBOARD_BUTTON('6')});
-    this->add<Button>("7")->set_callback([this]() {KEYBOARD_BUTTON('7')});
-    this->add<Button>("8")->set_callback([this]() {KEYBOARD_BUTTON('8')});
-    this->add<Button>("9")->set_callback([this]() {KEYBOARD_BUTTON('9')});
-    Button *button_del = new Button(this, "-");
-    button_del->set_callback([this](){
-      if (this->mKeyboardValue.length())
-      {
-        this->mKeyboardValue.pop_back();
-        this->get_textbox()->set_value(this->mKeyboardValue);
-      }
-    });
-    this->add<Button>("0")->set_callback([this]() {KEYBOARD_BUTTON('0')});
-    this->add<Button>(".")->set_callback([this]() {
+    btn->set_fixed_size(Vector2i(50, 50));
+    btn->set_position(Vector2i(20, 185));
+    btn = this->add<Button>("0");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('0')});
+    btn->set_fixed_size(Vector2i(50, 50));
+    btn->set_position(Vector2i(75, 185));
+    btn = this->add<Button>(".");
+    btn->set_callback([this]() {
         this->mKeyboardValue.push_back('.');
         this->get_textbox()->set_value(this->mKeyboardValue);
         });
-    Button *button_ok = new Button(this, "↵");
+    btn->set_fixed_size(Vector2i(50, 50));
+    btn->set_position(Vector2i(130, 185));
+
+    Button *button_ok = new Button(this, "确认");
     button_ok->set_callback([this]() {
                 red_debug_lite("num ok pushed:%s\n", this->mKeyboardValue.c_str());
                 this->window()->set_visible(false);
+                this->get_textbox()->window()->set_modal(true);
                 this->get_textbox()->window()->request_focus();
                 this->get_textbox()->set_value(this->mKeyboardValue);
         });
-    /* 测试发现大小是 29，30 这里直接固定大小,但是随着字体大小的改变
-     * 这个大小应该也要变化
-     * */
-    button_ok->set_fixed_size(Vector2i(30 * 3 + 4, 34));
-    button_del->set_fixed_size(Vector2i(30, 34));
-
-    int i = 0 , j = 0;
-    for (; i < 4; i++)
-      for (j = 0; j < 3; j++)
-      {
-        dynamic_cast<Button *>(m_children[i*3+j])->set_fixed_size(Vector2i(29, 30));
-        layout->set_anchor(m_children[i*3+j], AdvancedGridLayout::Anchor(j, i, 1, 1, Alignment::Middle));
-      }
-    m_children[i*3]->set_fixed_size(Vector2i(34 + 29*2, 30));
-    layout->set_anchor(m_children[i*3], AdvancedGridLayout::Anchor(0, i, 3, 1, Alignment::Middle));
+    button_ok->set_fixed_size(Vector2i(180, 60));
+    button_ok->set_position(Vector2i(10, 255));
   }
   else if (type == KeyboardType::Full)
   {
-    set_layout(new GridLayout(Orientation::Horizontal, 10, Alignment::Middle, 1, 1));
-    this->add<Button>("1")->set_callback([this]() {KEYBOARD_BUTTON('1')});
-    this->add<Button>("2")->set_callback([this]() {KEYBOARD_BUTTON('2')});
-    this->add<Button>("3")->set_callback([this]() {KEYBOARD_BUTTON('3')});
-    this->add<Button>("4")->set_callback([this]() {KEYBOARD_BUTTON('4')});
-    this->add<Button>("5")->set_callback([this]() {KEYBOARD_BUTTON('5')});
-    this->add<Button>("6")->set_callback([this]() {KEYBOARD_BUTTON('6')});
-    this->add<Button>("7")->set_callback([this]() {KEYBOARD_BUTTON('7')});
-    this->add<Button>("8")->set_callback([this]() {KEYBOARD_BUTTON('8')});
-    this->add<Button>("9")->set_callback([this]() {KEYBOARD_BUTTON('9')});
-    this->add<Button>("0")->set_callback([this]() {KEYBOARD_BUTTON('0')});
+    set_fixed_size(Vector2i(456, 594));
+    set_background_image(RED_LED3000_ASSETS_DIR"/keyboard_full.png");
+    Button * btn = this->add<Button>("1");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('1')});
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn->set_position(Vector2i(22, 22));
+    btn = this->add<Button>("2");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('2')});
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn->set_position(Vector2i(92, 22));
+    btn = this->add<Button>("3");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('3')});
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn->set_position(Vector2i(162, 22));
+    btn = this->add<Button>("4");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('4')});
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn->set_position(Vector2i(232, 22));
+    btn = this->add<Button>("5");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('5')});
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn->set_position(Vector2i(302, 22));
+    btn = this->add<Button>("6");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('6')});
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn->set_position(Vector2i(372, 22));
+    btn = this->add<Button>("7");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('7')});
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn->set_position(Vector2i(22, 92));
+    btn = this->add<Button>("8");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('8')});
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn->set_position(Vector2i(92, 92));
+    btn = this->add<Button>("9");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('9')});
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn->set_position(Vector2i(162, 92));
+    btn = this->add<Button>("0");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('0')});
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn->set_position(Vector2i(232, 92));
 
-    this->add<Button>("q")->set_callback([this]() {KEYBOARD_BUTTON('q');});
-    this->add<Button>("w")->set_callback([this]() {KEYBOARD_BUTTON('w');});
-    this->add<Button>("e")->set_callback([this]() {KEYBOARD_BUTTON('e');});
-    this->add<Button>("r")->set_callback([this]() {KEYBOARD_BUTTON('r');});
-    this->add<Button>("t")->set_callback([this]() {KEYBOARD_BUTTON('t');});
-    this->add<Button>("y")->set_callback([this]() {KEYBOARD_BUTTON('y');});
-    this->add<Button>("u")->set_callback([this]() {KEYBOARD_BUTTON('u');});
-    this->add<Button>("i")->set_callback([this]() {KEYBOARD_BUTTON('i');});
-    this->add<Button>("o")->set_callback([this]() {KEYBOARD_BUTTON('o');});
-    this->add<Button>("p")->set_callback([this]() {KEYBOARD_BUTTON('p');});
+    btn = this->add<Button>("q");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('q');});
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn->set_position(Vector2i(302, 92));
+    btn = this->add<Button>("w");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('w');});
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn->set_position(Vector2i(372, 92));
+    btn = this->add<Button>("e");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('e');});
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn->set_position(Vector2i(22, 162));
+    btn = this->add<Button>("r");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('r');});
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn->set_position(Vector2i(92, 162));
+    btn = this->add<Button>("t");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('t');});
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn->set_position(Vector2i(162, 162));
+    btn = this->add<Button>("y");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('y');});
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn->set_position(Vector2i(232, 162));
+    btn = this->add<Button>("u");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('u');});
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn->set_position(Vector2i(302, 162));
+    btn = this->add<Button>("i");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('i');});
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn->set_position(Vector2i(372, 162));
+    btn = this->add<Button>("o");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('o');});
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn->set_position(Vector2i(22, 232));
+    btn = this->add<Button>("p");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('p');});
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn->set_position(Vector2i(92, 232));
 
-    this->add<Button>("a")->set_callback([this]() {KEYBOARD_BUTTON('a');});
-    this->add<Button>("s")->set_callback([this]() {KEYBOARD_BUTTON('s');});
-    this->add<Button>("d")->set_callback([this]() {KEYBOARD_BUTTON('d');});
-    this->add<Button>("f")->set_callback([this]() {KEYBOARD_BUTTON('f');});
-    this->add<Button>("g")->set_callback([this]() {KEYBOARD_BUTTON('g');});
-    this->add<Button>("h")->set_callback([this]() {KEYBOARD_BUTTON('h');});
-    this->add<Button>("j")->set_callback([this]() {KEYBOARD_BUTTON('j');});
-    this->add<Button>("k")->set_callback([this]() {KEYBOARD_BUTTON('k');});
-    this->add<Button>("l")->set_callback([this]() {KEYBOARD_BUTTON('l');});
-    this->add<Button>("/")->set_callback([this]() {KEYBOARD_BUTTON('/');});
+    btn = this->add<Button>("a");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('a');});
+    btn->set_position(Vector2i(162, 232));
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn = this->add<Button>("s");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('s');});
+    btn->set_position(Vector2i(232, 232));
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn = this->add<Button>("d");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('d');});
+    btn->set_position(Vector2i(302, 232));
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn = this->add<Button>("f");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('f');});
+    btn->set_position(Vector2i(372, 232));
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn = this->add<Button>("g");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('g');});
+    btn->set_position(Vector2i(22, 302));
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn = this->add<Button>("h");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('h');});
+    btn->set_position(Vector2i(92, 302));
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn = this->add<Button>("j");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('j');});
+    btn->set_position(Vector2i(162, 302));
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn = this->add<Button>("k");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('k');});
+    btn->set_position(Vector2i(232, 302));
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn = this->add<Button>("l");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('l');});
+    btn->set_position(Vector2i(302, 302));
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn = this->add<Button>("z");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('z');});
+    btn->set_position(Vector2i(372, 302));
+    btn->set_fixed_size(Vector2i(60, 60));
 
-    this->add<Button>("z")->set_callback([this]() {KEYBOARD_BUTTON('z');});
-    this->add<Button>("x")->set_callback([this]() {KEYBOARD_BUTTON('x');});
-    this->add<Button>("c")->set_callback([this]() {KEYBOARD_BUTTON('c');});
-    this->add<Button>("v")->set_callback([this]() {KEYBOARD_BUTTON('v');});
-    this->add<Button>("b")->set_callback([this]() {KEYBOARD_BUTTON('b');});
-    this->add<Button>("n")->set_callback([this]() {KEYBOARD_BUTTON('n');});
-    this->add<Button>("m")->set_callback([this]() {KEYBOARD_BUTTON('m');});
-    this->add<Button>(".")->set_callback([this]() {KEYBOARD_BUTTON('.');});
-    this->add<Button>(",")->set_callback([this]() {KEYBOARD_BUTTON(',');});
-    this->add<Button>(" ")->set_callback([this]() {KEYBOARD_BUTTON(' ');});
+    btn = this->add<Button>("x");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('x');});
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn->set_position(Vector2i(22, 372));
+    btn = this->add<Button>("c");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('c');});
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn->set_position(Vector2i(92, 372));
+    btn = this->add<Button>("v");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('v');});
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn->set_position(Vector2i(162, 372));
+    btn = this->add<Button>("b");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('b');});
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn->set_position(Vector2i(232, 372));
+    btn = this->add<Button>("n");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('n');});
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn->set_position(Vector2i(302, 372));
+    btn = this->add<Button>("m");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('m');});
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn->set_position(Vector2i(372, 372));
 
-    this->add<Button>("!")->set_callback([this]() {KEYBOARD_BUTTON('!');});
-    this->add<Button>("@")->set_callback([this]() {KEYBOARD_BUTTON('@');});
-    this->add<Button>("#")->set_callback([this]() {KEYBOARD_BUTTON('#');});
-    this->add<Button>("$")->set_callback([this]() {KEYBOARD_BUTTON('$');});
-    this->add<Button>("%")->set_callback([this]() {KEYBOARD_BUTTON('%');});
-    this->add<Button>("^")->set_callback([this]() {KEYBOARD_BUTTON('^');});
-    this->add<Button>("&")->set_callback([this]() {KEYBOARD_BUTTON('&');});
-    this->add<Button>(":")->set_callback([this]() {KEYBOARD_BUTTON(':');});
+    btn = this->add<Button>("(");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('(');});
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn->set_position(Vector2i(22, 442));
+    btn = this->add<Button>(")");
+    btn->set_callback([this]() {KEYBOARD_BUTTON(')');});
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn->set_position(Vector2i(92, 442));
+    btn = this->add<Button>(".");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('.');});
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn->set_position(Vector2i(162, 442));
 
-    Button *button_del = new Button(this, "-");
-    button_del->set_callback([this](){
+    btn = this->add<Button>("/");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('/');});
+    btn->set_position(Vector2i(232, 442));
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn = this->add<Button>("-");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('-');});
+    btn->set_position(Vector2i(302, 442));
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn = this->add<Button>("?");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('?');});
+    btn->set_position(Vector2i(372, 442));
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn = this->add<Button>("@");
+    btn->set_callback([this]() {KEYBOARD_BUTTON('@');});
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn->set_position(Vector2i(22, 512));
+    btn = this->add<Button>(":");
+    btn->set_callback([this]() {KEYBOARD_BUTTON(':');});
+    btn->set_fixed_size(Vector2i(60, 60));
+    btn->set_position(Vector2i(92, 512));
+
+    btn = this->add<Button>("ఀ"); /* 0xc00 表示删除 */
+    btn->set_fixed_size(Vector2i(130, 60));
+    btn->set_position(Vector2i(162, 512));
+    btn->set_callback([this](){
       if (this->mKeyboardValue.length())
       {
         this->mKeyboardValue.pop_back();
         this->get_textbox()->set_value(this->mKeyboardValue);
       }
     });
-    Button *button_ok = new Button(this, "↵");
-    button_ok->set_callback([this]() {
+    btn = this->add<Button>("确认");
+    btn->set_fixed_size(Vector2i(130, 60));
+    btn->set_position(Vector2i(302, 512));
+    btn->set_callback([this]() {
         red_debug_lite("num ok pushed:%s\n", this->mKeyboardValue.c_str());
         this->window()->set_visible(false);
+        this->get_textbox()->window()->set_modal(true);
         this->get_textbox()->window()->request_focus();
         this->get_textbox()->set_value(this->mKeyboardValue);
     });
-    button_ok->set_fixed_size(Vector2i(31, 30));
-    button_del->set_fixed_size(Vector2i(31, 30));
   }
 }
 
@@ -211,7 +336,15 @@ void Keyboard::refresh_relative_placement() {
         return;
     m_parent_window->refresh_relative_placement();
     m_visible &= m_parent_window->visible_recursive();
-    m_pos = m_parent_window->position() + m_anchor_pos - Vector2i(0, m_anchor_offset);
+    /* 全键盘时因为尺寸过大，使用指定高度的显示 */
+    if (mKeyboardType == KeyboardType::Full)
+    {
+        m_pos = Vector2i(m_anchor_size + m_parent_window->position()[0] + m_parent_window->size()[0], 104);
+    }
+    else
+    {
+        m_pos = m_parent_window->position() + m_anchor_pos - Vector2i(0, m_anchor_offset);
+    }
 }
 
 void Keyboard::draw(NVGcontext* ctx) {
