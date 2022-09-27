@@ -46,6 +46,10 @@ public:
 
     Label *message_label() { return m_message_label; }
     const Label *message_label() const { return m_message_label; }
+    Label *label_icon() const { return m_label_icon; }
+    Button *cancel_button() {return m_cancel_button;}
+    Button *set_button() {return m_set_button;}
+    Button *confirm_button() {return m_confirm_button;}
 
     std::function<void(int)> callback() const { return m_callback; }
     void set_callback(const std::function<void(int)> &callback) { m_callback = callback; }

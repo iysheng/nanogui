@@ -91,7 +91,7 @@ void Window::draw(NVGcontext *ctx) {
     if (m_background_image)
     {
         NVGpaint img_paint = nvgImagePattern(ctx, m_pos.x(), m_pos.y(), m_size.x(),
-                   m_size.y(), 0, m_background_image, m_enabled ? 0.5f : 0.25f);
+                   m_size.y(), 0, m_background_image, m_enabled ? 1.0f : 0.5f);
         nvgFillPaint(ctx, img_paint);
         nvgFill(ctx);
     }

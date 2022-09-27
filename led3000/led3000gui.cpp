@@ -217,6 +217,46 @@ void do_with_green_light_normal(Widget *widget, int choose)
   }
 }
 
+void do_with_green_light_blink(Widget *widget, int choose)
+{
+  std::cout << "green light blink:" << choose << std::endl;
+  Led3000Window * window = dynamic_cast<Led3000Window *>(widget->screen());
+  const std::vector<Button *> * green_dev_btns = window->get_green_dev_control_btns();
+  if (choose != 2)
+  {
+    /* TODO change green light status */
+
+      switch(choose)
+      {
+        case 0:
+            red_debug_lite("choose 0 \n");
+            break;
+        case 1:
+            red_debug_lite("choose 1 \n");
+            green_dev_btns->at(0)->set_pushed(false);
+            green_dev_btns->at(1)->set_pushed(true);
+            green_dev_btns->at(2)->set_pushed(false);
+            break;
+        default:
+            break;
+      }
+  }
+}
+
+void do_paint_green_light_mocode(Widget *widget)
+{
+    auto * mocode_value_title = widget->add<Label>("莫码参数为：", "sans-bold");
+    mocode_value_title->set_font_size(20);
+    auto * mocode_counts_title = widget->add<Label>("莫码发送次数为：", "sans-bold");
+    mocode_counts_title->set_font_size(20);
+    auto * mocode_period_title = widget->add<Label>("莫码发送间隔为：", "sans-bold");
+    mocode_period_title->set_font_size(20);
+
+    mocode_value_title->set_position(Vector2i(61, 180));
+    mocode_counts_title->set_position(Vector2i(46, 236));
+    mocode_period_title->set_position(Vector2i(46, 292));
+}
+
 void do_with_green_light_mocode(Widget *widget, int choose)
 {
   red_debug_lite("mocode light normal:%d\n", choose);
@@ -511,6 +551,9 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           Button *btn_green_blink = new Button(cwindow, "绿闪");
           btn_green_blink->set_fixed_size({120, 92});
           btn_green_blink->set_position({140, 48});
+          btn_green_blink->set_callback([&] {
+              new MessageDialog(this, MessageDialog::Type::Choose, "", "确认要绿光闪烁么？", "确认", "取消", "配置", do_with_green_light_blink);
+          });
           /* 这里会弹出来新的 MessageDialog, 新的 MessageDialog 支持弹出新的 Window
            * 测试发现这个 MessageDialog Widget 的 parent 竟然是 Led3000Window * ？？？
            * */
@@ -518,7 +561,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           btn_green_mocode->set_fixed_size({120, 92});
           btn_green_mocode->set_position({270, 48});
           btn_green_mocode->set_callback([&] {
-              MessageDialog *dlg = new MessageDialog(this, MessageDialog::Type::Choose, "", "开启绿光莫码模式？", "确认", "取消", "配置", do_with_green_light_mocode);});
+              MessageDialog *dlg = new MessageDialog(this, MessageDialog::Type::Choose, "", "开启绿光莫码模式？", "确认", "取消", "配置", do_with_green_light_mocode, do_paint_green_light_mocode);});
 
           btn_green_led->push_button_group(btn_green_led);
           btn_green_led->push_button_group(btn_green_blink);
@@ -564,7 +607,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           sysconfig_btn->set_position({15, 15});
           sysconfig_btn->set_fixed_size({46, 46});
           sysconfig_btn->set_callback([&] {
-              new MessageDialog(this, MessageDialog::Type::Choose, "系统参数设置", "准备配置参数", "确认", "取消", "参数配置", do_with_sysconfig);});
+              new MessageDialog(this, MessageDialog::Type::Choose, "系统参数设置", "准备配置参数", "确认", "取消", "参数配置", do_with_sysconfig, do_paint_sysconfig);});
 
           Button *devBtn = swindow->add<Button>("    灯光装置终端一", "/tmp/abc/huiyuan/dev_unchoose.png", "/tmp/abc/huiyuan/dev_choose.png", 0);
           devBtn->set_flags(Button::RadioButton);

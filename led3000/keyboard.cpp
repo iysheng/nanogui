@@ -226,17 +226,20 @@ void Keyboard::draw(NVGcontext* ctx) {
     nvgSave(ctx);
     nvgResetScissor(ctx);
 
-    /* Draw a drop shadow */
-    NVGpaint shadow_paint = nvgBoxGradient(
-        ctx, m_pos.x(), m_pos.y(), m_size.x(), m_size.y(), cr*2, ds*2,
-        m_theme->m_drop_shadow, m_theme->m_transparent);
-
-    nvgBeginPath(ctx);
-    nvgRect(ctx, m_pos.x()-ds,m_pos.y()-ds, m_size.x()+2*ds, m_size.y()+2*ds);
-    nvgRoundedRect(ctx, m_pos.x(), m_pos.y(), m_size.x(), m_size.y(), cr);
-    nvgPathWinding(ctx, NVG_HOLE);
-    nvgFillPaint(ctx, shadow_paint);
-    nvgFill(ctx);
+    if (ds)
+    {
+        /* Draw a drop shadow */
+        NVGpaint shadow_paint = nvgBoxGradient(
+            ctx, m_pos.x(), m_pos.y(), m_size.x(), m_size.y(), cr*2, ds*2,
+            m_theme->m_drop_shadow, m_theme->m_transparent);
+    
+        nvgBeginPath(ctx);
+        nvgRect(ctx, m_pos.x()-ds,m_pos.y()-ds, m_size.x()+2*ds, m_size.y()+2*ds);
+        nvgRoundedRect(ctx, m_pos.x(), m_pos.y(), m_size.x(), m_size.y(), cr);
+        nvgPathWinding(ctx, NVG_HOLE);
+        nvgFillPaint(ctx, shadow_paint);
+        nvgFill(ctx);
+    }
 
     /* Draw window */
     nvgBeginPath(ctx);
@@ -254,6 +257,13 @@ void Keyboard::draw(NVGcontext* ctx) {
     nvgLineTo(ctx, base.x() - 1*sign, base.y() + m_anchor_size);
 
     nvgFillColor(ctx, m_theme->m_window_popup);
+
+    if (m_background_image)
+    {
+        NVGpaint img_paint = nvgImagePattern(ctx, m_pos.x(), m_pos.y(), m_size.x(),
+                   m_size.y(), 0, m_background_image, m_enabled ? 1.0f : 0.5f);
+        nvgFillPaint(ctx, img_paint);
+    }
     nvgFill(ctx);
     nvgRestore(ctx);
 

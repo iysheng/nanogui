@@ -84,6 +84,14 @@ void Label::draw(NVGcontext *ctx) {
 
 void Label::set_icon(const std::string &icon_path) {
     NVGcontext *ctx = screen()->nvg_context();
-    m_icon = nvgCreateImage(ctx, icon_path.c_str(), 0);
+    if (m_icon)
+    {
+        nvgDeleteImage(ctx, m_icon);
+    }
+
+    if (!icon_path.empty())
+    {
+        m_icon = nvgCreateImage(ctx, icon_path.c_str(), 0);
+    }
 };
 NAMESPACE_END(nanogui)
