@@ -334,10 +334,10 @@ Screen::Screen(const Vector2i &size, const std::string &caption, bool resizable,
             {
                 if (action == GLFW_PRESS)
                 {
-                s->cursor_pos_callback_event(x, y);
+                    s->cursor_pos_callback_event(x, y);
                     s->mouse_button_callback_event(button, GLFW_PRESS, modifiers);
-            xx = x;
-            yy = y;
+                    xx = x;
+                    yy = y;
                 }
             }
             else

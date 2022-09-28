@@ -24,7 +24,7 @@ Button::Button(Widget *parent, const std::string &caption, int icon)
       m_text_color(Color(0, 0)) { }
 
 Button::Button(Widget *parent, const std::string &caption, const std::string &BackgroundImage, int icon)
-    : Widget(parent), m_caption(caption), m_icon(icon), m_background_image(0),
+    : Widget(parent), m_caption(caption), m_icon(icon), m_background_image(0),m_pushed_background_image(0),
       m_icon_position(IconPosition::LeftCentered), m_pushed(false),
       m_flags(NormalButton), m_background_color(Color(0, 0)),
       m_text_color(Color(0, 0)) {
@@ -162,11 +162,10 @@ bool Button::mouse_button_event(const Vector2i &p, int button, bool down, int mo
 void Button::draw(NVGcontext *ctx) {
     /* 执行 child 的 widgets 的 draw() */
     Widget::draw(ctx);
-    int background_image = 0;
+    int background_image = m_background_image;
 
     NVGcolor grad_top = m_theme->m_button_gradient_top_unfocused;
     NVGcolor grad_bot = m_theme->m_button_gradient_bot_unfocused;
-    background_image = m_background_image;
 
     if (m_pushed || (m_mouse_focus && (m_flags & MenuButton))) {
         grad_top = m_theme->m_button_gradient_top_pushed;

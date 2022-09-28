@@ -43,6 +43,7 @@ TextBox::TextBox(Widget *parent, const std::string &value, KeyboardType type)
       m_mouse_drag_pos(Vector2i(-1,-1)),
       m_mouse_down_modifier(0),
       m_text_offset(0),
+      m_break_width(130),
       m_last_click(0) {
     if (m_theme) m_font_size = m_theme->m_text_box_font_size;
     m_keyboard = new Keyboard(screen(), window(), type);
@@ -125,7 +126,7 @@ void TextBox::draw(NVGcontext* ctx) {
 
     nvgFontSize(ctx, font_size());
     nvgFontFace(ctx, "sans");
-    Vector2i draw_pos(m_pos.x(), m_pos.y() + m_size.y() * 0.5f + 1);
+    Vector2i draw_pos(m_pos.x(), m_pos.y() + m_font_size);
 
     float x_spacing = m_size.y() * 0.3f;
 
@@ -150,7 +151,7 @@ void TextBox::draw(NVGcontext* ctx) {
         unit_width = nvgTextBounds(ctx, 0, 0, m_units.c_str(), nullptr, nullptr);
         nvgFillColor(ctx, Color(255, m_enabled ? 64 : 32));
         nvgTextAlign(ctx, NVG_ALIGN_RIGHT | NVG_ALIGN_MIDDLE);
-        nvgText(ctx, m_pos.x() + m_size.x() - x_spacing, draw_pos.y(),
+        nvgTextBox(ctx, m_pos.x() + m_size.x() - x_spacing, draw_pos.y(), m_break_width,
                 m_units.c_str(), nullptr);
         unit_width += 2;
     }
@@ -172,7 +173,7 @@ void TextBox::draw(NVGcontext* ctx) {
             nvgTextAlign(ctx, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
             Vector2f icon_pos(m_pos.x() + 4.f,
                              m_pos.y() + m_size.y()/2.f - x_spacing/2.f);
-            nvgText(ctx, icon_pos.x(), icon_pos.y(), icon.data(), nullptr);
+            nvgTextBox(ctx, icon_pos.x(), icon_pos.y(), m_break_width, icon.data(), nullptr);
         }
 
         /* down button */ {
@@ -182,7 +183,7 @@ void TextBox::draw(NVGcontext* ctx) {
             nvgTextAlign(ctx, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
             Vector2f icon_pos(m_pos.x() + 4.f,
                              m_pos.y() + m_size.y()/2.f + x_spacing/2.f + 1.5f);
-            nvgText(ctx, icon_pos.x(), icon_pos.y(), icon.data(), nullptr);
+            nvgTextBox(ctx, icon_pos.x(), icon_pos.y(), m_break_width, icon.data(), nullptr);
         }
 
         nvgFontSize(ctx, font_size());
@@ -221,13 +222,14 @@ void TextBox::draw(NVGcontext* ctx) {
     Vector2i old_draw_pos(draw_pos);
     draw_pos.x() += m_text_offset;
 
+    /* 显示字体内容 */
     if (m_committed) {
-        nvgText(ctx, draw_pos.x(), draw_pos.y(), m_value.empty() ? m_placeholder.c_str() : m_value.c_str(), nullptr);
+        nvgTextBox(ctx, draw_pos.x(), draw_pos.y(), m_break_width, m_value.empty() ? m_placeholder.c_str() : m_value.c_str(), nullptr);
     } else {
         const int max_glyphs = 1024;
         NVGglyphPosition glyphs[max_glyphs];
         float text_bound[4];
-        nvgTextBounds(ctx, draw_pos.x(), draw_pos.y(), m_value_temp.c_str(),
+        nvgTextBoxBounds(ctx, draw_pos.x(), draw_pos.y(), m_break_width, m_value_temp.c_str(),
                       nullptr, text_bound);
         float lineh = text_bound[3] - text_bound[1];
 
@@ -251,8 +253,8 @@ void TextBox::draw(NVGcontext* ctx) {
         draw_pos.x() = old_draw_pos.x() + m_text_offset;
 
         // draw text with offset
-        nvgText(ctx, draw_pos.x(), draw_pos.y(), m_value_temp.c_str(), nullptr);
-        nvgTextBounds(ctx, draw_pos.x(), draw_pos.y(), m_value_temp.c_str(),
+        nvgTextBox(ctx, draw_pos.x(), draw_pos.y(), m_break_width, m_value_temp.c_str(), nullptr);
+        nvgTextBoxBounds(ctx, draw_pos.x(), draw_pos.y(), m_break_width, m_value_temp.c_str(),
                       nullptr, text_bound);
 
         // recompute cursor positions

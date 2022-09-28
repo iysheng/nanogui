@@ -225,7 +225,6 @@ void do_paint_green_light_blink(Widget *widget)
     textBox->set_editable(true);
     textBox->set_value(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode);
     textBox->setSyncCharsValue(&(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode[0]));
-    textBox->set_font_size(20);
     textBox->set_alignment(TextBox::Alignment::Left);
 
     msg_dlg->label_icon()->set_position(Vector2i(148, 91));
@@ -494,45 +493,55 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
         {
           auto* swindow = new Window(this, "");
           swindow->set_fixed_size({1240, 166});
-          printf("swindow addr=%p\n", &swindow);
           swindow->set_background_image("/tmp/abc/huiyuan/status.png");
           /* 确定了 swindow 的位置 */
           swindow->set_position({20, 444});
-          /* 创建一个新的布局 */
-          auto* layout = new GridLayout(Orientation::Horizontal, 6,
-                                         Alignment::Minimum, 15, 5);
-          layout->set_col_alignment({ Alignment::Maximum, Alignment::Fill });
-          layout->set_spacing(0, 10);
-          /* 定义了这个窗口的布局 */
-          swindow->set_layout(layout);
 
           /* 调用 add 函数模板
            * 将新创建的 label 控件关联到 swindow 作为其 parent
            * */
-          new Label(swindow, "        ", "sans-bold");
-          new Label(swindow, "设备状态", "sans-bold");
-          new Label(swindow, "水平/垂直角度(swindow, 糖)", "sans-bold");
-          new Label(swindow, "水平/垂直速度(swindow, 糖/s)", "sans-bold");
-          new Label(swindow, "莫码信息", "sans-bold");
-          new Label(swindow, "绿灯状态", "sans-bold");
+          auto * label = swindow->add<Label>("设备名称", "sans-bold");
+          label->set_position(Vector2i(60, 10));
+          label = swindow->add<Label>("设备状态", "sans-bold");
+          label->set_position(Vector2i(323, 10));
+          label = swindow->add<Label>("水平|垂直角度(糖)", "sans-bold");
+          label->set_position(Vector2i(516, 10));
+          label = swindow->add<Label>("水平|垂直速度(糖/s)", "sans-bold");
+          label->set_position(Vector2i(701, 10));
+          label = swindow->add<Label>("莫码信息", "sans-bold");
+          label->set_position(Vector2i(930, 10));
+          label = swindow->add<Label>("绿灯状态", "sans-bold");
+          label->set_position(Vector2i(1135, 10));
 
-          new Label(swindow, "灯光装置终端一", "sans-bold");
+          label = swindow->add<Label>("灯光装置终端一", "sans-bold");
+          label->set_position(Vector2i(40, 62));
           m_dev_state[0] = new Label(swindow, "在线", "sans");
+          m_dev_state[0]->set_position(Vector2i(323, 62));
           m_dev_angle[0] = new Label(swindow, "120/10", "sans");
+          m_dev_angle[0]->set_position(Vector2i(516, 62));
           m_dev_angular_speed[0] = new Label(swindow, "20/10", "sans");
+          m_dev_angular_speed[0]->set_position(Vector2i(701, 62));
           m_dev_morse_code[0] = new Label(swindow, "", "sans");
           m_dev_morse_code[0]->set_caption_merge(mJsonValue.devices[0].green_led.mocode, mJsonValue.devices[0].white_led.mocode, '/');
+          m_dev_morse_code[0]->set_position(Vector2i(930, 62));
           m_dev_auth[0] = new Label(swindow, "", "sans");
           m_dev_auth[0]->set_caption_merge((mJsonValue.devices[0].green_led.auth ? "已" : "未"), "授权", '\0');
+          m_dev_auth[0]->set_position(Vector2i(1135, 62));
 
-          new Label(swindow, "灯光装置终端二", "sans-bold");
+          label = swindow->add<Label>("灯光装置终端二", "sans-bold");
+          label->set_position(Vector2i(40, 125));
           m_dev_state[1] = new Label(swindow, "离线", "sans");
+          m_dev_state[1]->set_position(Vector2i(323, 125));
           m_dev_angle[1] = new Label(swindow, "-/-", "sans");
+          m_dev_angle[1]->set_position(Vector2i(516, 125));
           m_dev_angular_speed[1] = new Label(swindow, "-/-", "sans");
+          m_dev_angular_speed[1]->set_position(Vector2i(701, 125));
           m_dev_morse_code[1] = new Label(swindow, "", "sans");
           m_dev_morse_code[1]->set_caption_merge(mJsonValue.devices[1].green_led.mocode, mJsonValue.devices[1].white_led.mocode, '/');
+          m_dev_morse_code[1]->set_position(Vector2i(930, 125));
           m_dev_auth[1] = new Label(swindow, "", "sans");
           m_dev_auth[1]->set_caption_merge((mJsonValue.devices[1].green_led.auth ? "已" : "未"), "授权", '\0');
+          m_dev_auth[1]->set_position(Vector2i(1135, 125));
         }
 
         /* 设备控制窗口 */
@@ -565,9 +574,6 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           btn_green_blink->set_callback([&] {
               new MessageDialog(this, MessageDialog::Type::Question, "", "", "确认", "取消", "", do_with_green_light_blink, do_paint_green_light_blink);
           });
-          /* 这里会弹出来新的 MessageDialog, 新的 MessageDialog 支持弹出新的 Window
-           * 测试发现这个 MessageDialog Widget 的 parent 竟然是 Led3000Window * ？？？
-           * */
           Button *btn_green_mocode = new Button(cwindow, "莫码");
           btn_green_mocode->set_fixed_size({120, 92});
           btn_green_mocode->set_position({270, 48});
@@ -651,40 +657,6 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           devBtn->push_button_group(devBtn2);
         }
 
-#if 0
-        /* 设备选择 */
-        {
-          auto* chooseWindow = new Window(this, "设备选择");
-
-          chooseWindow->set_background_image("/tmp/abc/dev.png");
-          /* 确定了chooseWindow 的位置 */
-          chooseWindow->set_position({980, 150});
-          /* 创建一个新的布局 */
-          GridLayout * layout = new GridLayout(Orientation::Horizontal, 1,
-                                         Alignment::Middle, 5, 5);
-          layout->set_col_alignment({ Alignment::Fill, Alignment::Fill });
-          /* 定义了这个窗口的布局 */
-          chooseWindow->set_layout(layout);
-          Button *devBtn = chooseWindow->add<Button>("灯光装置终端一");
-          devBtn->set_callback([this]() {
-            cout << "choose device 1" << endl;
-            this->get_green_dev_label()->set_caption("绿灯一");
-            this->get_white_dev_label()->set_caption("白灯一");
-            this->setCurrentDevice(0);
-          });
-          /* 根据实际系统功能中按键大小，为了保持大小一致，修改设备选择按键大小保持一致 */
-          ///devBtn->set_fixed_size(Vector2i(165, 30));
-          devBtn = chooseWindow->add<Button>("灯光装置终端二");
-          devBtn->set_callback([this]() {
-            cout << "choose device 2" << endl;
-            this->get_green_dev_label()->set_caption("绿灯二");
-            this->get_white_dev_label()->set_caption("白灯二");
-            this->setCurrentDevice(1);
-          });
-          ///devBtn->set_fixed_size(Vector2i(165, 30));
-        }
-#endif
-
         /* 转台功能 */
         {
           auto* turntableWindow = new Window(this, "");
@@ -721,6 +693,9 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
             video_image->set_fixed_size(Vector2i(520, 286));
             video_image->set_position(Vector2i(20, 20));
 
+            auto *label = img_window->add<Label>("1");
+            label->set_font("sans-bold");
+            label->set_position(Vector2i(570, 64));
             auto *btn = img_window->add<Button>("", "/tmp/abc/huiyuan/dec_focal.png");
             btn->set_callback([this]() {
                   cout << "decrease camera 1 focal len" << endl;
@@ -739,6 +714,9 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
             img2_window->set_fixed_size({610, 326});
             img2_window->set_position(Vector2i(650, 98));
             img2_window->set_background_image("/tmp/abc/huiyuan/video.png");
+            label = img2_window->add<Label>("2");
+            label->set_font("sans-bold");
+            label->set_position(Vector2i(570, 64));
 
             btn = img2_window->add<Button>("", "/tmp/abc/huiyuan/dec_focal.png", 0);
             btn->set_fixed_size({30, 30});
