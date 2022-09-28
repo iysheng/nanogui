@@ -160,7 +160,7 @@ void do_paint_sysconfig(Widget *widget)
 void do_with_sysconfig(Widget *widget, int choose)
 {
   std::cout << "do with sysconfig :" << choose << std::endl;
-  if (choose != 2)
+  if (choose == 1)
   {
       Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
       /* "json"  消息表示更新配置文件 */
@@ -318,7 +318,12 @@ void do_with_green_light_mocode(Widget *widget, int choose)
   if (choose == 1)
   {
     Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
+    /* 发送消息控制莫码 */
     led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_GREEN_MOCODE_SETTING, led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode));
+    /* 更新界面莫码显示 */
+    led3000Window->get_dev_morse_code_label(led3000Window->getCurrentDevice())->set_caption_merge(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode, led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mocode, '/');
+    /* 同步消息内容到 json 文件 */
+    led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
 
     green_dev_btns->at(0)->set_pushed(false);
     green_dev_btns->at(1)->set_pushed(false);
@@ -523,7 +528,8 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           m_dev_angular_speed[0]->set_position(Vector2i(701, 62));
           m_dev_morse_code[0] = new Label(swindow, "", "sans");
           m_dev_morse_code[0]->set_caption_merge(mJsonValue.devices[0].green_led.mocode, mJsonValue.devices[0].white_led.mocode, '/');
-          m_dev_morse_code[0]->set_position(Vector2i(930, 62));
+          m_dev_morse_code[0]->set_position(Vector2i(930, 46));
+          m_dev_morse_code[0]->set_fixed_size(Vector2i(200, 50));
           m_dev_auth[0] = new Label(swindow, "", "sans");
           m_dev_auth[0]->set_caption_merge((mJsonValue.devices[0].green_led.auth ? "已" : "未"), "授权", '\0');
           m_dev_auth[0]->set_position(Vector2i(1135, 62));
@@ -538,7 +544,8 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           m_dev_angular_speed[1]->set_position(Vector2i(701, 125));
           m_dev_morse_code[1] = new Label(swindow, "", "sans");
           m_dev_morse_code[1]->set_caption_merge(mJsonValue.devices[1].green_led.mocode, mJsonValue.devices[1].white_led.mocode, '/');
-          m_dev_morse_code[1]->set_position(Vector2i(930, 125));
+          m_dev_morse_code[1]->set_position(Vector2i(930, 109));
+          m_dev_morse_code[1]->set_fixed_size(Vector2i(200, 50));
           m_dev_auth[1] = new Label(swindow, "", "sans");
           m_dev_auth[1]->set_caption_merge((mJsonValue.devices[1].green_led.auth ? "已" : "未"), "授权", '\0');
           m_dev_auth[1]->set_position(Vector2i(1135, 125));
@@ -630,6 +637,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           devBtn->set_flags(Button::RadioButton);
           devBtn->set_position({415, 13});
           devBtn->set_fixed_size({220, 50});
+          devBtn->set_pushed(true);
           devBtn->set_callback([this]() {
             cout << "choose device 1" << endl;
             this->get_green_dev_label()->set_caption("灯光装置终端一 绿灯");
