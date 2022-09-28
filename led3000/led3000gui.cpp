@@ -38,9 +38,9 @@ void do_paint_sysconfig(Widget *widget)
       /* 创建 textBox */
       auto* textBox = widget->add<TextBox>("",KeyboardType::NumberIP);
       textBox->set_editable(true);
-      textBox->set_position(Vector2i(166, 84));
+      textBox->set_position(Vector2i(146, 71));
       /* 设置控件大小 */
-      textBox->set_fixed_size(Vector2i(150, 20));
+      textBox->set_fixed_size(Vector2i(176, 46));
       textBox->set_value(led3000Window->getJsonValue()->eths[0].ip);
       textBox->setSyncCharsValue(led3000Window->getJsonValue()->eths[0].ip);
       /* 设置字体大小 */
@@ -52,9 +52,9 @@ void do_paint_sysconfig(Widget *widget)
       label->set_position(Vector2i(29, 140));
       label->set_font_size(20);
       textBox = widget->add<TextBox>("",KeyboardType::NumberIP);
-      textBox->set_position(Vector2i(166, 144));
+      textBox->set_position(Vector2i(146, 127));
       textBox->set_editable(true);
-      textBox->set_fixed_size(Vector2i(150, 20));
+      textBox->set_fixed_size(Vector2i(176, 46));
       textBox->set_value(led3000Window->getJsonValue()->eths[0].netmask);
       textBox->setSyncCharsValue(led3000Window->getJsonValue()->eths[0].netmask);
       textBox->set_font_size(16);
@@ -63,9 +63,9 @@ void do_paint_sysconfig(Widget *widget)
       label->set_position(Vector2i(44, 196));
       label->set_font_size(20);
       textBox = widget->add<TextBox>("",KeyboardType::NumberIP);
-      textBox->set_position(Vector2i(166, 196));
+      textBox->set_position(Vector2i(146, 183));
       textBox->set_editable(true);
-      textBox->set_fixed_size(Vector2i(150, 20));
+      textBox->set_fixed_size(Vector2i(176, 46));
       textBox->set_value(led3000Window->getJsonValue()->eths[0].gateway);
       textBox->setSyncCharsValue(led3000Window->getJsonValue()->eths[0].gateway);
       textBox->set_font_size(16);
@@ -77,8 +77,8 @@ void do_paint_sysconfig(Widget *widget)
       label->set_font_size(20);
       textBox = widget->add<TextBox>("",KeyboardType::NumberIP);
       textBox->set_editable(true);
-      textBox->set_fixed_size(Vector2i(150, 20));
-      textBox->set_position(Vector2i(166, 252));
+      textBox->set_position(Vector2i(146, 239));
+      textBox->set_fixed_size(Vector2i(176, 46));
       textBox->set_value(led3000Window->getJsonValue()->eths[1].ip);
       textBox->setSyncCharsValue(led3000Window->getJsonValue()->eths[1].ip);
       textBox->set_font_size(16);
@@ -88,9 +88,9 @@ void do_paint_sysconfig(Widget *widget)
       label->set_position(Vector2i(29, 308));
       label->set_font_size(20);
       textBox = widget->add<TextBox>("",KeyboardType::NumberIP);
-      textBox->set_position(Vector2i(166, 308));
+      textBox->set_position(Vector2i(146, 295));
       textBox->set_editable(true);
-      textBox->set_fixed_size(Vector2i(150, 20));
+      textBox->set_fixed_size(Vector2i(176, 46));
       textBox->set_value(led3000Window->getJsonValue()->eths[1].netmask);
       textBox->setSyncCharsValue(led3000Window->getJsonValue()->eths[1].netmask);
       textBox->set_font_size(16);
@@ -100,9 +100,9 @@ void do_paint_sysconfig(Widget *widget)
       label->set_position(Vector2i(44, 364));
       label->set_font_size(20);
       textBox = widget->add<TextBox>("", KeyboardType::NumberIP);
-      textBox->set_position(Vector2i(166, 364));
+      textBox->set_position(Vector2i(146, 351));
       textBox->set_editable(true);
-      textBox->set_fixed_size(Vector2i(150, 20));
+      textBox->set_fixed_size(Vector2i(176, 46));
       textBox->set_value(led3000Window->getJsonValue()->eths[1].gateway);
       textBox->setSyncCharsValue(led3000Window->getJsonValue()->eths[1].gateway);
       textBox->set_font_size(16);
@@ -112,9 +112,9 @@ void do_paint_sysconfig(Widget *widget)
       label->set_position(Vector2i(44, 420));
       label->set_font_size(20);
       textBox = widget->add<TextBox>("", KeyboardType::NumberIP);
-      textBox->set_position(Vector2i(166, 420));
+      textBox->set_position(Vector2i(146, 407));
       textBox->set_editable(true);
-      textBox->set_fixed_size(Vector2i(150, 20));
+      textBox->set_fixed_size(Vector2i(176, 46));
       textBox->set_value(led3000Window->getJsonValue()->server.ip);
       textBox->setSyncCharsValue(led3000Window->getJsonValue()->server.ip);
       textBox->set_font_size(16);
@@ -125,8 +125,8 @@ void do_paint_sysconfig(Widget *widget)
       label->set_font_size(20);
       textBox = widget->add<TextBox>(std::to_string(led3000Window->getJsonValue()->server.port), KeyboardType::NumberIP);
       textBox->set_editable(true);
-      textBox->set_position(Vector2i(166, 476));
-      textBox->set_fixed_size(Vector2i(150, 20));
+      textBox->set_position(Vector2i(146, 463));
+      textBox->set_fixed_size(Vector2i(176, 46));
       textBox->setSyncUshortValue(&(led3000Window->getJsonValue()->server.port));
       textBox->set_font_size(16);
       textBox->set_alignment(TextBox::Alignment::Left);
@@ -136,8 +136,8 @@ void do_paint_sysconfig(Widget *widget)
       label->set_font_size(20);
       textBox = widget->add<TextBox>("", KeyboardType::Full);
       textBox->set_editable(true);
-      textBox->set_position(Vector2i(156, 525));
-      textBox->set_fixed_size(Vector2i(157, 52));
+      textBox->set_position(Vector2i(146, 519));
+      textBox->set_fixed_size(Vector2i(176, 64));
       textBox->set_value(led3000Window->getJsonValue()->devices[0].camera_url);
       textBox->setSyncCharsValue(&(led3000Window->getJsonValue()->devices[0].camera_url[0]));
       textBox->set_font_size(16);
@@ -147,8 +147,8 @@ void do_paint_sysconfig(Widget *widget)
       label->set_position(Vector2i(37, 615));
       label->set_font_size(20);
       textBox = widget->add<TextBox>("", KeyboardType::Full);
-      textBox->set_position(Vector2i(156, 599));
-      textBox->set_fixed_size(Vector2i(157, 52));
+      textBox->set_position(Vector2i(146, 593));
+      textBox->set_fixed_size(Vector2i(176, 64));
       textBox->set_editable(true);
       textBox->set_value(led3000Window->getJsonValue()->devices[1].camera_url);
       textBox->setSyncCharsValue(&(led3000Window->getJsonValue()->devices[1].camera_url[0]));
@@ -204,6 +204,36 @@ void do_with_green_light_normal(Widget *widget, int choose)
             break;
       }
   }
+}
+
+void do_paint_green_light_blink(Widget *widget)
+{
+    MessageDialog * msg_dlg = dynamic_cast<MessageDialog *>(widget);
+    Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
+    auto * blink_title = widget->add<Label>("爆闪频率：", "sans-bold");
+    blink_title->set_font_size(20);
+    blink_title->set_position(Vector2i(48, 180));
+    widget->window()->set_fixed_size(Vector2i(342, 313));
+    widget->window()->set_background_image(RED_LED3000_ASSETS_DIR"/set_dlg_blink.png");
+    blink_title = widget->add<Label>("HZ", "sans-bold");
+    blink_title->set_font_size(20);
+    blink_title->set_position(Vector2i(283, 180));
+
+    auto *textBox = widget->add<TextBox>("", KeyboardType::NumberIP);
+    textBox->set_position(Vector2i(134, 167));
+    textBox->set_fixed_size(Vector2i(140, 46));
+    textBox->set_editable(true);
+    textBox->set_value(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode);
+    textBox->setSyncCharsValue(&(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode[0]));
+    textBox->set_font_size(20);
+    textBox->set_alignment(TextBox::Alignment::Left);
+
+    msg_dlg->label_icon()->set_position(Vector2i(148, 91));
+    msg_dlg->label_icon()->set_icon(RED_LED3000_ASSETS_DIR"/sys_icon.png");
+    msg_dlg->confirm_button()->set_position(Vector2i(10, 243));
+    msg_dlg->confirm_button()->set_fixed_size(Vector2i(156, 60));
+    msg_dlg->cancel_button()->set_position(Vector2i(176, 243));
+    msg_dlg->cancel_button()->set_fixed_size(Vector2i(156, 60));
 }
 
 void do_with_green_light_blink(Widget *widget, int choose)
@@ -533,7 +563,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           btn_green_blink->set_fixed_size({120, 92});
           btn_green_blink->set_position({140, 48});
           btn_green_blink->set_callback([&] {
-              new MessageDialog(this, MessageDialog::Type::Choose, "", "确认要绿光闪烁么？", "确认", "取消", "配置", do_with_green_light_blink);
+              new MessageDialog(this, MessageDialog::Type::Question, "", "", "确认", "取消", "", do_with_green_light_blink, do_paint_green_light_blink);
           });
           /* 这里会弹出来新的 MessageDialog, 新的 MessageDialog 支持弹出新的 Window
            * 测试发现这个 MessageDialog Widget 的 parent 竟然是 Led3000Window * ？？？
@@ -583,7 +613,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           sysconfig_btn->set_position({1219, 15});
           sysconfig_btn->set_fixed_size({46, 46});
           sysconfig_btn->set_callback([&] {
-              new MessageDialog(this, MessageDialog::Type::Question, "关机", "确认要关机么?", "确认", "取消", "", do_with_power_off); });
+              new MessageDialog(this, MessageDialog::Type::Question, "", "确认要关机么?", "确认", "取消", "", do_with_power_off); });
           sysconfig_btn = swindow->add<Button>("", "/tmp/abc/huiyuan/sys.png", 0);
           sysconfig_btn->set_position({15, 15});
           sysconfig_btn->set_fixed_size({46, 46});
@@ -665,7 +695,6 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
 
           m_turntable_dev = turntableWindow->add<Label>("灯光装置终端一 转台");
           m_turntable_dev->set_position({39, 9});
-          m_turntable_dev->set_font("sans-bold");
           auto * btn = turntableWindow->add<Button>("目标检测");
           btn->set_flags(Button::RadioButton);
           btn->set_fixed_size({120, 92});
