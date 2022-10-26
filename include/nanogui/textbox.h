@@ -55,8 +55,13 @@ public:
     const std::string &default_value() const { return m_default_value; }
     void set_default_value(const std::string &default_value) { m_default_value = default_value; }
 
-    void syncValue() const { if (mSyncChars) {memcpy(mSyncChars, m_value.c_str(), 1 + m_value.length());} else if (mSyncUshort && m_value.size() > 0) {*mSyncUshort = (unsigned short)stoi(m_value);}}
+    void syncValue() const {
+        if (mSyncChars) {memcpy(mSyncChars, m_value.c_str(), 1 + m_value.length());}
+        else if (mSyncUshort && m_value.size() > 0) {*mSyncUshort = (unsigned short)stoi(m_value);}
+        else if (mSyncUchar && m_value.size() > 0) {*mSyncUchar = (unsigned char)stoi(m_value);}
+    }
     void setSyncCharsValue(char *syncChars) { mSyncChars = syncChars;}
+    void setSyncUcharValue(unsigned char *syncChar) { mSyncUchar = syncChar;}
     void setSyncUshortValue(unsigned short *syncShort) { mSyncUshort = syncShort;}
 
     Alignment alignment() const { return m_alignment; }
@@ -127,6 +132,7 @@ protected:
     bool m_committed;
     bool m_entered;
     char *mSyncChars = nullptr;
+    unsigned char *mSyncUchar = nullptr;
     unsigned short *mSyncUshort = nullptr;
     std::string m_value;
     std::string m_default_value;
@@ -146,6 +152,7 @@ protected:
     int m_mouse_down_modifier;
     float m_text_offset;
     double m_last_click;
+    float m_break_width;
     Keyboard *m_keyboard;
     int m_chevron_icon;
 };

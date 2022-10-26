@@ -6,6 +6,7 @@
 * Description:      灯光装置控制线程
 *****************************************************************************/
 
+#include <cstdint>
 #include <sys/prctl.h>
 #include <nanogui/common.h>
 #include <led3000gui.h>
@@ -135,6 +136,11 @@ static void _do_with_green_mocode(std::string message, Led3000Window * window)
     red_debug_lite("mocode:%s", message.c_str());
 }
 
+static void _do_with_green_blink(std::string message, Led3000Window * window)
+{
+    red_debug_lite("blink:%u", (uint8_t)stoi(message));
+}
+
 void *devices_entry(void *arg)
 {
     led_device_t * led_devp = (led_device_t *)arg;
@@ -159,8 +165,8 @@ void *devices_entry(void *arg)
         if (m)
         {
             auto& dm = dynamic_cast<PolyM::DataMsg<std::string>&>(*m);
-            msg_payload = dm.getPayload();
             msg_id = dm.getMsgId();
+            msg_payload = dm.getPayload();
             red_debug_lite("Device%d thread :%u@%s", led_devp->uart.index, msg_id, msg_payload.c_str());
         }
 
@@ -171,6 +177,9 @@ void *devices_entry(void *arg)
                 break;
             case POLYM_GREEN_MOCODE_SETTING:
                 _do_with_green_mocode(msg_payload, screen);
+                break;
+            case POLYM_GREEN_BLINK_SETTING:
+                _do_with_green_blink(msg_payload, screen);
                 break;
             default:
                 red_debug_lite("No support this id:%d", msg_id);

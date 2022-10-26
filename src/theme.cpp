@@ -19,8 +19,8 @@
 NAMESPACE_BEGIN(nanogui)
 
 Theme::Theme(NVGcontext *ctx) {
-    m_standard_font_size                 = 18;
-    m_button_font_size                   = 20;
+    m_standard_font_size                 = 25;
+    m_button_font_size                   = 25;
     m_text_box_font_size                 = 20;
     m_icon_scale                         = 0.60f;
 
@@ -78,10 +78,9 @@ Theme::Theme(NVGcontext *ctx) {
     m_text_box_up_icon                  = FA_CHEVRON_UP;
     m_text_box_down_icon                = FA_CHEVRON_DOWN;
 
-    m_font_sans_regular = nvgCreateFontMem(ctx, "sans", (uint8_t *) roboto_regular_ttf,
-                                           roboto_regular_ttf_size, 0);
-    m_font_sans_bold = nvgCreateFontMem(ctx, "sans-bold", (uint8_t *) roboto_bold_ttf,
-                                        roboto_bold_ttf_size, 0);
+    /* 从内存中加载的字体 */
+    m_font_sans_regular = nvgCreateFont(ctx, "sans", RED_LED3000_ASSETS_DIR"/MYH.ttf");
+    m_font_sans_bold = nvgCreateFont(ctx, "sans-bold", RED_LED3000_ASSETS_DIR"/MYHB.ttf");
     m_font_icons = nvgCreateFontMem(ctx, "icons", (uint8_t *) fontawesome_solid_ttf,
                                     fontawesome_solid_ttf_size, 0);
     m_font_mono_regular = nvgCreateFontMem(ctx, "mono", (uint8_t *) inconsolata_regular_ttf,

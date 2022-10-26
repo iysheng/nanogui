@@ -6,6 +6,7 @@
 * Description:      led3000 gui source file
 *****************************************************************************/
 
+#include <cstdint>
 #include <led3000gui.h>
 #include <stdlib.h>
 #include <string>
@@ -215,16 +216,16 @@ void do_paint_green_light_blink(Widget *widget)
     blink_title->set_position(Vector2i(48, 180));
     widget->window()->set_fixed_size(Vector2i(342, 313));
     widget->window()->set_background_image(RED_LED3000_ASSETS_DIR"/set_dlg_blink.png");
-    blink_title = widget->add<Label>("HZ", "sans-bold");
+    blink_title = widget->add<Label>("(1~15)HZ", "sans-bold");
     blink_title->set_font_size(20);
-    blink_title->set_position(Vector2i(283, 180));
+    blink_title->set_position(Vector2i(233, 180));
 
     auto *textBox = widget->add<TextBox>("", KeyboardType::NumberIP);
     textBox->set_position(Vector2i(134, 167));
-    textBox->set_fixed_size(Vector2i(140, 46));
+    textBox->set_fixed_size(Vector2i(90, 46));
     textBox->set_editable(true);
-    textBox->set_value(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode);
-    textBox->setSyncCharsValue(&(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode[0]));
+    textBox->set_value(std::to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.blink_freq));
+    textBox->setSyncUcharValue(&(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.blink_freq));
     textBox->set_alignment(TextBox::Alignment::Left);
 
     msg_dlg->label_icon()->set_position(Vector2i(148, 91));
@@ -238,26 +239,18 @@ void do_paint_green_light_blink(Widget *widget)
 void do_with_green_light_blink(Widget *widget, int choose)
 {
   std::cout << "green light blink:" << choose << std::endl;
-  Led3000Window * window = dynamic_cast<Led3000Window *>(widget->screen());
-  const std::vector<Button *> * green_dev_btns = window->get_green_dev_control_btns();
-  if (choose != 2)
+  Led3000Window * led3000Window= dynamic_cast<Led3000Window *>(widget->screen());
+  const std::vector<Button *> * green_dev_btns = led3000Window->get_green_dev_control_btns();
+  if (choose == 1)
   {
-    /* TODO change green light status */
-
-      switch(choose)
-      {
-        case 0:
-            red_debug_lite("choose 0 \n");
-            break;
-        case 1:
-            red_debug_lite("choose 1 \n");
-            green_dev_btns->at(0)->set_pushed(false);
-            green_dev_btns->at(1)->set_pushed(true);
-            green_dev_btns->at(2)->set_pushed(false);
-            break;
-        default:
-            break;
-      }
+    /* 发送消息控制频闪 */
+    led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_GREEN_BLINK_SETTING, to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.blink_freq)));
+    /* 更新界面频闪显示 */
+    /* 同步消息内容到 json 文件 */
+    led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
+    green_dev_btns->at(0)->set_pushed(false);
+    green_dev_btns->at(1)->set_pushed(true);
+    green_dev_btns->at(2)->set_pushed(false);
   }
 }
 
@@ -683,7 +676,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           btn->set_flags(Button::RadioButton);
           btn->set_fixed_size({120, 92});
           btn->set_position({140, 48});
-          btn = turntableWindow->add<Button>("复位");
+          btn = turntableWindow->add<Button>("扫海");
           btn->set_flags(Button::RadioButton);
           btn->set_fixed_size({120, 92});
           btn->set_position({270, 48});

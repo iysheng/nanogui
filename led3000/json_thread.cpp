@@ -27,6 +27,9 @@
 
 #include <PolyM/include/polym/Queue.hpp>
 
+/* 最大频率 15 */
+#define BLINK_MAX_FREQ     15
+
 using std::cout;
 using std::cerr;
 using std::endl;
@@ -103,10 +106,18 @@ static void _sync_json(Led3000Window *window)
     Pointer("/devices/0/camera_url").Set(*d, window->getJsonValue()->devices[0].camera_url);
     Pointer("/devices/0/white_led/mode").Set(*d, window->getJsonValue()->devices[0].white_led.mode);
     Pointer("/devices/0/white_led/normal_status").Set(*d, window->getJsonValue()->devices[0].white_led.normal_status);
+    if (window->getJsonValue()->devices[0].white_led.blink_freq > BLINK_MAX_FREQ)
+        window->getJsonValue()->devices[0].white_led.blink_freq = BLINK_MAX_FREQ;
+    else if (window->getJsonValue()->devices[0].white_led.blink_freq < 1)
+        window->getJsonValue()->devices[0].white_led.blink_freq = 1;
     Pointer("/devices/0/white_led/blink_freq").Set(*d, window->getJsonValue()->devices[0].white_led.blink_freq);
     Pointer("/devices/0/white_led/mocode").Set(*d, window->getJsonValue()->devices[0].white_led.mocode);
     Pointer("/devices/0/green_led/mode").Set(*d, window->getJsonValue()->devices[0].green_led.mode);
     Pointer("/devices/0/green_led/normal_status").Set(*d, window->getJsonValue()->devices[0].green_led.normal_status);
+    if (window->getJsonValue()->devices[0].green_led.blink_freq > BLINK_MAX_FREQ)
+        window->getJsonValue()->devices[0].green_led.blink_freq = BLINK_MAX_FREQ;
+    else if (window->getJsonValue()->devices[0].green_led.blink_freq < 1)
+        window->getJsonValue()->devices[0].green_led.blink_freq = 1;
     Pointer("/devices/0/green_led/blink_freq").Set(*d, window->getJsonValue()->devices[0].green_led.blink_freq);
     Pointer("/devices/0/green_led/mocode").Set(*d, window->getJsonValue()->devices[0].green_led.mocode);
     Pointer("/devices/0/turntable/mode").Set(*d, window->getJsonValue()->devices[0].turntable.mode);
@@ -116,10 +127,18 @@ static void _sync_json(Led3000Window *window)
     Pointer("/devices/1/camera_url").Set(*d, window->getJsonValue()->devices[1].camera_url);
     Pointer("/devices/1/white_led/mode").Set(*d, window->getJsonValue()->devices[1].white_led.mode);
     Pointer("/devices/1/white_led/normal_status").Set(*d, window->getJsonValue()->devices[1].white_led.normal_status);
+    if (window->getJsonValue()->devices[1].white_led.blink_freq > BLINK_MAX_FREQ)
+        window->getJsonValue()->devices[1].white_led.blink_freq = BLINK_MAX_FREQ;
+    else if (window->getJsonValue()->devices[1].white_led.blink_freq < 1)
+        window->getJsonValue()->devices[1].white_led.blink_freq = 1;
     Pointer("/devices/1/white_led/blink_freq").Set(*d, window->getJsonValue()->devices[1].white_led.blink_freq);
     Pointer("/devices/1/white_led/mocode").Set(*d, window->getJsonValue()->devices[1].white_led.mocode);
     Pointer("/devices/1/green_led/mode").Set(*d, window->getJsonValue()->devices[1].green_led.mode);
     Pointer("/devices/1/green_led/normal_status").Set(*d, window->getJsonValue()->devices[1].green_led.normal_status);
+    if (window->getJsonValue()->devices[1].green_led.blink_freq > BLINK_MAX_FREQ)
+        window->getJsonValue()->devices[1].green_led.blink_freq = BLINK_MAX_FREQ;
+    else if (window->getJsonValue()->devices[1].green_led.blink_freq < 1)
+        window->getJsonValue()->devices[1].green_led.blink_freq = 1;
     Pointer("/devices/1/green_led/blink_freq").Set(*d, window->getJsonValue()->devices[1].green_led.blink_freq);
     Pointer("/devices/1/green_led/mocode").Set(*d, window->getJsonValue()->devices[1].green_led.mocode);
     Pointer("/devices/1/turntable/mode").Set(*d, window->getJsonValue()->devices[1].turntable.mode);
