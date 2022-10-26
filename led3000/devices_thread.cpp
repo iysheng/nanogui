@@ -138,7 +138,14 @@ static void _do_with_green_mocode(std::string message, Led3000Window * window)
 
 static void _do_with_green_blink(std::string message, Led3000Window * window)
 {
-    red_debug_lite("blink:%u", (uint8_t)stoi(message));
+    uint8_t freq = (uint8_t)stoi(message);
+    red_debug_lite("blink:%u", freq);
+}
+
+static void _do_with_green_normal(std::string message, Led3000Window * window)
+{
+    uint8_t level = (uint8_t)stoi(message);
+    red_debug_lite("normal:%u", level);
 }
 
 void *devices_entry(void *arg)
@@ -180,6 +187,9 @@ void *devices_entry(void *arg)
                 break;
             case POLYM_GREEN_BLINK_SETTING:
                 _do_with_green_blink(msg_payload, screen);
+                break;
+            case POLYM_GREEN_NORMAL_SETTING:
+                _do_with_green_normal(msg_payload, screen);
                 break;
             default:
                 red_debug_lite("No support this id:%d", msg_id);

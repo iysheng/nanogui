@@ -11,6 +11,7 @@ using MsgUID = unsigned long long;
 #define    POLYM_FOCAL_SETTING          1 /* 调焦命令字 */
 #define    POLYM_GREEN_MOCODE_SETTING   2 /* 绿光莫码控制 */
 #define    POLYM_GREEN_BLINK_SETTING    3 /* 绿光频闪控制 */
+#define    POLYM_GREEN_NORMAL_SETTING   4 /* 绿光开关控制 */
 
 
 /* JSON 文件配置 ID */

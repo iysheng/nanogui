@@ -184,19 +184,23 @@ void do_with_power_off(Widget *widget, int choose)
 void do_with_green_light_normal(Widget *widget, int choose)
 {
   std::cout << "green light normal:" << choose << std::endl;
-  Led3000Window * window = dynamic_cast<Led3000Window *>(widget->screen());
-  const std::vector<Button *> * green_dev_btns = window->get_green_dev_control_btns();
+  Led3000Window * led3000Window= dynamic_cast<Led3000Window *>(widget->screen());
+  const std::vector<Button *> * green_dev_btns = led3000Window->get_green_dev_control_btns();
   if (choose != 2)
   {
-    /* TODO change green light status */
+      /* TODO 检验是否授权 */
 
       switch(choose)
       {
         case 0:
-            red_debug_lite("choose 0 \n");
+            led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.normal_status = 0;
+            /* 发送消息控制关灯 */
+            led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_GREEN_NORMAL_SETTING, to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.normal_status)));
             break;
         case 1:
-            red_debug_lite("choose 1 \n");
+            /* 发送消息控制开灯 */
+            led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.normal_status = 100;
+            led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_GREEN_NORMAL_SETTING, to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.normal_status)));
             green_dev_btns->at(0)->set_pushed(true);
             green_dev_btns->at(1)->set_pushed(false);
             green_dev_btns->at(2)->set_pushed(false);
@@ -245,7 +249,6 @@ void do_with_green_light_blink(Widget *widget, int choose)
   {
     /* 发送消息控制频闪 */
     led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_GREEN_BLINK_SETTING, to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.blink_freq)));
-    /* 更新界面频闪显示 */
     /* 同步消息内容到 json 文件 */
     led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
     green_dev_btns->at(0)->set_pushed(false);
