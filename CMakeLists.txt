@@ -470,6 +470,8 @@ list(APPEND NANOGUI_EXTRA
   led3000/devices_thread.cpp
   led3000/network_thread.cpp
   led3000/joystick_thread.cpp
+  led3000/network_udp.h
+  led3000/network_udp.cpp
 )
 # Compile main NanoGUI library
 add_library(nanogui ${NANOGUI_LIBRARY_TYPE}
