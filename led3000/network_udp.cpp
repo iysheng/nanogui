@@ -9,6 +9,9 @@
 #include "network_udp.h"
 
 using namespace std;
+
+/* 默认设置 socket 为无阻塞模式 */
+#define SOCKET_NO_BLOCK
 NetworkUdp::NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port)
 {
     char decimal_port[16];
@@ -32,6 +35,13 @@ NetworkUdp::NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port)
         printf("could not create socket address or port: %s:%u\n", dstip.c_str(), dst_port);
         return;
     }
+#ifdef SOCKET_NO_BLOCK
+    struct timeval tv;
+    tv.tv_sec = 3;
+    tv.tv_usec = 0;
+    /* 设置接收超时 */
+    setsockopt(m_socket, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+#endif
 
     m_source_sin.sin_addr.s_addr = htonl(INADDR_ANY);
     m_source_sin.sin_family = AF_INET;
@@ -53,6 +63,35 @@ void NetworkUdp::send2server(char *buffer, uint16_t len, int flags)
     if (-1 == ret)
     {
         printf("Failed send msg to server :%d\n", errno);
+    }
+}
+
+void NetworkUdp::recv_from_server(char *buffer, uint16_t len, int flags)
+{
+    int ret;
+    ret = recvfrom(m_socket, buffer, len, flags, m_addrinfo->ai_addr, &(m_addrinfo->ai_addrlen));
+    if (-1 == ret)
+    {
+        printf("Failed recvfrom server :%d\n", errno);
+    }
+    else
+    {
+        NetworkUdp::hexdump("RECV_FROM_SEREVR", buffer, ret);
+    }
+}
+
+void NetworkUdp::hexdump(char *title, char *buffer, uint16_t len)
+{
+    int i;
+
+    printf("[%s(%d)]", title, len);
+    if (buffer)
+    {
+        for (i = 0; i < len; i++)
+        {
+            printf("%02hhX ", buffer[i]);
+        }
+        printf("\n");
     }
 }
 

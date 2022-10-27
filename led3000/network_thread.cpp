@@ -22,14 +22,16 @@ void *network_thread(void *arg)
 {
     Led3000Window *screen = (Led3000Window *)arg;
     red_debug_lite("Hello Network Thread json file path:%s", screen->getFileName().c_str());
-    NetworkUdp test_udp_client("10.20.52.39", 5168, 5168);
+    red_debug_lite("connect:%s@%u", screen->getJsonValue()->server.ip, screen->getJsonValue()->server.port);
+    NetworkUdp test_udp_client(screen->getJsonValue()->server.ip, screen->getJsonValue()->server.port, screen->getJsonValue()->server.port);
+    char buffer_recv[256] = {0};
 
     prctl(PR_SET_NAME, "network");
     while(1)
     {
         //red_debug_lite("Hello Network UDP");
-        sleep(10);
         test_udp_client.send2server("Hello World", strlen("Hello World"));
         printf("send hello world to test\n");
+        test_udp_client.recv_from_server(buffer_recv, sizeof(buffer_recv));
     }
 }

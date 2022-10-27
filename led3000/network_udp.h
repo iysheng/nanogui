@@ -23,6 +23,8 @@ class NetworkUdp {
     NetworkUdp(){};
     NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port);
     void send2server(char *buffer, uint16_t len, int flags = 0);
+    void recv_from_server(char *buffer, uint16_t len, int flags = 0);
+    static void hexdump(char * title, char *buffer, uint16_t len);
 
   private:
     int m_socket;
