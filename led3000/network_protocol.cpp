@@ -170,15 +170,15 @@ int do_report_dev_status(char dev1_status, char dev1_green_status, char dev1_whi
   */
 int do_report_dev_off()
 {
-    if (gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].get_socket() <= 0)
+    if (gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].get_socket() <= 0)
     {
         red_debug_lite("Novalid socket for network udp");
         return -EINVAL;
     }
     char dev_off_buffer[NETWORK_PACKGE_LEN_MAX] = {0};
-    NetworkPackage dev_off(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].index(), NETWORK_SEND_OFF, 0X08, gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].stamp(), dev_off_buffer);
+    NetworkPackage dev_off(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].index(), NETWORK_SEND_OFF, 0X08, gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].stamp(), dev_off_buffer);
 
-    return _do_report_msg2net(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE], dev_off);
+    return _do_report_msg2net(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST], dev_off);
 }
 
 /**
@@ -212,8 +212,6 @@ int do_report_dev_info(short dev1_direction, short dev1_elevation, short dev2_di
 
     return _do_report_msg2net(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE], dev_info);
 }
-
-
 
 /**
   * @brief 注册指定类型的 NetworkUdp 句柄

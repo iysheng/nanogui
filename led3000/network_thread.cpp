@@ -24,6 +24,10 @@ void *network_thread(void *arg)
     Led3000Window *screen = (Led3000Window *)arg;
     red_debug_lite("Hello Network Thread json file path:%s", screen->getFileName().c_str());
     red_debug_lite("connect:%s@%u", screen->getJsonValue()->server.ip, screen->getJsonValue()->server.port);
+
+    /* 创建和指控广播组通信的句柄 */
+    /* TODO just for test */
+    NetworkUdp udp_guide_broadcast_client("10.20.52.35", screen->getJsonValue()->server.port, screen->getJsonValue()->server.port);
     /* 创建和指控通信的句柄 */
     NetworkUdp udp_guide_client(screen->getJsonValue()->server.ip, screen->getJsonValue()->server.port, screen->getJsonValue()->server.port);
 
@@ -35,7 +39,20 @@ void *network_thread(void *arg)
         }
         else
         {
-            red_debug_lite("Registe guide socket success.");
+            red_debug_lite("Register guide socket success.");
+        }
+    }
+
+    /* TODO just for test */
+    if (udp_guide_broadcast_client.get_socket() > 0)
+    {
+        if (network_protocol_registe(NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST, udp_guide_broadcast_client) < 0)
+        {
+            red_debug_lite("Failed register network fd broadcast.");
+        }
+        else
+        {
+            red_debug_lite("Register guide socket success.");
         }
     }
     char buffer_recv[256] = {0};
