@@ -26,3 +26,17 @@
 #define NETWORK_SEND_INFO     0XA1
 /* 上报系统关机信息 */
 #define NETWORK_SEND_OFF      0XE4
+
+
+typedef enum {
+    NETWORK_PROTOCOL_TYPE_SEND_GUIDE, /* 向指控网络发送  */
+    NETWORK_PROTOCOL_TYPE_COUNTS,
+} network_protocol_type_E;
+
+/**
+  * @brief 注册指定类型的 NetworkUdp 句柄
+  * @param char fd_type: 
+  * @param NetworkUdp &net_fd: 
+  * retval Linux/errno.
+  */
+extern int network_protocol_registe(char fd_type, NetworkUdp &net_fd);

@@ -11,7 +11,6 @@
 #pragma once
 
 using namespace std;
-
 /* 获取时戳总长度 */
 #define MK_PAYLOAD_LEN(x)    (x - 8)
 
@@ -19,6 +18,7 @@ using namespace std;
 #define MK_PACKAGE_LEN(x)    (x + 8)
 
 #define NETWORK_PACKAGE_PAYLOAD_LEN    32
+#define NETWORK_PACKGE_LEN_MAX         MK_PACKAGE_LEN(NETWORK_PACKAGE_PAYLOAD_LEN)
 
 class NetworkPackage {
 public:
@@ -33,6 +33,7 @@ public:
     char id(){return m_id;};
     char* payload(){return m_payload;};
     short payload_len(){return m_payload_len;};
+    short len(){return m_len;};
 private:
     /* 序号 */
     char m_index;

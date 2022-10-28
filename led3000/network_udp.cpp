@@ -12,6 +12,15 @@ using namespace std;
 
 /* 默认设置 socket 为无阻塞模式 */
 #define SOCKET_NO_BLOCK
+
+NetworkUdp& NetworkUdp::operator=(NetworkUdp& ref) noexcept
+{
+    m_socket = ref.get_socket();
+    m_addrinfo = ref.addrinfo();
+    m_source_sin = ref.source_sin();
+    return *this;
+}
+
 NetworkUdp::NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port)
 {
     char decimal_port[16];

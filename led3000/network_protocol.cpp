@@ -6,10 +6,16 @@
 *                   网络协议处理源文件
 *****************************************************************************/
 
+#include <network_udp.h>
 #include <network_protocol.h>
 #include <network_package.h>
 #include <debug.h>
 #include <stdint.h>
+
+
+static NetworkUdp gs_network_udp[NETWORK_PROTOCOL_TYPE_COUNTS];
+
+
 
 /**
   * @brief 处理指控发送的作战干预指令
@@ -121,4 +127,52 @@ int handle_with_network_buffer(char *buffer, int size)
     return ret;
 }
 
+/* 上报信息到一体化网络 */
+int do_report_msg2net(NetworkUdp &net_fd, NetworkPackage &network_package)
+{
+    char buffer[NETWORK_PACKGE_LEN_MAX] = {0};
+    if (network_package.convert_to_buffer(buffer, NETWORK_PACKGE_LEN_MAX))
+    {
+        return ENOMEM;
+    }
+    net_fd.send2server(buffer, network_package.len());
+    return 0;
+}
 
+/**
+  * @brief 上报设备状态到指控
+  * @param NetworkUdp &net_fd: 发送的网络句柄
+  * @param NetworkPackage &network_package: 
+  * retval Linux/errno.
+  */
+int do_report_dev_status()
+{
+
+}
+
+/**
+  * @brief 注册指定类型的 NetworkUdp 句柄
+  * @param char fd_type: 
+  * @param NetworkUdp &net_fd: 
+  * retval Linux/errno.
+  */
+int network_protocol_registe(char fd_type, NetworkUdp &net_fd)
+{
+    int ret = 0;
+
+    if (fd_type < 0 || fd_type >= NETWORK_PROTOCOL_TYPE_COUNTS)
+    {
+        red_debug_lite("invalid fd type:%hd", fd_type);
+        return -EINVAL;
+    }
+
+    if (gs_network_udp[fd_type].get_socket() > 0)
+    {
+        red_debug_lite("the fd type:%hd has registered before", fd_type);
+        ret = 1;
+    }
+
+    gs_network_udp[fd_type] = net_fd;
+
+    return ret;
+}
