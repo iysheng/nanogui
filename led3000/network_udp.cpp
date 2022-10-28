@@ -21,7 +21,16 @@ NetworkUdp& NetworkUdp::operator=(NetworkUdp& ref) noexcept
     return *this;
 }
 
-NetworkUdp::NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port)
+int NetworkUdp::stamp()
+{
+    static int stamp = 0;
+
+    stamp += 10;
+
+    return stamp;
+}
+
+NetworkUdp::NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port):m_index(0)
 {
     char decimal_port[16];
     snprintf(decimal_port, sizeof(decimal_port), "%u", source_port);

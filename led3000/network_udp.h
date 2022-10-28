@@ -20,7 +20,7 @@ using namespace std;
 class NetworkUdp {
   public:
     ~NetworkUdp();
-    NetworkUdp(){};
+    NetworkUdp():m_index(0){};
     NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port);
     /* 表示该函数不会抛出异常 */
     NetworkUdp& operator=(NetworkUdp& r) noexcept;
@@ -32,8 +32,11 @@ class NetworkUdp {
     int get_socket(){return m_socket;};
     struct addrinfo * addrinfo(){return m_addrinfo;};
     struct sockaddr_in source_sin(){return m_source_sin;};
+    int stamp();
+    char index() {return m_index++;};
 
   private:
+    int m_index;
     int m_socket;
     /* 目的地址信息 */
     struct addrinfo *m_addrinfo;

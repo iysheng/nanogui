@@ -145,9 +145,25 @@ int do_report_msg2net(NetworkUdp &net_fd, NetworkPackage &network_package)
   * @param NetworkPackage &network_package: 
   * retval Linux/errno.
   */
-int do_report_dev_status()
+int do_report_dev_status(char dev1_status, char dev1_green_status, char dev1_white_status,
+    char dev2_status, char dev2_green_status, char dev2_white_status)
 {
+    if (gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].get_socket() <= 0)
+    {
+        red_debug_lite("Novalid socket for network udp");
+        return -EINVAL;
+    }
+    char dev_status_buffer[NETWORK_PACKGE_LEN_MAX] = {0};
 
+    dev_status_buffer[0] = dev1_status << 7 | dev1_green_status << 6 | dev1_white_status << 5 |
+        dev2_status << 4 | dev2_green_status << 3 | dev2_white_status << 2;
+    dev_status_buffer[1] = 0x00;
+    dev_status_buffer[2] = 0x00;
+    dev_status_buffer[3] = 0x00;
+
+    NetworkPackage dev_status(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].index(), NETWORK_SEND_STATUS, 0X0C, gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].stamp(), dev_status_buffer);
+
+    do_report_msg2net(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE], dev_status);
 }
 
 /**
