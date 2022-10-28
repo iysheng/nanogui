@@ -74,7 +74,7 @@ NetworkUdp::NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port):m_
     printf("Create socket success.\n");
 }
 
-void NetworkUdp::send2server(char *buffer, uint16_t len, int flags)
+int NetworkUdp::send2server(char *buffer, uint16_t len, int flags)
 {
     int ret;
     ret = sendto(m_socket, buffer, len, flags, m_addrinfo->ai_addr, m_addrinfo->ai_addrlen);
@@ -82,9 +82,12 @@ void NetworkUdp::send2server(char *buffer, uint16_t len, int flags)
     {
         printf("Failed send msg to server :%d\n", errno);
     }
+    m_index++;
+
+    return ret;
 }
 
-void NetworkUdp::recv_from_server(char *buffer, uint16_t len, int flags)
+int NetworkUdp::recv_from_server(char *buffer, uint16_t len, int flags)
 {
     int ret;
     ret = recvfrom(m_socket, buffer, len, flags, m_addrinfo->ai_addr, &(m_addrinfo->ai_addrlen));
@@ -96,6 +99,8 @@ void NetworkUdp::recv_from_server(char *buffer, uint16_t len, int flags)
     {
         NetworkUdp::hexdump("RECV_FROM_SEREVR", buffer, ret);
     }
+
+    return ret;
 }
 
 void NetworkUdp::hexdump(char *title, char *buffer, uint16_t len)

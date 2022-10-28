@@ -25,15 +25,15 @@ class NetworkUdp {
     /* 表示该函数不会抛出异常 */
     NetworkUdp& operator=(NetworkUdp& r) noexcept;
 
-    void send2server(char *buffer, uint16_t len, int flags = 0);
-    void recv_from_server(char *buffer, uint16_t len, int flags = 0);
+    int send2server(char *buffer, uint16_t len, int flags = 0);
+    int recv_from_server(char *buffer, uint16_t len, int flags = 0);
     static void hexdump(char * title, char *buffer, uint16_t len);
 
     int get_socket(){return m_socket;};
     struct addrinfo * addrinfo(){return m_addrinfo;};
     struct sockaddr_in source_sin(){return m_source_sin;};
     int stamp();
-    char index() {return m_index++;};
+    char index() {return m_index;};
 
   private:
     int m_index;

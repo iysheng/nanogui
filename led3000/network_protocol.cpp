@@ -128,12 +128,12 @@ int handle_with_network_buffer(char *buffer, int size)
 }
 
 /* 上报信息到一体化网络 */
-int do_report_msg2net(NetworkUdp &net_fd, NetworkPackage &network_package)
+int _do_report_msg2net(NetworkUdp &net_fd, NetworkPackage &network_package)
 {
     char buffer[NETWORK_PACKGE_LEN_MAX] = {0};
     if (network_package.convert_to_buffer(buffer, NETWORK_PACKGE_LEN_MAX))
     {
-        return ENOMEM;
+        return -ENOMEM;
     }
     net_fd.send2server(buffer, network_package.len());
     return 0;
@@ -141,8 +141,6 @@ int do_report_msg2net(NetworkUdp &net_fd, NetworkPackage &network_package)
 
 /**
   * @brief 上报设备状态到指控
-  * @param NetworkUdp &net_fd: 发送的网络句柄
-  * @param NetworkPackage &network_package: 
   * retval Linux/errno.
   */
 int do_report_dev_status(char dev1_status, char dev1_green_status, char dev1_white_status,
@@ -163,8 +161,59 @@ int do_report_dev_status(char dev1_status, char dev1_green_status, char dev1_whi
 
     NetworkPackage dev_status(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].index(), NETWORK_SEND_STATUS, 0X0C, gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].stamp(), dev_status_buffer);
 
-    do_report_msg2net(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE], dev_status);
+    return _do_report_msg2net(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE], dev_status);
 }
+
+/**
+  * @brief 上报设备关机事件
+  * retval Linux/errno.
+  */
+int do_report_dev_off()
+{
+    if (gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].get_socket() <= 0)
+    {
+        red_debug_lite("Novalid socket for network udp");
+        return -EINVAL;
+    }
+    char dev_off_buffer[NETWORK_PACKGE_LEN_MAX] = {0};
+    NetworkPackage dev_off(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].index(), NETWORK_SEND_OFF, 0X08, gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].stamp(), dev_off_buffer);
+
+    return _do_report_msg2net(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE], dev_off);
+}
+
+/**
+  * @brief 上报设备数据
+  * @param short dev1_direction: 设备一指向角， 指向角，右边为正，左边为负，+-180
+  * @param short dev1_elevatioon: 设备一仰角，仰角范围是 +-90， 采用二进制补码
+  * @param short dev2_direction: 设备二指向角
+  * @param short dev2_elevation: 设备二仰角
+  * retval Linux/errno.
+  */
+int do_report_dev_info(short dev1_direction, short dev1_elevation, short dev2_direction, short dev2_elevation)
+{
+    if (gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].get_socket() <= 0)
+    {
+        red_debug_lite("Novalid socket for network udp");
+        return -EINVAL;
+    }
+    char dev_info_buffer[NETWORK_PACKGE_LEN_MAX] = {0};
+
+    dev_info_buffer[6] = dev1_direction >> 8 & 0xff;
+    dev_info_buffer[7] = dev1_direction & 0xff;
+    dev_info_buffer[8] = dev1_elevation >> 8 & 0xff;
+    dev_info_buffer[9] = dev1_elevation & 0xff;
+
+    dev_info_buffer[14] = dev2_direction >> 8 & 0xff;
+    dev_info_buffer[15] = dev2_direction & 0xff;
+    dev_info_buffer[16] = dev2_elevation >> 8 & 0xff;
+    dev_info_buffer[17] = dev2_elevation & 0xff;
+
+    NetworkPackage dev_info(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].index(), NETWORK_SEND_INFO, 0X1A, gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].stamp(), dev_info_buffer);
+
+    return _do_report_msg2net(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE], dev_info);
+}
+
+
 
 /**
   * @brief 注册指定类型的 NetworkUdp 句柄
