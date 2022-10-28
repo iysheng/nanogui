@@ -12,16 +12,27 @@
 
 using namespace std;
 
+/* 获取时戳总长度 */
+#define MK_PAYLOAD_LEN(x)    (x - 8)
+
+/* 获取软件包总长度 */
+#define MK_PACKAGE_LEN(x)    (x + 8)
+
 #define NETWORK_PACKAGE_PAYLOAD_LEN    32
+
 class NetworkPackage {
 public:
     NetworkPackage():m_payload_len(0){memset(m_payload, 0, sizeof(m_payload));};
     NetworkPackage(int payload_len):m_payload_len(payload_len){memset(m_payload, 0, sizeof(m_payload));};
-    NetworkPackage(char *buffer, int len);
+    NetworkPackage(char index, char id, char len, int stamp, char * payload);
     ~NetworkPackage();
 
     int convert_from_buffer(char *buffer, short int len);
+    int convert_to_buffer(char *buffer, short int len);
+
     char id(){return m_id;};
+    char* payload(){return m_payload;};
+    short payload_len(){return m_payload_len;};
 private:
     /* 序号 */
     char m_index;
@@ -29,7 +40,7 @@ private:
     char m_id;
     /* 帧总长度 */
     short m_len;
-    /* 帧负载的长度 */
+    /* 帧负载的长度， 信息单元长度 - 单元序号(1) - 单元标识(1) - 单元长度(2) - 时戳(4) */
     short m_payload_len;
     /* 时戳 */
     int m_stamp;
