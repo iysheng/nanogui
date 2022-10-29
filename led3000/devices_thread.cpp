@@ -48,7 +48,7 @@ typedef struct {
 static led_device_t gs_led_devices[2] = {
     {
         .uart = {
-            {.name = "/dev/ttyS4"}, /* C++ 要这样初始化，否则会报编译错误 */
+            {.name = "/dev/ttyS3"}, /* C++ 要这样初始化，否则会报编译错误 */
             .baud = B115200,
             .data_bit = CS8,
             .stop_bit = 1, /* 一个停止位 */
@@ -58,7 +58,7 @@ static led_device_t gs_led_devices[2] = {
     },
     {
         .uart = {
-            {.name = "/dev/ttyS5"}, /* C++ 要这样初始化，否则会报编译错误 */
+            {.name = "/dev/ttyS4"}, /* C++ 要这样初始化，否则会报编译错误 */
             .baud = B115200,
             .data_bit = CS8,
             .stop_bit = 1, /* 一个停止位 */
