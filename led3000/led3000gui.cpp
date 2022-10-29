@@ -181,6 +181,155 @@ void do_with_power_off(Widget *widget, int choose)
   }
 }
 
+
+
+void do_with_white_light_normal(Widget *widget, int choose)
+{
+  std::cout << "white light normal:" << choose << std::endl;
+  Led3000Window * led3000Window= dynamic_cast<Led3000Window *>(widget->screen());
+  const std::vector<Button *> * white_dev_btns = led3000Window->get_white_dev_control_btns();
+  if (choose != 2)
+  {
+      /* TODO 检验是否授权 */
+
+      switch(choose)
+      {
+        case 0:
+            led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.normal_status = 0;
+            /* 发送消息控制关灯 */
+            led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_WHITE_NORMAL_SETTING, to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.normal_status)));
+            break;
+        case 1:
+            /* 发送消息控制开灯 */
+            led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.normal_status = 100;
+            led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_WHITE_NORMAL_SETTING, to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.normal_status)));
+            white_dev_btns->at(0)->set_pushed(true);
+            white_dev_btns->at(1)->set_pushed(false);
+            white_dev_btns->at(2)->set_pushed(false);
+            break;
+        default:
+            break;
+      }
+  }
+}
+
+void do_paint_white_light_blink(Widget *widget)
+{
+    MessageDialog * msg_dlg = dynamic_cast<MessageDialog *>(widget);
+    Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
+    auto * blink_title = widget->add<Label>("爆闪频率：", "sans-bold");
+    blink_title->set_font_size(20);
+    blink_title->set_position(Vector2i(48, 180));
+    widget->window()->set_fixed_size(Vector2i(342, 313));
+    widget->window()->set_background_image(RED_LED3000_ASSETS_DIR"/set_dlg_blink.png");
+    blink_title = widget->add<Label>("(1~15)HZ", "sans-bold");
+    blink_title->set_font_size(20);
+    blink_title->set_position(Vector2i(233, 180));
+
+    auto *textBox = widget->add<TextBox>("", KeyboardType::NumberIP);
+    textBox->set_position(Vector2i(134, 167));
+    textBox->set_fixed_size(Vector2i(90, 46));
+    textBox->set_editable(true);
+    textBox->set_value(std::to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.blink_freq));
+    textBox->setSyncUcharValue(&(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.blink_freq));
+    textBox->set_alignment(TextBox::Alignment::Left);
+
+    msg_dlg->label_icon()->set_position(Vector2i(148, 91));
+    msg_dlg->label_icon()->set_icon(RED_LED3000_ASSETS_DIR"/sys_icon.png");
+    msg_dlg->confirm_button()->set_position(Vector2i(10, 243));
+    msg_dlg->confirm_button()->set_fixed_size(Vector2i(156, 60));
+    msg_dlg->cancel_button()->set_position(Vector2i(176, 243));
+    msg_dlg->cancel_button()->set_fixed_size(Vector2i(156, 60));
+}
+
+void do_with_white_light_blink(Widget *widget, int choose)
+{
+  std::cout << "white light blink:" << choose << std::endl;
+  Led3000Window * led3000Window= dynamic_cast<Led3000Window *>(widget->screen());
+  const std::vector<Button *> * white_dev_btns = led3000Window->get_white_dev_control_btns();
+  if (choose == 1)
+  {
+    /* 发送消息控制频闪 */
+    led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_WHITE_BLINK_SETTING, to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.blink_freq)));
+    /* 同步消息内容到 json 文件 */
+    led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
+    white_dev_btns->at(0)->set_pushed(false);
+    white_dev_btns->at(1)->set_pushed(true);
+    white_dev_btns->at(2)->set_pushed(false);
+  }
+}
+
+void do_paint_white_light_mocode(Widget *widget)
+{
+    MessageDialog * msg_dlg = dynamic_cast<MessageDialog *>(widget);
+    Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
+    auto * mocode_value_title = widget->add<Label>("莫码参数为：", "sans-bold");
+    mocode_value_title->set_font_size(20);
+    widget->window()->set_background_image(RED_LED3000_ASSETS_DIR"/set_msgdlg1.png");
+    auto *textBox = widget->add<TextBox>("", KeyboardType::Full);
+    textBox->set_position(Vector2i(174, 167));
+    textBox->set_fixed_size(Vector2i(138, 46));
+    textBox->set_editable(true);
+    textBox->set_value(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mocode);
+    textBox->setSyncCharsValue(&(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mocode[0]));
+    textBox->set_font_size(16);
+    textBox->set_alignment(TextBox::Alignment::Left);
+
+    auto * mocode_counts_title = widget->add<Label>("莫码发送次数为：", "sans-bold");
+    mocode_counts_title->set_font_size(20);
+    textBox = widget->add<TextBox>("", KeyboardType::NumberIP);
+    textBox->set_position(Vector2i(174, 223));
+    textBox->set_fixed_size(Vector2i(138, 46));
+    textBox->set_editable(true);
+    textBox->set_value(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mocode);
+    textBox->setSyncCharsValue(&(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mocode[0]));
+    textBox->set_font_size(16);
+    textBox->set_alignment(TextBox::Alignment::Left);
+
+    auto * mocode_period_title = widget->add<Label>("莫码发送间隔为：", "sans-bold");
+    mocode_period_title->set_font_size(20);
+    textBox = widget->add<TextBox>("", KeyboardType::NumberIP);
+    textBox->set_fixed_size(Vector2i(138, 46));
+    textBox->set_position(Vector2i(174, 279));
+    textBox->set_editable(true);
+    textBox->set_value(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mocode);
+    textBox->setSyncCharsValue(&(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mocode[0]));
+    textBox->set_font_size(16);
+    textBox->set_alignment(TextBox::Alignment::Left);
+
+    mocode_value_title->set_position(Vector2i(61, 180));
+    mocode_counts_title->set_position(Vector2i(46, 236));
+    mocode_period_title->set_position(Vector2i(46, 292));
+
+    msg_dlg->label_icon()->set_position(Vector2i(148, 91));
+    msg_dlg->message_label()->set_position(Vector2i(104, 394));
+    msg_dlg->confirm_button()->set_position(Vector2i(10, 462));
+    msg_dlg->confirm_button()->set_fixed_size(Vector2i(156, 60));
+    msg_dlg->cancel_button()->set_position(Vector2i(176, 462));
+    msg_dlg->cancel_button()->set_fixed_size(Vector2i(156, 60));
+}
+
+void do_with_white_light_mocode(Widget *widget, int choose)
+{
+  Led3000Window * window = dynamic_cast<Led3000Window *>(widget->screen());
+  const std::vector<Button *> * white_dev_btns = window->get_white_dev_control_btns();
+  if (choose == 1)
+  {
+    Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
+    /* 发送消息控制莫码 */
+    led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_WHITE_MOCODE_SETTING, led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mocode));
+    /* 更新界面莫码显示 */
+    led3000Window->get_dev_morse_code_label(led3000Window->getCurrentDevice())->set_caption_merge(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mocode, led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mocode, '/');
+    /* 同步消息内容到 json 文件 */
+    led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
+
+    white_dev_btns->at(0)->set_pushed(false);
+    white_dev_btns->at(1)->set_pushed(false);
+    white_dev_btns->at(2)->set_pushed(true);
+    return;
+  }
+}
+
 void do_with_green_light_normal(Widget *widget, int choose)
 {
   std::cout << "green light normal:" << choose << std::endl;
@@ -600,12 +749,26 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           auto * btn_white_led = new Button(cwindow, "常亮");
           btn_white_led->set_position({10, 48});
           btn_white_led->set_fixed_size({120, 92});
+          btn_white_led->set_callback([&] {
+              new MessageDialog(this, MessageDialog::Type::Warning, "", "确认要打开白光么?", "确认", "取消", "", do_with_white_light_normal); });
           auto * btn_white_blink = new Button(cwindow, "白闪");
           btn_white_blink->set_position({140, 48});
           btn_white_blink->set_fixed_size({120, 92});
+          btn_white_blink->set_callback([&] {
+              new MessageDialog(this, MessageDialog::Type::Question, "", "", "确认", "取消", "", do_with_white_light_blink, do_paint_white_light_blink);
+          });
           auto * btn_white_mocode = new Button(cwindow, "莫码");
           btn_white_mocode->set_position({270, 48});
           btn_white_mocode->set_fixed_size({120, 92});
+          btn_white_mocode->set_callback([&] {
+              MessageDialog *dlg = new MessageDialog(this, MessageDialog::Type::Question, "", "开启白光莫码模式？", "确认", "取消", "", do_with_white_light_mocode, do_paint_white_light_mocode);});
+
+          btn_white_led->push_button_group(btn_white_led);
+          btn_white_led->push_button_group(btn_white_blink);
+          btn_white_led->push_button_group(btn_white_mocode);
+          btn_white_blink->set_button_group(btn_white_led->button_group());
+          btn_white_mocode->set_button_group(btn_white_led->button_group());
+          set_white_dev_control_btns(&btn_white_led->button_group());
         }
 
         /* 系统窗口 */
