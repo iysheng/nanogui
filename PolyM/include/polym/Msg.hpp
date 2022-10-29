@@ -12,6 +12,9 @@ using MsgUID = unsigned long long;
 #define    POLYM_GREEN_MOCODE_SETTING   2 /* 绿光莫码控制 */
 #define    POLYM_GREEN_BLINK_SETTING    3 /* 绿光频闪控制 */
 #define    POLYM_GREEN_NORMAL_SETTING   4 /* 绿光开关控制 */
+#define    POLYM_WHITE_MOCODE_SETTING   5 /* 白光莫码控制 */
+#define    POLYM_WHITE_BLINK_SETTING    6 /* 白光频闪控制 */
+#define    POLYM_WHITE_NORMAL_SETTING   7 /* 白光开关控制 */
 
 
 /* JSON 文件配置 ID */

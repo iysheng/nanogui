@@ -10,6 +10,7 @@
 #include <sys/prctl.h>
 #include <nanogui/common.h>
 #include <led3000gui.h>
+#include <debug.h>
 #include <PolyM/include/polym/Msg.hpp>
 #include <PolyM/include/polym/Queue.hpp>
 
@@ -126,26 +127,77 @@ end:
     return ret;
 }
 
-static void _do_with_focal(std::string message, Led3000Window * window)
+/**
+  * @brief 计算异或的和
+  * @param uint8_t *src: 
+  * @param int len: 
+  * retval 异或和.
+  */
+static uint8_t _get_xor(uint8_t *src, int len)
+{
+    int i = 0;
+    uint8_t xor_ans = 0;
+
+    for (; i < len; i++)
+    {
+        xor_ans ^= src[i];
+    }
+
+    return xor_ans;
+}
+
+static void _do_with_focal(led_device_t* devp, std::string message)
 {
     red_debug_lite("focal:%s", message.c_str());
 }
 
-static void _do_with_green_mocode(std::string message, Led3000Window * window)
+static void _do_with_green_mocode(led_device_t* devp, std::string message)
 {
     red_debug_lite("mocode:%s", message.c_str());
 }
 
-static void _do_with_green_blink(std::string message, Led3000Window * window)
+static void _do_with_green_blink(led_device_t* devp, std::string message)
 {
     uint8_t freq = (uint8_t)stoi(message);
+    uint8_t buffer[13] = {0X7E, 0X09 /* 帧长 */, 0X81, 0X11, 1 + devp->uart.index, 0XFF,
+        0X01, 0XFF, 0X01, 0X01, freq, 0X00 /* 校验和 */, 0XE7};
+
+    buffer[11] = _get_xor(&buffer[2], 9);
+    write(devp->uart.fd, buffer, sizeof(buffer));
     red_debug_lite("blink:%u", freq);
 }
 
-static void _do_with_green_normal(std::string message, Led3000Window * window)
+static void _do_with_green_normal(led_device_t *devp, std::string message)
 {
     uint8_t level = (uint8_t)stoi(message);
+    uint8_t buffer[13] = {0X7E, 0X09 /* 帧长 */, 0X81, 0X11, 1 + devp->uart.index, 0XFF,
+        0X01, 0XFF, 0X00, 0X01, level, 0X00 /* 校验和 */, 0XE7};
+
+    buffer[11] = _get_xor(&buffer[2], 9);
     red_debug_lite("normal:%u", level);
+    write(devp->uart.fd, buffer, sizeof(buffer));
+}
+
+static void _do_with_white_blink(led_device_t* devp, std::string message)
+{
+    uint8_t freq = (uint8_t)stoi(message);
+    uint8_t buffer[13] = {0X7E, 0X09 /* 帧长 */, 0X81, 0X11, 1 + devp->uart.index, 0X01,
+        0X01, freq, 0XFF, 0X01, 0XFF, 0X00 /* 校验和 */, 0XE7};
+
+    buffer[11] = _get_xor(&buffer[2], 9);
+    write(devp->uart.fd, buffer, sizeof(buffer));
+    red_debug_lite("blink:%u", freq);
+}
+
+static void _do_with_white_normal(led_device_t *devp, std::string message)
+{
+    uint8_t level = (uint8_t)stoi(message);
+    uint8_t buffer[13] = {0X7E, 0X09 /* 帧长 */, 0X81, 0X11, 1 + devp->uart.index, 0X00,
+        0X01, level, 0XFF, 0X01, 0XFF, 0X00 /* 校验和 */, 0XE7};
+
+    buffer[11] = _get_xor(&buffer[2], 9);
+    red_debug_lite("normal:%u", level);
+    write(devp->uart.fd, buffer, sizeof(buffer));
 }
 
 void *devices_entry(void *arg)
@@ -180,16 +232,22 @@ void *devices_entry(void *arg)
         switch (msg_id)
         {
             case POLYM_FOCAL_SETTING:
-                _do_with_focal(msg_payload, screen);
+                _do_with_focal(led_devp, msg_payload);
                 break;
             case POLYM_GREEN_MOCODE_SETTING:
-                _do_with_green_mocode(msg_payload, screen);
+                _do_with_green_mocode(led_devp, msg_payload);
                 break;
             case POLYM_GREEN_BLINK_SETTING:
-                _do_with_green_blink(msg_payload, screen);
+                _do_with_green_blink(led_devp, msg_payload);
                 break;
             case POLYM_GREEN_NORMAL_SETTING:
-                _do_with_green_normal(msg_payload, screen);
+                _do_with_green_normal(led_devp, msg_payload);
+                break;
+            case POLYM_WHITE_BLINK_SETTING:
+                _do_with_white_blink(led_devp, msg_payload);
+                break;
+            case POLYM_WHITE_NORMAL_SETTING:
+                _do_with_white_normal(led_devp, msg_payload);
                 break;
             default:
                 red_debug_lite("No support this id:%d", msg_id);
