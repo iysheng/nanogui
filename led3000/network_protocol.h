@@ -17,6 +17,8 @@
 #define NETWORK_RECV_FORCE    0X05
 /* 指控关机发送 */
 #define NETWORK_RECV_OFF      0XE4
+/* 指控舰艇姿态信息发送 */
+#define NETWORK_RECV_ATTITUDE_INFO      0XB0
 
 
 /********************   发送给主控的命令集合   ******************************/

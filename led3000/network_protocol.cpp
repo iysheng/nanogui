@@ -16,6 +16,37 @@
 static NetworkUdp gs_network_udp[NETWORK_PROTOCOL_TYPE_COUNTS];
 
 
+/**
+  * @brief 处理指控发送的舰艇姿态信息
+  * retval .
+  */
+static int do_with_network_attitude_info(NetworkPackage &net_package)
+{
+    short info_valid_flags /* 状态及数据有效标志 */;
+    int direction_info /* 航向角 */, vertical_info /* 纵摇角 */, horizon_info /* 横摇角 */;
+
+    if (net_package.len() != 0X16)
+    {
+        red_debug_lite("Invalid payload_len4recv_attitude_info");
+        return -1;
+    }
+
+    info_valid_flags = net_package.payload()[0] << 8 | net_package.payload()[1];
+    if (info_valid_flags & 0x01)
+    {
+        red_debug_lite("invalid attitude info");
+    }
+    direction_info = net_package.payload()[2] << 8 | net_package.payload()[3] << 16 |
+        net_package.payload()[4] << 8 | net_package.payload()[5];
+    vertical_info = net_package.payload()[6] << 8 | net_package.payload()[7] << 16 |
+        net_package.payload()[8] << 8 | net_package.payload()[9];
+    horizon_info = net_package.payload()[10] << 8 | net_package.payload()[11] << 16 |
+        net_package.payload()[12] << 8 | net_package.payload()[13];
+
+    red_debug_lite("flag:%hx direction:%x vertical:%x horizon:%x", info_valid_flags,
+        direction_info, vertical_info, horizon_info);
+    return 0;
+}
 
 /**
   * @brief 处理指控发送的作战干预指令
@@ -109,6 +140,10 @@ int handle_with_network_buffer(char *buffer, int size)
         case NETWORK_RECV_FORCE:
             do_with_network_recv_force(net_package);
             red_debug_lite("TODO with FORCE");
+            break;
+        case NETWORK_RECV_ATTITUDE_INFO:
+            red_debug_lite("TODO with ATTITUDE_INFO");
+            do_with_network_attitude_info(net_package);
             break;
         case NETWORK_RECV_GUIDE:
             red_debug_lite("TODO with GUIDE");
