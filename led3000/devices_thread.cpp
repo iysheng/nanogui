@@ -148,26 +148,56 @@ static uint8_t _get_xor(uint8_t *src, int len)
 
 static void _do_with_turntable_left(led_device_t* devp, std::string message)
 {
-    red_debug_lite("left:%s", message.c_str());
+    uint16_t level = (uint16_t)stoi(message);
+    uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X11 /* 左边手动 */,
+        level >> 8, level, 0X00, 0X00, 0X00 /* 校验和 */, 0XE7};
+
+    buffer[11] = _get_xor(&buffer[2], 8);
+    write(devp->uart.fd, buffer, sizeof(buffer));
+    red_debug_lite("left:%u", level);
 }
 
 static void _do_with_turntable_right(led_device_t* devp, std::string message)
 {
+    uint16_t level = (uint16_t)stoi(message);
+    uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X21 /* 右边手动 */,
+        level >> 8, level, 0X00, 0X00, 0X00 /* 校验和 */, 0XE7};
+
+    buffer[11] = _get_xor(&buffer[2], 8);
+    write(devp->uart.fd, buffer, sizeof(buffer));
     red_debug_lite("right:%s", message.c_str());
 }
 
 static void _do_with_turntable_down(led_device_t* devp, std::string message)
 {
+    uint16_t level = (uint16_t)stoi(message);
+    uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X41 /* 下边手动 */,
+        0X00, 0X00, level >> 8, level, 0X00 /* 校验和 */, 0XE7};
+
+    buffer[11] = _get_xor(&buffer[2], 8);
+    write(devp->uart.fd, buffer, sizeof(buffer));
     red_debug_lite("down:%s", message.c_str());
 }
 
 static void _do_with_turntable_up(led_device_t* devp, std::string message)
 {
+    uint16_t level = (uint16_t)stoi(message);
+    uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X31 /* 上边手动 */,
+        0X00, 0X00, level >> 8, level, 0X00 /* 校验和 */, 0XE7};
+
+    buffer[11] = _get_xor(&buffer[2], 8);
+    write(devp->uart.fd, buffer, sizeof(buffer));
     red_debug_lite("up:%s", message.c_str());
 }
 
 static void _do_with_turntable_stop(led_device_t* devp, std::string message)
 {
+    uint16_t level = (uint16_t)stoi(message);
+    uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X01 /* 停止手动 */,
+        0XFF, 0XFF, 0XFF, 0XFF, 0X00 /* 校验和 */, 0XE7};
+
+    buffer[11] = _get_xor(&buffer[2], 8);
+    write(devp->uart.fd, buffer, sizeof(buffer));
     red_debug_lite("stop:%s", message.c_str());
 }
 
