@@ -219,7 +219,9 @@ void *joystick_thread(void *arg)
         axes = glfwGetJoystickAxes(present, &axis_count);
         if (!axes)
             continue;
-        do_with_handle_axis(axes[0], axes[1]);
+        /* TODO 检查工作模式，仅仅在手动模式时受操纵杆控制 */
+        if (gs_screen->getJsonValue()->devices[gs_screen->getCurrentDevice()].turntable.mode == TURNTABLE_MANUAL_MODE)
+            do_with_handle_axis(axes[0], axes[1]);
 #if 0
         /* 目前测试
          * X 轴向中心数据是 479 ~ 521

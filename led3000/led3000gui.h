@@ -48,6 +48,13 @@
 
 #define LED3000_DEVICES_COUNTS    2
 
+typedef enum {
+    TURNTABLE_TRACK_MODE,
+    TURNTABLE_MANUAL_MODE,
+    TURNTABLE_SCAN_MODE,
+    TURNTABLE_RESET_MODE,
+} turntable_mode_E;
+
 using namespace rapidjson;
 NAMESPACE_BEGIN(nanogui)
 

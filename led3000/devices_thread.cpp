@@ -171,6 +171,11 @@ static void _do_with_turntable_stop(led_device_t* devp, std::string message)
     red_debug_lite("stop:%s", message.c_str());
 }
 
+static void _do_with_turntable_mode_setting(led_device_t* devp, std::string message)
+{
+    red_debug_lite("mode_setting:%s", message.c_str());
+}
+
 static void _do_with_focal(led_device_t* devp, std::string message)
 {
     red_debug_lite("focal:%s", message.c_str());
@@ -288,6 +293,9 @@ void *devices_entry(void *arg)
                 break;
             case POLYM_TURNTABLE_STOP_SETTING:
                 _do_with_turntable_stop(led_devp, msg_payload);
+                break;
+            case POLYM_TURNTABLE_MODE_SETTING:
+                _do_with_turntable_mode_setting(led_devp, msg_payload);
                 break;
             default:
                 red_debug_lite("No support this id:%d", msg_id);

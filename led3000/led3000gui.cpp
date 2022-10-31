@@ -835,14 +835,32 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           m_turntable_dev = turntableWindow->add<Label>("灯光装置终端一 转台");
           m_turntable_dev->set_position({39, 9});
           auto * btn = turntableWindow->add<Button>("目标检测");
+          btn->set_callback([&] {
+              this->getJsonValue()->devices[this->getCurrentDevice()].turntable.mode = TURNTABLE_TRACK_MODE;
+              this->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_MODE_SETTING, to_string(TURNTABLE_TRACK_MODE)));
+              /* 同步消息内容到 json 文件 */
+              this->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
+          });
           btn->set_flags(Button::RadioButton);
           btn->set_fixed_size({120, 92});
           btn->set_position({10, 48});
           btn = turntableWindow->add<Button>("手动");
+          btn->set_callback([&] {
+              this->getJsonValue()->devices[this->getCurrentDevice()].turntable.mode = TURNTABLE_MANUAL_MODE;
+              this->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_MODE_SETTING, to_string(TURNTABLE_MANUAL_MODE)));
+              /* 同步消息内容到 json 文件 */
+              this->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
+          });
           btn->set_flags(Button::RadioButton);
           btn->set_fixed_size({120, 92});
           btn->set_position({140, 48});
           btn = turntableWindow->add<Button>("扫海");
+          btn->set_callback([&] {
+              this->getJsonValue()->devices[this->getCurrentDevice()].turntable.mode = TURNTABLE_SCAN_MODE;
+              this->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_MODE_SETTING, to_string(TURNTABLE_SCAN_MODE)));
+              /* 同步消息内容到 json 文件 */
+              this->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
+          });
           btn->set_flags(Button::RadioButton);
           btn->set_fixed_size({120, 92});
           btn->set_position({270, 48});
