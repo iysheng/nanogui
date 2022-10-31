@@ -29,6 +29,153 @@ using namespace std;
 
 static Led3000Window *gs_screen;
 
+/* X 方向的点位信息 */
+#define X_LEFT_POINT     479
+#define X_RIGHT_POINT    521
+
+/* Y 方向的点位信息 */
+#define Y_LEFT_POINT     479
+#define Y_RIGHT_POINT    521
+
+/**
+  * @brief 左转运动
+  * @param int bias: 
+  * retval Linux/errno.
+  */
+static int do_x_left_bias(short int bias)
+{
+    red_debug_lite("X LEFT:%d", bias);
+    return 0;
+}
+
+/**
+  * @brief 右转运动
+  * @param short int bias: 
+  * retval Linux/errno.
+  */
+static int do_x_right_bias(short int bias)
+{
+    red_debug_lite("X RIGHT:%d", bias);
+    return 0;
+}
+
+/**
+  * @brief 向下运动
+  * @param short int bias: 
+  * retval Linux/errno.
+  */
+static int do_y_down_bias(short int bias)
+{
+    red_debug_lite("Y DOWN:%d", bias);
+    return 0;
+}
+
+/**
+  * @brief 向上运动
+  * @param short int bias: 
+  * retval Linux/errno.
+  */
+static int do_y_up_bias(short int bias)
+{
+    red_debug_lite("Y UP:%d", bias);
+    return 0;
+}
+
+/**
+  * @brief 向上运动
+  * @param int bias: 
+  * retval Linux/errno.
+  */
+static int do_xy_stop(void)
+{
+    red_debug_lite("XY STOP");
+    return 0;
+}
+
+/**
+  * @brief 向上运动
+  * @param int bias: 
+  * retval Linux/errno.
+  */
+static int do_with_xy_bias(int x_bias, int y_bias)
+{
+    if (x_bias < 0)
+    {
+        x_bias *= -1;
+        do_x_left_bias(x_bias & 0xffff);
+    }
+    else if (x_bias > 0)
+    {
+        do_x_right_bias(x_bias & 0xffff);
+    }
+
+    if (y_bias < 0)
+    {
+        y_bias *= -1;
+        do_y_down_bias(y_bias & 0xffff);
+    }
+    else if (y_bias > 0)
+    {
+        do_y_up_bias(y_bias & 0xffff);
+    }
+
+    return 0;
+}
+
+
+
+
+/**
+  * @brief 对坐标信息进处理
+  * retval .
+  */
+static int do_with_handle_axis(float x_axis, float y_axis)
+{
+    int x_turn_bais = 0, y_turn_bais = 0;
+
+    if (x_axis < X_LEFT_POINT)
+    {
+        /* TODO 左转 */
+        x_turn_bais = x_axis - X_LEFT_POINT;
+    }
+    else if (x_axis > X_RIGHT_POINT)
+    {
+        /* TODO 右转 */
+        x_turn_bais = x_axis - X_RIGHT_POINT;
+    }
+    else
+    {
+        x_turn_bais = 0;
+    }
+
+    if (y_axis < Y_LEFT_POINT)
+    {
+        /* TODO 向上 */
+        y_turn_bais = y_axis - Y_LEFT_POINT;
+    }
+    else if (y_axis > Y_RIGHT_POINT)
+    {
+        /* TODO 向下 */
+        y_turn_bais = y_axis - Y_RIGHT_POINT;
+    }
+    else
+    {
+        y_turn_bais = 0;
+    }
+
+    if (!x_turn_bais && !y_turn_bais)
+    {
+        /* TODO 停止转台 */
+        do_xy_stop();
+    }
+    else
+    {
+        do_with_xy_bias(x_turn_bais, y_turn_bais);
+    }
+
+    return 0;
+}
+
 void *joystick_thread(void *arg)
 {
     Led3000Window * screen = (Led3000Window *)arg;
@@ -66,7 +213,12 @@ void *joystick_thread(void *arg)
         axes = glfwGetJoystickAxes(present, &axis_count);
         if (!axes)
             continue;
-
+        do_with_handle_axis(axes[0], axes[1]);
+        
+        /* 目前测试
+         * X 轴向中心数据是 479 ~ 521
+         * Y 轴向中心数据是 479 ~ 521
+         * */
         for (i = 0; i < axis_count; i++)
         {
             red_debug_lite("%f@%d", axes[i], i);
