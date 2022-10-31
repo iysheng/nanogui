@@ -308,6 +308,8 @@ bool VideoView::mouse_button_event(const Vector2i &p, int button, bool down, int
     /* TODO 发送坐标信息进行目标追踪 */
     Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(window()->parent());
     led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_TRACK_SETTING, track_buffer));
+    /* 防止发送太快驱动板无法处理 */
+    usleep(40000);
     return true;
 }
 NAMESPACE_END(nanogui)

@@ -122,6 +122,8 @@ int init_uart_port(uartport_t *uart)
     uart_setting.c_cflag &= ~CSIZE;
     uart_setting.c_cflag |= uart->data_bit;
 
+    /* 禁止将输出的 NL 转换为 CR-NL */
+    uart_setting.c_oflag &= ~ONLCR;
     if((tcsetattr(fd, TCSANOW, &uart_setting)) != 0)
     {
         printf("Failed in Setting attributes");
@@ -219,9 +221,9 @@ static void _do_with_turntable_track_setting(led_device_t* devp, std::string mes
 {
     int16_t x_pos, y_pos;
     uint16_t level = (uint16_t)stoi(message);
+    sscanf(message.c_str(), "%hd,%hd", &x_pos, &y_pos);
     uint8_t buffer[14] = {0X7E, 0X0A /* 帧长 */, 0X82, 0X11, 1 + devp->uart.index, 0X01 /* 停止手动 */,
         x_pos >> 8, x_pos, y_pos >> 8, y_pos, 0X00 /* 不调焦 */, 0X00/* 不调视场 */, 0X00 /* 校验和 */, 0XE7};
-    sscanf(message.c_str(), "%hd,%hd", &x_pos, &y_pos);
 
     buffer[12] = _get_xor(&buffer[2], 0X0B);
     write(devp->uart.fd, buffer, sizeof(buffer));

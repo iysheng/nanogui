@@ -52,6 +52,7 @@ public:
 
     void draw(NVGcontext *ctx);
 
+    virtual bool mouse_button_event(const Vector2i &p, int button, bool down, int modifiers) override;
     static int video_draw_handler(void *object);
 
     int setSrcUrl(const char *srcurl) {memcpy(mSrcUrl, srcurl, strlen(srcurl) + 1);return 0;}
