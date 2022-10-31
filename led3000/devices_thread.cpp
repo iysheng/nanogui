@@ -146,6 +146,31 @@ static uint8_t _get_xor(uint8_t *src, int len)
     return xor_ans;
 }
 
+static void _do_with_turntable_left(led_device_t* devp, std::string message)
+{
+    red_debug_lite("left:%s", message.c_str());
+}
+
+static void _do_with_turntable_right(led_device_t* devp, std::string message)
+{
+    red_debug_lite("right:%s", message.c_str());
+}
+
+static void _do_with_turntable_down(led_device_t* devp, std::string message)
+{
+    red_debug_lite("down:%s", message.c_str());
+}
+
+static void _do_with_turntable_up(led_device_t* devp, std::string message)
+{
+    red_debug_lite("up:%s", message.c_str());
+}
+
+static void _do_with_turntable_stop(led_device_t* devp, std::string message)
+{
+    red_debug_lite("stop:%s", message.c_str());
+}
+
 static void _do_with_focal(led_device_t* devp, std::string message)
 {
     red_debug_lite("focal:%s", message.c_str());
@@ -248,6 +273,21 @@ void *devices_entry(void *arg)
                 break;
             case POLYM_WHITE_NORMAL_SETTING:
                 _do_with_white_normal(led_devp, msg_payload);
+                break;
+            case POLYM_TURNTABLE_LEFT_SETTING:
+                _do_with_turntable_left(led_devp, msg_payload);
+                break;
+            case POLYM_TURNTABLE_RIGHT_SETTING:
+                _do_with_turntable_right(led_devp, msg_payload);
+                break;
+            case POLYM_TURNTABLE_DOWN_SETTING:
+                _do_with_turntable_down(led_devp, msg_payload);
+                break;
+            case POLYM_TURNTABLE_UP_SETTING:
+                _do_with_turntable_up(led_devp, msg_payload);
+                break;
+            case POLYM_TURNTABLE_STOP_SETTING:
+                _do_with_turntable_stop(led_devp, msg_payload);
                 break;
             default:
                 red_debug_lite("No support this id:%d", msg_id);

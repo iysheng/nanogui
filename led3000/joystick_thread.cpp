@@ -27,7 +27,7 @@ using std::endl;
 using namespace nanogui;
 using namespace std;
 
-static Led3000Window *gs_screen;
+static Led3000Window *gs_screen = nullptr;
 
 /* X 方向的点位信息 */
 #define X_LEFT_POINT     479
@@ -45,6 +45,8 @@ static Led3000Window *gs_screen;
 static int do_x_left_bias(short int bias)
 {
     red_debug_lite("X LEFT:%d", bias);
+
+    gs_screen->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_LEFT_SETTING, to_string(bias)));
     return 0;
 }
 
@@ -56,6 +58,7 @@ static int do_x_left_bias(short int bias)
 static int do_x_right_bias(short int bias)
 {
     red_debug_lite("X RIGHT:%d", bias);
+    gs_screen->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_RIGHT_SETTING, to_string(bias)));
     return 0;
 }
 
@@ -67,6 +70,7 @@ static int do_x_right_bias(short int bias)
 static int do_y_down_bias(short int bias)
 {
     red_debug_lite("Y DOWN:%d", bias);
+    gs_screen->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_DOWN_SETTING, to_string(bias)));
     return 0;
 }
 
@@ -78,6 +82,7 @@ static int do_y_down_bias(short int bias)
 static int do_y_up_bias(short int bias)
 {
     red_debug_lite("Y UP:%d", bias);
+    gs_screen->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_UP_SETTING, to_string(bias)));
     return 0;
 }
 
@@ -89,6 +94,7 @@ static int do_y_up_bias(short int bias)
 static int do_xy_stop(void)
 {
     red_debug_lite("XY STOP");
+    gs_screen->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_STOP_SETTING, to_string(0)));
     return 0;
 }
 
@@ -178,7 +184,7 @@ static int do_with_handle_axis(float x_axis, float y_axis)
 
 void *joystick_thread(void *arg)
 {
-    Led3000Window * screen = (Led3000Window *)arg;
+    gs_screen = (Led3000Window *)arg;
     std::string msg_payload;
     int msg_id;
     int fd, ret;
@@ -190,7 +196,7 @@ void *joystick_thread(void *arg)
 
     prctl(PR_SET_NAME, thread_name);
 
-    red_debug_lite("Hello joystick");
+    red_debug_lite("Hello joystick: screen: %p", gs_screen);
     for (present = GLFW_JOYSTICK_1; present < GLFW_JOYSTICK_LAST; present++)
     {
         if (glfwJoystickPresent(present))
@@ -214,7 +220,7 @@ void *joystick_thread(void *arg)
         if (!axes)
             continue;
         do_with_handle_axis(axes[0], axes[1]);
-        
+#if 0
         /* 目前测试
          * X 轴向中心数据是 479 ~ 521
          * Y 轴向中心数据是 479 ~ 521
@@ -223,5 +229,6 @@ void *joystick_thread(void *arg)
         {
             red_debug_lite("%f@%d", axes[i], i);
         }
+#endif
     }
 }

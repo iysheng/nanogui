@@ -16,6 +16,11 @@ using MsgUID = unsigned long long;
 #define    POLYM_WHITE_BLINK_SETTING    6 /* 白光频闪控制 */
 #define    POLYM_WHITE_NORMAL_SETTING   7 /* 白光开关控制 */
 
+#define    POLYM_TURNTABLE_LEFT_SETTING   8 /* 左转控制 */
+#define    POLYM_TURNTABLE_RIGHT_SETTING  9 /* 右转控制 */
+#define    POLYM_TURNTABLE_DOWN_SETTING   10 /* 向下控制 */
+#define    POLYM_TURNTABLE_UP_SETTING     11 /* 向上控制 */
+#define    POLYM_TURNTABLE_STOP_SETTING   12 /* 停止 */
 
 /* JSON 文件配置 ID */
 #define    POLYM_BUTTON_CONFIRM  2
