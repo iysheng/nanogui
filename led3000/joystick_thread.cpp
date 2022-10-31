@@ -34,8 +34,13 @@ static Led3000Window *gs_screen = nullptr;
 #define X_RIGHT_POINT    521
 
 /* Y 方向的点位信息 */
-#define Y_LEFT_POINT     479
-#define Y_RIGHT_POINT    521
+#define Y_DOWN_POINT     479
+#define Y_UP_POINT    521
+
+#define MK_X_LEFT_SPEED(x)  (x * 64 / X_LEFT_POINT)
+#define MK_X_RIGHT_SPEED(x) (x * 64 / X_RIGHT_POINT)
+#define MK_Y_DOWN_SPEED(y)  (y * 64 / Y_DOWN_POINT)
+#define MK_Y_UP_SPEED(y)    (y * 64 / Y_UP_POINT)
 
 /**
   * @brief 左转运动
@@ -108,21 +113,21 @@ static int do_with_xy_bias(int x_bias, int y_bias)
     if (x_bias < 0)
     {
         x_bias *= -1;
-        do_x_left_bias(x_bias & 0xffff);
+        do_x_left_bias(MK_X_LEFT_SPEED(x_bias));
     }
     else if (x_bias > 0)
     {
-        do_x_right_bias(x_bias & 0xffff);
+        do_x_right_bias(MK_X_RIGHT_SPEED(x_bias));
     }
 
     if (y_bias < 0)
     {
         y_bias *= -1;
-        do_y_down_bias(y_bias & 0xffff);
+        do_y_down_bias(MK_Y_DOWN_SPEED(y_bias));
     }
     else if (y_bias > 0)
     {
-        do_y_up_bias(y_bias & 0xffff);
+        do_y_up_bias(MK_Y_UP_SPEED(y_bias));
     }
 
     return 0;
@@ -154,15 +159,15 @@ static int do_with_handle_axis(float x_axis, float y_axis)
         x_turn_bais = 0;
     }
 
-    if (y_axis < Y_LEFT_POINT)
-    {
-        /* TODO 向上 */
-        y_turn_bais = y_axis - Y_LEFT_POINT;
-    }
-    else if (y_axis > Y_RIGHT_POINT)
+    if (y_axis < Y_DOWN_POINT)
     {
         /* TODO 向下 */
-        y_turn_bais = y_axis - Y_RIGHT_POINT;
+        y_turn_bais = y_axis - Y_DOWN_POINT;
+    }
+    else if (y_axis > Y_UP_POINT)
+    {
+        /* TODO 向上 */
+        y_turn_bais = y_axis - Y_UP_POINT;
     }
     else
     {
@@ -222,6 +227,7 @@ void *joystick_thread(void *arg)
         /* TODO 检查工作模式，仅仅在手动模式时受操纵杆控制 */
         if (gs_screen->getJsonValue()->devices[gs_screen->getCurrentDevice()].turntable.mode == TURNTABLE_MANUAL_MODE)
             do_with_handle_axis(axes[0], axes[1]);
+        usleep(40000);
 #if 0
         /* 目前测试
          * X 轴向中心数据是 479 ~ 521

@@ -53,7 +53,7 @@ static led_device_t gs_led_devices[2] = {
             .baud = B115200,
             .data_bit = CS8,
             .stop_bit = 1, /* 一个停止位 */
-            .even = 1, /* 偶校验 */
+            .even = 0, /* 无校验 */
             .index = 0,
         },
     },
@@ -63,7 +63,7 @@ static led_device_t gs_led_devices[2] = {
             .baud = B115200,
             .data_bit = CS8,
             .stop_bit = 1, /* 一个停止位 */
-            .even = 1, /* 偶校验 */
+            .even = 0, /* 无校验 */
             .index = 1,
         },
     },
@@ -93,10 +93,19 @@ int init_uart_port(uartport_t *uart)
     cfsetispeed(&uart_setting, uart->baud);
     cfsetospeed(&uart_setting, uart->baud);
 
+    /* 偶校验 */
     if (uart->even)
     {
         uart_setting.c_cflag |= PARENB;
+        uart_setting.c_cflag &= ~PARODD;
     }
+    /* 奇校验 */
+    else if (uart->even == 2)
+    {
+        uart_setting.c_cflag |= PARENB;
+        uart_setting.c_cflag |= PARODD;
+    }
+    /* 无校验 */
     else
     {
         uart_setting.c_cflag &= ~PARENB;
@@ -150,9 +159,9 @@ static void _do_with_turntable_left(led_device_t* devp, std::string message)
 {
     uint16_t level = (uint16_t)stoi(message);
     uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X11 /* 左边手动 */,
-        level >> 8, level, 0X00, 0X00, 0X00 /* 校验和 */, 0XE7};
+        0X00, level, 0X00, 0X00, 0X00 /* 校验和 */, 0XE7};
 
-    buffer[11] = _get_xor(&buffer[2], 8);
+    buffer[10] = _get_xor(&buffer[2], 8);
     write(devp->uart.fd, buffer, sizeof(buffer));
     red_debug_lite("left:%u", level);
 }
@@ -161,9 +170,9 @@ static void _do_with_turntable_right(led_device_t* devp, std::string message)
 {
     uint16_t level = (uint16_t)stoi(message);
     uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X21 /* 右边手动 */,
-        level >> 8, level, 0X00, 0X00, 0X00 /* 校验和 */, 0XE7};
+        0X00, level, 0X00, 0X00, 0X00 /* 校验和 */, 0XE7};
 
-    buffer[11] = _get_xor(&buffer[2], 8);
+    buffer[10] = _get_xor(&buffer[2], 8);
     write(devp->uart.fd, buffer, sizeof(buffer));
     red_debug_lite("right:%s", message.c_str());
 }
@@ -172,9 +181,9 @@ static void _do_with_turntable_down(led_device_t* devp, std::string message)
 {
     uint16_t level = (uint16_t)stoi(message);
     uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X41 /* 下边手动 */,
-        0X00, 0X00, level >> 8, level, 0X00 /* 校验和 */, 0XE7};
+        0X00, 0X00, 0X00, level, 0X00 /* 校验和 */, 0XE7};
 
-    buffer[11] = _get_xor(&buffer[2], 8);
+    buffer[10] = _get_xor(&buffer[2], 8);
     write(devp->uart.fd, buffer, sizeof(buffer));
     red_debug_lite("down:%s", message.c_str());
 }
@@ -183,9 +192,9 @@ static void _do_with_turntable_up(led_device_t* devp, std::string message)
 {
     uint16_t level = (uint16_t)stoi(message);
     uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X31 /* 上边手动 */,
-        0X00, 0X00, level >> 8, level, 0X00 /* 校验和 */, 0XE7};
+        0X00, 0X00, 0X00, level, 0X00 /* 校验和 */, 0XE7};
 
-    buffer[11] = _get_xor(&buffer[2], 8);
+    buffer[10] = _get_xor(&buffer[2], 8);
     write(devp->uart.fd, buffer, sizeof(buffer));
     red_debug_lite("up:%s", message.c_str());
 }
@@ -196,7 +205,7 @@ static void _do_with_turntable_stop(led_device_t* devp, std::string message)
     uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X01 /* 停止手动 */,
         0XFF, 0XFF, 0XFF, 0XFF, 0X00 /* 校验和 */, 0XE7};
 
-    buffer[11] = _get_xor(&buffer[2], 8);
+    buffer[10] = _get_xor(&buffer[2], 8);
     write(devp->uart.fd, buffer, sizeof(buffer));
     red_debug_lite("stop:%s", message.c_str());
 }
@@ -204,6 +213,20 @@ static void _do_with_turntable_stop(led_device_t* devp, std::string message)
 static void _do_with_turntable_mode_setting(led_device_t* devp, std::string message)
 {
     red_debug_lite("mode_setting:%s", message.c_str());
+}
+
+static void _do_with_turntable_track_setting(led_device_t* devp, std::string message)
+{
+    int16_t x_pos, y_pos;
+    uint16_t level = (uint16_t)stoi(message);
+    uint8_t buffer[14] = {0X7E, 0X0A /* 帧长 */, 0X82, 0X11, 1 + devp->uart.index, 0X01 /* 停止手动 */,
+        x_pos >> 8, x_pos, y_pos >> 8, y_pos, 0X00 /* 不调焦 */, 0X00/* 不调视场 */, 0X00 /* 校验和 */, 0XE7};
+    sscanf(message.c_str(), "%hd,%hd", &x_pos, &y_pos);
+
+    buffer[12] = _get_xor(&buffer[2], 0X0B);
+    write(devp->uart.fd, buffer, sizeof(buffer));
+
+    red_debug_lite("track_setting:%s", message.c_str());
 }
 
 static void _do_with_focal(led_device_t* devp, std::string message)
@@ -326,6 +349,9 @@ void *devices_entry(void *arg)
                 break;
             case POLYM_TURNTABLE_MODE_SETTING:
                 _do_with_turntable_mode_setting(led_devp, msg_payload);
+                break;
+            case POLYM_TURNTABLE_TRACK_SETTING:
+                _do_with_turntable_track_setting(led_devp, msg_payload);
                 break;
             default:
                 red_debug_lite("No support this id:%d", msg_id);

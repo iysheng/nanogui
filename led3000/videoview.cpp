@@ -31,6 +31,8 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
+#include <led3000gui.h>
+#include <PolyM/include/polym/Queue.hpp>
 NAMESPACE_BEGIN(nanogui)
 
 int VideoView::video_draw_handler(void *object)
@@ -285,4 +287,27 @@ void VideoView::draw(NVGcontext *ctx)
     ImageView::draw(ctx);
 }
 
+/* 固定大小为 520 * 286 */
+#define VIDEO_SHOW_FIXED_WIDTH    520
+#define VIDEO_SHOW_FIXED_HEIGH    286
+
+#define VIDEO_TRACK_FIXED_WIDTH    1920
+#define VIDEO_TRACK_FIXED_HEIGH    1080
+
+
+bool VideoView::mouse_button_event(const Vector2i &p, int button, bool down, int modifiers) {
+    char track_buffer[32] = {0};
+    Vector2i track_p;
+
+    track_p.v[0] = p.v[0] * VIDEO_TRACK_FIXED_WIDTH / VIDEO_SHOW_FIXED_WIDTH;
+    track_p.v[1] = p.v[1] * VIDEO_TRACK_FIXED_HEIGH / VIDEO_SHOW_FIXED_HEIGH;
+    track_p.v[0] -= VIDEO_TRACK_FIXED_WIDTH / 2 ;
+    track_p.v[1] = VIDEO_TRACK_FIXED_HEIGH / 2 - track_p.v[1];
+    snprintf(track_buffer, sizeof track_buffer, "%d,%d", track_p.v[0], track_p.v[1]);
+    red_debug_lite("track buffer %s raw:%d,%d", track_buffer, p.v[0], p.v[1]);
+    /* TODO 发送坐标信息进行目标追踪 */
+    Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(window()->parent());
+    led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_TRACK_SETTING, track_buffer));
+    return true;
+}
 NAMESPACE_END(nanogui)

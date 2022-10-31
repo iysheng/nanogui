@@ -919,6 +919,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
 
             /* 在这个 window 上创建一个 img2_window 控件 */
             video_image = img2_window->add<VideoView>(mJsonValue.devices[1].camera_url);
+            /* 固定大小为 520 * 286 */
             video_image->set_fixed_size(Vector2i(520, 286));
             video_image->set_position(Vector2i(20, 20));
         }
