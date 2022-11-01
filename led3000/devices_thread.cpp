@@ -212,8 +212,45 @@ static void _do_with_turntable_stop(led_device_t* devp, std::string message)
     red_debug_lite("stop:%s", message.c_str());
 }
 
+static void _do_with_turntable_mode_track(led_device_t* devp, std::string message)
+{
+    uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X03 /* 追踪模式 */,
+        0XFF, 0XFF, 0XFF, 0XFF, 0X00 /* 校验和 */, 0XE7};
+
+    buffer[10] = _get_xor(&buffer[2], 8);
+    write(devp->uart.fd, buffer, sizeof(buffer));
+    red_debug_lite("track:%s", message.c_str());
+}
+
+static void _do_with_turntable_mode_scan(led_device_t* devp, std::string message)
+{
+    uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X32 /* 扫海 */,
+        0XFF, 0XFF, 0XFF, 0XFF, 0X00 /* 校验和 */, 0XE7};
+
+    buffer[10] = _get_xor(&buffer[2], 8);
+    write(devp->uart.fd, buffer, sizeof(buffer));
+    red_debug_lite("scan:%s", message.c_str());
+}
+
 static void _do_with_turntable_mode_setting(led_device_t* devp, std::string message)
 {
+    uint8_t mode = (uint8_t)stoi(message);
+
+    switch (mode)
+    {
+        case TURNTABLE_TRACK_MODE:
+            _do_with_turntable_mode_track(devp, message);
+            break;
+        case TURNTABLE_SCAN_MODE:
+            _do_with_turntable_mode_scan(devp, message);
+            break;
+        case TURNTABLE_MANUAL_MODE:
+            /* 切换手动模式时，直接停机 */
+            _do_with_turntable_stop(devp, message);
+            break;
+        default:
+            break;
+    }
     red_debug_lite("mode_setting:%s", message.c_str());
 }
 
@@ -285,6 +322,84 @@ static void _do_with_white_normal(led_device_t *devp, std::string message)
     write(devp->uart.fd, buffer, sizeof(buffer));
 }
 
+static int _do_analysis_hear_msg(int index, char * buffer, int len)
+{
+    uint8_t dev_status;
+    uint8_t white_mode, white_mode_param;
+    uint8_t green_mode, green_mode_param;
+    uint8_t turntable_mode;
+    int16_t turntable_horizon, turntable_vertical;
+    uint16_t turntable_horizon_speed, turntable_vertical_speed;
+    uint16_t camera_falcon; /* 摄像头焦距 */
+
+    dev_status = buffer[2];
+    white_mode = buffer[3];
+    white_mode_param = buffer[4];
+    green_mode = buffer[5];
+    green_mode_param = buffer[6];
+    turntable_mode = buffer[7];
+    turntable_horizon = buffer[8] << 8 | buffer[9];
+    turntable_vertical = buffer[10] << 8 | buffer[11];
+    turntable_horizon_speed = buffer[12] << 8 | buffer[13];
+    turntable_vertical_speed = buffer[14] << 8 | buffer[15];
+    camera_falcon = buffer[16];
+
+    gs_led_devices[index].screen->get_dev_state_label(index)->set_caption(dev_status ? "故障" : "正常");
+    gs_led_devices[index].screen->get_dev_angle_label(index)->set_caption(to_string(turntable_horizon) + '/' + to_string(turntable_vertical));
+    gs_led_devices[index].screen->get_dev_angular_speed_label(index)->set_caption(to_string(turntable_horizon_speed) + '/' + to_string(turntable_vertical_speed));
+}
+
+static int get_device_heart_msg(int index)
+{
+#define HEAR_MSG_LEN    22
+    char buffer[64] = {0};
+    int ret;
+
+    /* TODO check index valid */
+    if (index > 1)
+    {
+        red_debug_lite("invalid index:%d", index);
+        return -E2BIG;
+    }
+
+    ret = read(gs_led_devices[index].uart.fd, buffer, sizeof buffer);
+
+    if (ret < HEAR_MSG_LEN)
+    {
+        red_debug_lite("invalid heart msg get");
+        return -1;
+    }
+    /* 打印获取的心跳信息 */
+    //NetworkUdp::hexdump();
+
+    if (buffer[0] != 0X7E || buffer[ret - 1] != 0XE7)
+    {
+        return -2;
+    }
+    else if (buffer[1] != 0X12 || buffer[2] != 0XC0 || buffer[3] != index + 1)
+    {
+        /*
+         * 协议编号、或者长度不匹配
+         * */
+        return -3;
+    }
+    /* TODO 处理心跳数据 */
+    _do_analysis_hear_msg(index, buffer, 0X12);
+
+    return ret;
+}
+
+static void *heart_msg_entry(void *arg)
+{
+    led_device_t * led_devp = (led_device_t *)arg;
+
+    while(1)
+    {
+        /* 尝试读取心跳信息 */
+        get_device_heart_msg(led_devp->uart.index);
+    }
+}
+
 void *devices_entry(void *arg)
 {
     led_device_t * led_devp = (led_device_t *)arg;
@@ -292,6 +407,7 @@ void *devices_entry(void *arg)
     std::string msg_payload;
     int msg_id;
     char thread_name[16] = {0};
+
     /* 修改线程名 */
     snprintf(thread_name, sizeof(thread_name), "devices%d", led_devp->uart.index);
 
@@ -302,6 +418,9 @@ void *devices_entry(void *arg)
         red_debug_lite("Failed init %s.", led_devp->uart.name);
         return NULL;
     }
+
+    std::thread gsDeviceHeartThread(heart_msg_entry, led_devp);
+    gsDeviceHeartThread.detach();
 
     while(1)
     {
