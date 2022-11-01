@@ -397,6 +397,7 @@ static void *heart_msg_entry(void *arg)
     {
         /* 尝试读取心跳信息 */
         get_device_heart_msg(led_devp->uart.index);
+        sleep(1);
     }
 }
 
