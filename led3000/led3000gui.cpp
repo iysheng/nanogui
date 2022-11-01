@@ -257,6 +257,13 @@ void do_with_white_light_blink(Widget *widget, int choose)
     white_dev_btns->at(1)->set_pushed(true);
     white_dev_btns->at(2)->set_pushed(false);
   }
+  else
+  {
+    /* 发送消息关灯 */
+    led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_WHITE_NORMAL_SETTING, to_string(0X00)));
+    /* 同步消息内容到 json 文件 */
+    white_dev_btns->at(1)->set_pushed(false);
+  }
 }
 
 void do_paint_white_light_mocode(Widget *widget)
@@ -403,6 +410,13 @@ void do_with_green_light_blink(Widget *widget, int choose)
     green_dev_btns->at(0)->set_pushed(false);
     green_dev_btns->at(1)->set_pushed(true);
     green_dev_btns->at(2)->set_pushed(false);
+  }
+  else
+  {
+    /* 发送消息关灯 */
+    led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_GREEN_NORMAL_SETTING, to_string(0X00)));
+    /* 同步消息内容到 json 文件 */
+    green_dev_btns->at(1)->set_pushed(false);
   }
 }
 

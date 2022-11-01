@@ -80,7 +80,7 @@ int init_uart_port(uartport_t *uart)
         goto end;
     }
 
-    fd = open(uart->name, O_RDWR | O_NOCTTY | O_NDELAY);
+    fd = open(uart->name, O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK);
     if (fd <= 0)
     {
         red_debug_lite("Failed open %s err=%d.", uart->name, fd);
@@ -94,7 +94,7 @@ int init_uart_port(uartport_t *uart)
     cfsetospeed(&uart_setting, uart->baud);
 
     /* 偶校验 */
-    if (uart->even)
+    if (uart->even == 1)
     {
         uart_setting.c_cflag |= PARENB;
         uart_setting.c_cflag &= ~PARODD;
@@ -133,7 +133,7 @@ int init_uart_port(uartport_t *uart)
     uart->fd = fd;
     ret = 0;
 
-    write(fd, "RED", sizeof("RED"));
+    //write(fd, "RED", sizeof("RED"));
 end:
     return ret;
 }
@@ -259,10 +259,10 @@ static void _do_with_turntable_track_setting(led_device_t* devp, std::string mes
     int16_t x_pos, y_pos;
     uint16_t level = (uint16_t)stoi(message);
     sscanf(message.c_str(), "%hd,%hd", &x_pos, &y_pos);
-    uint8_t buffer[14] = {0X7E, 0X0A /* 帧长 */, 0X82, 0X11, 1 + devp->uart.index, 0X01 /* 停止手动 */,
+    uint8_t buffer[14] = {0X7E, 0X0A /* 帧长 */, 0X82, 0X11, 1 + devp->uart.index, 0X01 /* 停止手动,目标有效 */,
         x_pos >> 8, x_pos, y_pos >> 8, y_pos, 0X00 /* 不调焦 */, 0X00/* 不调视场 */, 0X00 /* 校验和 */, 0XE7};
 
-    buffer[12] = _get_xor(&buffer[2], 0X0B);
+    buffer[12] = _get_xor(&buffer[2], 0X0A);
     write(devp->uart.fd, buffer, sizeof(buffer));
 
     red_debug_lite("track_setting:%s", message.c_str());
@@ -270,6 +270,20 @@ static void _do_with_turntable_track_setting(led_device_t* devp, std::string mes
 
 static void _do_with_focal(led_device_t* devp, std::string message)
 {
+    uint8_t buffer[14] = {0X7E, 0X0A /* 帧长 */, 0X82, 0X11, 1 + devp->uart.index, 0X00 /* 坐标无效 */,
+        0XFF, 0XFF, 0XFF, 0XFF, 0X00 /* 不调焦 */, 0X00/* 不调视场 */, 0X00 /* 校验和 */, 0XE7};
+
+    if ('-' == message.c_str()[0])
+    {
+        buffer[10] = 2;
+    }
+    else if ('+' == message.c_str()[0])
+    {
+        buffer[10] = 1;
+    }
+    buffer[12] = _get_xor(&buffer[2], 0X0A);
+    write(devp->uart.fd, buffer, sizeof(buffer));
+
     red_debug_lite("focal:%s", message.c_str());
 }
 
