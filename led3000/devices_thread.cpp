@@ -399,7 +399,7 @@ static int get_device_heart_msg(int index)
         return -3;
     }
     /* TODO 处理心跳数据 */
-    _do_analysis_hear_msg(index, buffer, 0X12);
+    _do_analysis_hear_msg(index, &buffer[2], 0X12);
 
     return ret;
 }
