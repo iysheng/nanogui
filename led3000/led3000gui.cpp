@@ -683,8 +683,10 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           m_dev_state[0]->set_position(Vector2i(323, 62));
           m_dev_angle[0] = new Label(swindow, "120/10", "sans");
           m_dev_angle[0]->set_position(Vector2i(516, 62));
+          m_dev_angle[0]->set_fixed_size(Vector2i(200, 50));
           m_dev_angular_speed[0] = new Label(swindow, "20/10", "sans");
           m_dev_angular_speed[0]->set_position(Vector2i(701, 62));
+          m_dev_angular_speed[0]->set_fixed_size(Vector2i(200, 50));
           m_dev_morse_code[0] = new Label(swindow, "", "sans");
           m_dev_morse_code[0]->set_caption_merge(mJsonValue.devices[0].green_led.mocode, mJsonValue.devices[0].white_led.mocode, '/');
           m_dev_morse_code[0]->set_position(Vector2i(930, 46));
@@ -699,8 +701,10 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           m_dev_state[1]->set_position(Vector2i(323, 125));
           m_dev_angle[1] = new Label(swindow, "-/-", "sans");
           m_dev_angle[1]->set_position(Vector2i(516, 125));
+          m_dev_angle[1]->set_fixed_size(Vector2i(200, 50));
           m_dev_angular_speed[1] = new Label(swindow, "-/-", "sans");
           m_dev_angular_speed[1]->set_position(Vector2i(701, 125));
+          m_dev_angular_speed[1]->set_fixed_size(Vector2i(200, 50));
           m_dev_morse_code[1] = new Label(swindow, "", "sans");
           m_dev_morse_code[1]->set_caption_merge(mJsonValue.devices[1].green_led.mocode, mJsonValue.devices[1].white_led.mocode, '/');
           m_dev_morse_code[1]->set_position(Vector2i(930, 109));

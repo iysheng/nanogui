@@ -88,7 +88,7 @@ re_open:
         red_debug_lite("Failed open av input:%d  %s src=%s\n", value, errbuf, p_video_obj->mSrcUrl);
         sleep(1);
         goto re_open;
-        return -3;
+        //return -3;
     }
     else
     {

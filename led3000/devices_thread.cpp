@@ -361,6 +361,8 @@ static int _do_analysis_hear_msg(int index, char * buffer, int len)
     gs_led_devices[index].screen->get_dev_state_label(index)->set_caption(dev_status ? "故障" : "正常");
     gs_led_devices[index].screen->get_dev_angle_label(index)->set_caption(to_string(turntable_horizon) + '/' + to_string(turntable_vertical));
     gs_led_devices[index].screen->get_dev_angular_speed_label(index)->set_caption(to_string(turntable_horizon_speed) + '/' + to_string(turntable_vertical_speed));
+
+    red_debug_lite("valid heart msg:dev_status:%u %u|%u %u|%u", dev_status, turntable_horizon, turntable_vertical, turntable_horizon_speed, turntable_vertical_speed);
 }
 
 static int get_device_heart_msg(int index)
