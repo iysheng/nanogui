@@ -299,6 +299,9 @@ bool VideoView::mouse_button_event(const Vector2i &p, int button, bool down, int
     char track_buffer[32] = {0};
     Vector2i track_p;
 
+    Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(window()->parent());
+    if (led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].turntable.mode != TURNTABLE_TRACK_MODE)
+        return false;
     track_p.v[0] = p.v[0] * VIDEO_TRACK_FIXED_WIDTH / VIDEO_SHOW_FIXED_WIDTH;
     track_p.v[1] = p.v[1] * VIDEO_TRACK_FIXED_HEIGH / VIDEO_SHOW_FIXED_HEIGH;
     track_p.v[0] -= VIDEO_TRACK_FIXED_WIDTH / 2 ;
@@ -306,7 +309,6 @@ bool VideoView::mouse_button_event(const Vector2i &p, int button, bool down, int
     snprintf(track_buffer, sizeof track_buffer, "%d,%d", track_p.v[0], track_p.v[1]);
     red_debug_lite("track buffer %s raw:%d,%d", track_buffer, p.v[0], p.v[1]);
     /* TODO 发送坐标信息进行目标追踪 */
-    Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(window()->parent());
     led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_TRACK_SETTING, track_buffer));
     /* 防止发送太快驱动板无法处理 */
     usleep(40000);
