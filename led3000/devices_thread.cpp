@@ -289,6 +289,21 @@ static void _do_with_focal(led_device_t* devp, std::string message)
 
 static void _do_with_green_mocode(led_device_t* devp, std::string message)
 {
+    /* 莫码长度 */
+    int len = message.length();
+    /* TODO 检查莫码长度最大不超过 255 - 0X08 字节 */
+    /* 莫码最大长度不超过 255 */
+    uint8_t buffer[300] = {0X7E, 0X00 /* 帧长 */, 0X81, 0X11, 1 + devp->uart.index, 0XFF, 0X01, 0XFF,
+        0X02, 0X00 /* 参数长度 */, 0XFF /* 莫码内容 */, 0X00};
+
+    /* 帧长度 */
+    buffer[1] = (uint8_t)(len + 0X08);
+    /* 莫码长度 */
+    buffer[9] = (uint8_t)len;
+    memcpy(&buffer[10], message.c_str(), len);
+    buffer[10 + len] = _get_xor(&buffer[2], len + 0X08);
+    buffer[11 + len] = 0XE7;
+    write(devp->uart.fd, buffer, 12 + len);
     red_debug_lite("mocode:%s", message.c_str());
 }
 
@@ -323,6 +338,29 @@ static void _do_with_white_blink(led_device_t* devp, std::string message)
     buffer[11] = _get_xor(&buffer[2], 9);
     write(devp->uart.fd, buffer, sizeof(buffer));
     red_debug_lite("blink:%u", freq);
+}
+
+static void _do_with_white_mocode(led_device_t* devp, std::string message)
+{
+    /* 莫码长度 */
+    int len = message.length();
+    /* TODO 检查莫码长度最大不超过 255 - 0X08 字节 */
+    /* 莫码最大长度不超过 255 */
+    uint8_t buffer[300] = {0X7E, 0X00 /* 帧长 */, 0X81, 0X11, 1 + devp->uart.index, 0X02 /* 发送莫码 */,
+        0X00 /* 参数长度 */, 0XFF /* 莫码内容 */, 0X00};
+
+    /* 帧长度 */
+    buffer[1] = (uint8_t)(len + 0X08);
+    /* 莫码长度 */
+    buffer[6] = (uint8_t)len;
+    memcpy(&buffer[7], message.c_str(), len);
+    buffer[7 + len] = 0XFF;
+    buffer[8 + len] = 0X01;
+    buffer[9 + len] = 0XFF;
+    buffer[10 + len] = _get_xor(&buffer[2], len + 0X08);
+    buffer[11 + len] = 0XE7;
+    write(devp->uart.fd, buffer, 12 + len);
+    red_debug_lite("mocode:%s", message.c_str());
 }
 
 static void _do_with_white_normal(led_device_t *devp, std::string message)
@@ -462,6 +500,9 @@ void *devices_entry(void *arg)
                 break;
             case POLYM_GREEN_NORMAL_SETTING:
                 _do_with_green_normal(led_devp, msg_payload);
+                break;
+            case POLYM_WHITE_MOCODE_SETTING:
+                _do_with_white_mocode(led_devp, msg_payload);
                 break;
             case POLYM_WHITE_BLINK_SETTING:
                 _do_with_white_blink(led_devp, msg_payload);
