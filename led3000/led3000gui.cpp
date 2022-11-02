@@ -892,7 +892,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
             img_window->set_background_image("/tmp/abc/huiyuan/video.png");
 
             /* 在这个 window 上创建一个 img_window 控件 */
-            auto * video_image = img_window->add<VideoView>(mJsonValue.devices[1].camera_url);
+            auto * video_image = img_window->add<VideoView>(mJsonValue.devices[0].camera_url);
             video_image->set_fixed_size(Vector2i(520, 286));
             video_image->set_position(Vector2i(20, 20));
 
