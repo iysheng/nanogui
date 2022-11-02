@@ -113,21 +113,25 @@ static int do_with_xy_bias(int x_bias, int y_bias)
     if (x_bias < 0)
     {
         x_bias *= -1;
-        do_x_left_bias(MK_X_LEFT_SPEED(x_bias));
+        if (MK_X_LEFT_SPEED(x_bias))
+            do_x_left_bias(MK_X_LEFT_SPEED(x_bias));
     }
     else if (x_bias > 0)
     {
-        do_x_right_bias(MK_X_RIGHT_SPEED(x_bias));
+        if (MK_X_RIGHT_SPEED(x_bias))
+            do_x_right_bias(MK_X_RIGHT_SPEED(x_bias));
     }
 
     if (y_bias < 0)
     {
         y_bias *= -1;
-        do_y_down_bias(MK_Y_DOWN_SPEED(y_bias));
+        if (MK_Y_DOWN_SPEED(y_bias))
+            do_y_down_bias(MK_Y_DOWN_SPEED(y_bias));
     }
     else if (y_bias > 0)
     {
-        do_y_up_bias(MK_Y_UP_SPEED(y_bias));
+        if (MK_Y_UP_SPEED(y_bias))
+            do_y_up_bias(MK_Y_UP_SPEED(y_bias));
     }
 
     return 0;
