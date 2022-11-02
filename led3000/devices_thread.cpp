@@ -124,6 +124,7 @@ int init_uart_port(uartport_t *uart)
 
     /* 禁止将输出的 NL 转换为 CR-NL */
     uart_setting.c_oflag &= ~ONLCR;
+    uart_setting.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
     if((tcsetattr(fd, TCSANOW, &uart_setting)) != 0)
     {
         printf("Failed in Setting attributes");
@@ -391,7 +392,9 @@ static int _do_analysis_hear_msg(int index, char * buffer, int len)
     green_mode_param = buffer[6];
     turntable_mode = buffer[7];
     turntable_horizon = buffer[8] << 8 | buffer[9];
+    turntable_horizon /= 100;
     turntable_vertical = buffer[10] << 8 | buffer[11];
+    turntable_vertical /= 100;
     turntable_horizon_speed = buffer[12] << 8 | buffer[13];
     turntable_vertical_speed = buffer[14] << 8 | buffer[15];
     camera_falcon = buffer[16];
