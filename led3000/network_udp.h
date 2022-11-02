@@ -27,7 +27,6 @@ class NetworkUdp {
 
     int send2server(char *buffer, uint16_t len, int flags = 0);
     int recv_from_server(char *buffer, uint16_t len, int flags = 0);
-    static void hexdump(char * title, char *buffer, uint16_t len);
 
     int get_socket(){return m_socket;};
     struct addrinfo * addrinfo(){return m_addrinfo;};

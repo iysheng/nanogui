@@ -7,6 +7,7 @@
 *****************************************************************************/
 
 #include "network_udp.h"
+#include <debug.h>
 
 using namespace std;
 
@@ -93,29 +94,15 @@ int NetworkUdp::recv_from_server(char *buffer, uint16_t len, int flags)
     ret = recvfrom(m_socket, buffer, len, flags, m_addrinfo->ai_addr, &(m_addrinfo->ai_addrlen));
     if (-1 == ret)
     {
-        printf("Failed recvfrom server :%d\n", errno);
+        /* 为了测试暂时屏蔽该错误打印 */
+        //printf("Failed recvfrom server :%d\n", errno);
     }
     else
     {
-        NetworkUdp::hexdump("RECV_FROM_SEREVR", buffer, ret);
+        RedDebug::hexdump("RECV_FROM_SEREVR", buffer, ret);
     }
 
     return ret;
-}
-
-void NetworkUdp::hexdump(char *title, char *buffer, uint16_t len)
-{
-    int i;
-
-    printf("[%s(%d)]", title, len);
-    if (buffer)
-    {
-        for (i = 0; i < len; i++)
-        {
-            printf("%02hhX ", buffer[i]);
-        }
-        printf("\n");
-    }
 }
 
 NetworkUdp::~NetworkUdp()

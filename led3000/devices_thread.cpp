@@ -382,11 +382,10 @@ static int get_device_heart_msg(int index)
 
     if (ret < HEAR_MSG_LEN)
     {
-        red_debug_lite("invalid heart msg get");
         return -1;
     }
     /* 打印获取的心跳信息 */
-    //NetworkUdp::hexdump();
+    RedDebug::hexdump("HEART", buffer, ret);
 
     if (buffer[0] != 0X7E || buffer[ret - 1] != 0XE7)
     {

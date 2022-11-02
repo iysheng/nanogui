@@ -476,6 +476,8 @@ list(APPEND NANOGUI_EXTRA
   led3000/network_package.cpp
   led3000/network_protocol.cpp
   led3000/network_protocol.h
+  led3000/debug.cpp
+  led3000/debug.h
 )
 # Compile main NanoGUI library
 add_library(nanogui ${NANOGUI_LIBRARY_TYPE}
