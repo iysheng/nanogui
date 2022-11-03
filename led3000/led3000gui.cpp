@@ -679,12 +679,12 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
 
           label = swindow->add<Label>("灯光装置终端一", "sans-bold");
           label->set_position(Vector2i(40, 62));
-          m_dev_state[0] = new Label(swindow, "在线", "sans");
+          m_dev_state[0] = new Label(swindow, "离线", "sans");
           m_dev_state[0]->set_position(Vector2i(323, 62));
-          m_dev_angle[0] = new Label(swindow, "120/10", "sans");
+          m_dev_angle[0] = new Label(swindow, "-/-", "sans");
           m_dev_angle[0]->set_position(Vector2i(516, 62));
           m_dev_angle[0]->set_fixed_size(Vector2i(200, 50));
-          m_dev_angular_speed[0] = new Label(swindow, "20/10", "sans");
+          m_dev_angular_speed[0] = new Label(swindow, "-/-", "sans");
           m_dev_angular_speed[0]->set_position(Vector2i(701, 62));
           m_dev_angular_speed[0]->set_fixed_size(Vector2i(200, 50));
           m_dev_morse_code[0] = new Label(swindow, "", "sans");
