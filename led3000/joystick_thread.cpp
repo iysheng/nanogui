@@ -30,12 +30,12 @@ using namespace std;
 static Led3000Window *gs_screen = nullptr;
 
 /* X 方向的点位信息 */
-#define X_LEFT_POINT     479
-#define X_RIGHT_POINT    521
+#define X_LEFT_POINT     449
+#define X_RIGHT_POINT    531
 
 /* Y 方向的点位信息 */
-#define Y_DOWN_POINT     479
-#define Y_UP_POINT    521
+#define Y_DOWN_POINT     449
+#define Y_UP_POINT    531
 
 #define MK_X_LEFT_SPEED(x)  (x * 64 / X_LEFT_POINT)
 #define MK_X_RIGHT_SPEED(x) (x * 64 / X_RIGHT_POINT)
@@ -231,7 +231,7 @@ void *joystick_thread(void *arg)
         /* TODO 检查工作模式，仅仅在手动模式时受操纵杆控制 */
         if (gs_screen->getJsonValue()->devices[gs_screen->getCurrentDevice()].turntable.mode == TURNTABLE_MANUAL_MODE)
             do_with_handle_axis(axes[0], axes[1]);
-        usleep(40000);
+        usleep(100000);
 #if 0
         /* 目前测试
          * X 轴向中心数据是 479 ~ 521

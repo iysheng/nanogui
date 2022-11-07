@@ -80,7 +80,7 @@ int init_uart_port(uartport_t *uart)
         goto end;
     }
 
-    fd = open(uart->name, O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK);
+    fd = open(uart->name, O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK | O_SYNC);
     if (fd <= 0)
     {
         red_debug_lite("Failed open %s err=%d.", uart->name, fd);

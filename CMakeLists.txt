@@ -36,6 +36,10 @@ find_package(FFmpeg REQUIRED)
 
 include_directories(${FFmpeg_INCLUDE_DIR})
 
+find_package(ROCKCHIPmpp REQUIRED)
+
+include_directories(${ROCKCHIPmpp_INCLUDE_DIR})
+
 if (NOT IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw/src")
   message(FATAL_ERROR "The NanoGUI dependency repositories (GLFW, etc.) are missing! "
     "You probably did not clone the project with --recursive. It is possible to recover "
@@ -44,7 +48,7 @@ endif()
 
 if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to 'Release' as none was specified.")
-  set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
+  set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
     "MinSizeRel" "RelWithDebInfo")
 endif()
@@ -104,6 +108,8 @@ option(NANOGUI_INSTALL                   "Install NanoGUI on `make install`?" ON
 set(NANOGUI_NATIVE_FLAGS ${NANOGUI_NATIVE_FLAGS_DEFAULT} CACHE STRING
     "Compilation flags used to target the host processor architecture.")
 
+link_directories(/home/red/.local/bin/m3568-sdk-v1.0.0-ga/host/aarch64-buildroot-linux-gnu/sysroot/usr/lib/)
+set(CMAKE_LIBRARY_PATH /home/red/.local/bin/m3568-sdk-v1.0.0-ga/host/aarch64-buildroot-linux-gnu/sysroot/usr/lib/)
 if (NOT NANOGUI_BACKEND)
   if (CMAKE_SYSTEM_PROCESSOR MATCHES "armv7" OR
       CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64" OR
@@ -127,8 +133,6 @@ include(CheckCXXCompilerFlag)
 include(CheckCXXSourceRuns)
 
 include_directories(/home/red/.local/bin/m3568-sdk-v1.0.0-ga/host/aarch64-buildroot-linux-gnu/sysroot/usr/include)
-link_directories(/home/red/.local/bin/m3568-sdk-v1.0.0-ga/host/aarch64-buildroot-linux-gnu/sysroot/usr/lib/)
-set(CMAKE_LIBRARY_PATH /home/red/.local/bin/m3568-sdk-v1.0.0-ga/host/aarch64-buildroot-linux-gnu/sysroot/usr/lib/)
 
 macro(CHECK_CXX_COMPILER_AND_LINKER_FLAGS _RESULT _CXX_FLAGS _LINKER_FLAGS)
   set(CMAKE_REQUIRED_FLAGS ${_CXX_FLAGS})
@@ -459,6 +463,10 @@ list(APPEND NANOGUI_EXTRA
 endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/led3000)
+include_directories(${CMAKE_SOURCE_DIR}/led3000/include)
+include_directories(${CMAKE_SOURCE_DIR}/led3000/osal/inc)
+include_directories(${CMAKE_SOURCE_DIR}/led3000/base/inc)
+
 list(APPEND NANOGUI_EXTRA
   led3000/led3000gui.h
   led3000/led3000gui.cpp
@@ -478,6 +486,43 @@ list(APPEND NANOGUI_EXTRA
   led3000/network_protocol.h
   led3000/debug.cpp
   led3000/debug.h
+  led3000/utils.h
+  led3000/include/drmrga.h
+  led3000/include/GrallocOps.h
+  led3000/include/platform_gralloc4.h
+  led3000/include/rga.h
+  led3000/include/RgaApi.h
+  led3000/include/RgaMutex.h
+  led3000/include/RgaSingleton.h
+  led3000/include/RgaUtils.h
+  led3000/include/RockchipRga.h
+  led3000/osal/inc/mpp_allocator.h
+  led3000/osal/inc/mpp_callback.h
+  led3000/osal/inc/mpp_common.h
+  led3000/osal/inc/mpp_compat_impl.h
+  led3000/osal/inc/mpp_debug.h
+  led3000/osal/inc/mpp_dev_defs.h
+  led3000/osal/inc/mpp_device.h
+  led3000/osal/inc/mpp_env.h
+  led3000/osal/inc/mpp_eventfd.h
+  led3000/osal/inc/mpp_hash.h
+  led3000/osal/inc/mpp_list.h
+  led3000/osal/inc/mpp_lock.h
+  led3000/osal/inc/mpp_mem.h
+  led3000/osal/inc/mpp_mem_pool.h
+  led3000/osal/inc/mpp_platform.h
+  led3000/osal/inc/mpp_queue.h
+  led3000/osal/inc/mpp_runtime.h
+  led3000/osal/inc/mpp_server.h
+  led3000/osal/inc/mpp_service.h
+  led3000/osal/inc/mpp_service_api.h
+  led3000/osal/inc/mpp_soc.h
+  led3000/osal/inc/mpp_thread.h
+  led3000/osal/inc/mpp_time.h
+  led3000/osal/inc/mpp_trace.h
+  led3000/osal/inc/osal_2str.h
+  led3000/osal/inc/vcodec_service.h
+  led3000/osal/inc/vcodec_service_api.h
 )
 # Compile main NanoGUI library
 add_library(nanogui ${NANOGUI_LIBRARY_TYPE}
@@ -660,7 +705,7 @@ if (NANOGUI_BUILD_EXAMPLES)
 #  add_executable(example_icons src/example_icons.cpp)
 
   target_link_libraries(example1     nanogui)
-  target_link_libraries(ledmain      nanogui ${NANOGUI_LIBS} ${FFmpeg_LIBRARY})
+  target_link_libraries(ledmain      nanogui ${NANOGUI_LIBS} ${FFmpeg_LIBRARY} ${ROCKCHIPmpp_LIBRARY})
 #  target_link_libraries(example2      nanogui)
 #  target_link_libraries(example3      nanogui ${NANOGUI_LIBS}) # For OpenGL
 #  target_link_libraries(example4      nanogui)

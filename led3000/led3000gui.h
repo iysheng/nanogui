@@ -101,6 +101,7 @@ typedef struct {
 #define GET_LABEL_WITH_INDEX(x, i) \
     (i < LED3000_DEVICES_COUNTS) ? x[i] : NULL
 
+static Window *g_cwindow;
 /* 测试窗口类 */
 class NANOGUI_EXPORT Led3000Window : public Screen
 {
@@ -112,6 +113,31 @@ public:
     void init_json_file(void);
 #if 1
     virtual bool keyboard_event(int key, int scancode, int action, int modifiers) {
+        red_debug_lite("key=%d action=%d", key, action);
+        switch (key)
+        {
+          case GLFW_KEY_F1:
+          {
+            if (!g_cwindow)
+              g_cwindow = new Window(this, "TEST KEYBOARD");
+            if (action == GLFW_PRESS)
+            {
+            g_cwindow->set_background_image("/tmp/abc/huiyuan/green1.png");
+            /* 确定了 g_cwindow 的位置 */
+            g_cwindow->set_fixed_size({400, 150});
+            g_cwindow->center();
+            g_cwindow->request_focus();
+            g_cwindow->set_visible(true);
+            }
+          }
+              break;
+          case GLFW_KEY_F2:
+            g_cwindow->set_visible(false);
+            break;
+          default:
+            break;
+        }
+
         if (Screen::keyboard_event(key, scancode, action, modifiers))
             return true;
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
@@ -189,6 +215,16 @@ public:
     {
       return m_green_dev_control_btns;
     }
+
+    void set_white_dev_control_btns(const std::vector<Button *> *btns)
+    {
+      m_white_dev_control_btns = btns;
+    }
+
+    const std::vector<Button *> * get_white_dev_control_btns(void)
+    {
+      return m_white_dev_control_btns;
+    }
 private:
     /* 设备状态窗口 label 控件 */
     Label *m_dev_state[LED3000_DEVICES_COUNTS];
@@ -201,6 +237,7 @@ private:
     Label *m_turntable_dev;
 
     const std::vector<Button *> *m_green_dev_control_btns;
+    const std::vector<Button *> *m_white_dev_control_btns;
 
     ref<Shader> m_shader;
     ref<RenderPass> m_render_pass;

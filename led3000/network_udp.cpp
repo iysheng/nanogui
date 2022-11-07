@@ -8,6 +8,9 @@
 
 #include "network_udp.h"
 #include <debug.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 using namespace std;
 
@@ -46,6 +49,10 @@ NetworkUdp::NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port):m_
     {
         printf("invalid address or port: %s:%u\n", dstip.c_str(), source_port);
         return;
+    }
+    else
+    {
+        red_debug_lite("udp socket create to:%s success. -------------------------------", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr));
     }
     m_socket = socket(m_addrinfo->ai_family, SOCK_DGRAM | SOCK_CLOEXEC, IPPROTO_UDP);
     if(m_socket == -1)
@@ -99,6 +106,7 @@ int NetworkUdp::recv_from_server(char *buffer, uint16_t len, int flags)
     }
     else
     {
+        red_debug_lite("%s", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr));
         RedDebug::hexdump("RECV_FROM_SEREVR", buffer, ret);
     }
 

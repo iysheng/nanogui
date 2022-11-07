@@ -62,8 +62,7 @@ protected:
     char mSrcUrl[SRCURL_MAX];
     std::thread *m_thread;
     VideoViewStatus mStatus;
-    uint8_t* m_pixels[4];
-    int m_pitch[4];
+    uint8_t* m_pixels;
     Texture *m_texture;
 };
 

@@ -27,7 +27,7 @@ void *network_thread(void *arg)
 
     /* 创建和指控广播组通信的句柄 */
     /* TODO just for test */
-    NetworkUdp udp_guide_broadcast_client("10.20.52.35", screen->getJsonValue()->server.port, screen->getJsonValue()->server.port);
+    NetworkUdp udp_guide_broadcast_client("192.168.2.123", screen->getJsonValue()->server.port, screen->getJsonValue()->server.port);
     /* 创建和指控通信的句柄 */
     NetworkUdp udp_guide_client(screen->getJsonValue()->server.ip, screen->getJsonValue()->server.port, screen->getJsonValue()->server.port);
 
