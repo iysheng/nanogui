@@ -358,7 +358,7 @@ int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_b
                     RK_U8 * base = NULL;
                     /* 获取内存首地址 */
                     base = (RK_U8 *)mpp_buffer_get_ptr(buffer);
-                    printf("base=%p fmt=%d hstride=%d vstride=%d size=%d\n", base, mpp_frame_get_fmt(frame), h_stride, v_stride, buf_size);
+                    //printf("base=%p fmt=%d hstride=%d vstride=%d size=%d\n", base, mpp_frame_get_fmt(frame), h_stride, v_stride, buf_size);
                     ///////////////////////////////
                     memset(&src_rect, 0, sizeof(src_rect));
                     memset(&dst_rect, 0, sizeof(dst_rect));
@@ -384,7 +384,7 @@ int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_b
             src.format = RK_FORMAT_YCbCr_420_SP;
             dst.format = RK_FORMAT_RGBA_8888;
             ret = (MPP_RET)imresize(src, dst);
-            printf("resizing .... %s %p\n", imStrError(ret), display_buffer);
+            //printf("resizing .... %s %p\n", imStrError(ret), display_buffer);
                    }
                 }
                 frm_eos = mpp_frame_get_eos(frame);
