@@ -10,11 +10,17 @@
 #include <network_protocol.h>
 #include <network_package.h>
 #include <debug.h>
+#include <nanogui/common.h>
+#include <led3000gui.h>
+#include <PolyM/include/polym/Msg.hpp>
+#include <PolyM/include/polym/Queue.hpp>
 #include <stdint.h>
 
+using namespace nanogui;
+using namespace std;
 
 static NetworkUdp gs_network_udp[NETWORK_PROTOCOL_TYPE_COUNTS];
-
+static Led3000Window *gs_screen = nullptr;
 
 /**
   * @brief 处理指控发送的舰艇姿态信息
@@ -80,6 +86,7 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
     short control_word, target_batch_number /* 目标批号 */;
     int target_distance /* 目标距离 */;
     short target_direction /* 方位角 */, target_elevation /* 仰角 */;
+    char target_position_buffer[32] = {0};
 
     uint8_t dev_num, led_type, led_mode, guide_enable;
     uint8_t distance_valid, direction_valid, elevation_valid, batch_valid;
@@ -102,7 +109,7 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
     elevation_valid = control_word >> 1 & 0x01;
     batch_valid = control_word & 0x01;
 
-    if (!guide_enable)
+    if (guide_enable)
     {
         red_debug_lite("no guide enable, just return.");
         return 0;
@@ -112,10 +119,14 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
     target_distance = net_package.payload()[4] << 24 | net_package.payload()[5] << 16 | net_package.payload()[6] << 8 | net_package.payload()[7];
     target_direction = net_package.payload()[8] << 8 | net_package.payload()[9];
     target_elevation = net_package.payload()[10] << 8 | net_package.payload()[11];
+    /* 方向,俯仰 */
+    snprintf(target_position_buffer, sizeof(target_position_buffer), "%hd,%hd", target_direction, target_elevation);
 
     red_debug_lite("control_word:%hx batch_number:%hx distance:%x direction:%hx elevation:%hx", control_word, target_batch_number,
             target_distance, target_direction, target_elevation);
     /* TODO 发送消息到对应的设备控制线程 */
+    /* 发送消息控制转台转动到指定角度 */
+    gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_POSITION_SETTING, string(target_position_buffer)));
 }
 
 /**
@@ -126,6 +137,8 @@ int handle_with_network_buffer(char *buffer, int size)
 {
     int ret;
     NetworkPackage net_package;
+
+    /* TODO check gs_screen valid */
 
     ret = net_package.convert_from_buffer(buffer, size);
     if (ret < 0)
@@ -271,6 +284,23 @@ int network_protocol_registe(char fd_type, NetworkUdp &net_fd)
     }
 
     gs_network_udp[fd_type] = net_fd;
+
+    return ret;
+}
+
+/**
+  * @brief 注册 Led3000Window 对象指针
+  * @param Led3000Window *window: 
+  * retval Linux/errno.
+  */
+int screen_window_register(void *window)
+{
+    int ret = 0;
+
+    if (window && !gs_screen)
+    {
+        gs_screen = (Led3000Window *)window;
+    }
 
     return ret;
 }

@@ -269,6 +269,19 @@ static void _do_with_turntable_track_setting(led_device_t* devp, std::string mes
     red_debug_lite("track_setting:%s", message.c_str());
 }
 
+static void _do_with_turntable_position_setting(led_device_t* devp, std::string message)
+{
+    int16_t direction, elevation;
+    uint16_t level = (uint16_t)stoi(message);
+    sscanf(message.c_str(), "%hd,%hd", &direction, &elevation);
+    uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X51 /* 手动,角度 */,
+        direction >> 8, direction, elevation >> 8, elevation, 0X00 /* 校验和 */, 0XE7};
+
+    buffer[12] = _get_xor(&buffer[2], 0X08);
+    write(devp->uart.fd, buffer, sizeof(buffer));
+
+    red_debug_lite("position_setting:%s", message.c_str());
+}
 static void _do_with_focal(led_device_t* devp, std::string message)
 {
     uint8_t buffer[14] = {0X7E, 0X0A /* 帧长 */, 0X82, 0X11, 1 + devp->uart.index, 0X00 /* 坐标无效 */,
@@ -533,6 +546,9 @@ void *devices_entry(void *arg)
                 break;
             case POLYM_TURNTABLE_TRACK_SETTING:
                 _do_with_turntable_track_setting(led_devp, msg_payload);
+                break;
+            case POLYM_TURNTABLE_POSITION_SETTING:
+                _do_with_turntable_position_setting(led_devp, msg_payload);
                 break;
             default:
                 red_debug_lite("No support this id:%d", msg_id);

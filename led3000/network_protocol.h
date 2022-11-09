@@ -43,3 +43,12 @@ typedef enum {
   * retval Linux/errno.
   */
 extern int network_protocol_registe(char fd_type, NetworkUdp &net_fd);
+
+/**
+  * @brief 注册 Led3000Window 对象指针
+  * @param void *window: 
+  * retval Linux/errno.
+  */
+extern int screen_window_register(void *window);
+
+extern int handle_with_network_buffer(char *buffer, int size);

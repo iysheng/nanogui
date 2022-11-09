@@ -19,6 +19,43 @@
 using namespace nanogui;
 using namespace std;
 
+typedef struct {
+    char name[32];
+    NetworkUdp udp;
+    int fd_type;
+    Led3000Window *screen;
+} network_fd_t;
+
+static network_fd_t gs_network_fd[2] = {
+    {
+        {.name = "guide_client"},
+        .fd_type = NETWORK_PROTOCOL_TYPE_SEND_GUIDE,
+    },
+    {
+        {.name = "guide_broadcast"},
+        .fd_type = NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST,
+    }
+};
+
+void *network_entry(void *arg)
+{
+    network_fd_t * network_devp = (network_fd_t *)arg;
+    char buffer_recv[256] = {0};
+    int len;
+
+    if (strlen(network_devp->name))
+        prctl(PR_SET_NAME, network_devp->name);
+
+    network_devp->udp.send2server("Hello World", strlen("Hello World"));
+    printf("send hello world to test\n");
+    while(1)
+    {
+        len = network_devp->udp.recv_from_server(buffer_recv, sizeof(buffer_recv));
+        if (len > 0)
+            handle_with_network_buffer(buffer_recv, len);
+    }
+}
+
 void *network_thread(void *arg)
 {
     Led3000Window *screen = (Led3000Window *)arg;
@@ -27,13 +64,18 @@ void *network_thread(void *arg)
 
     /* 创建和指控广播组通信的句柄 */
     /* TODO just for test */
-    NetworkUdp udp_guide_broadcast_client("192.168.2.123", screen->getJsonValue()->server.port, screen->getJsonValue()->server.port);
+    gs_network_fd[0].screen = screen;
+    gs_network_fd[1].screen = screen;
+    NetworkUdp udp_client = NetworkUdp("192.168.1.111", screen->getJsonValue()->server.port, screen->getJsonValue()->server.port);
+    gs_network_fd[0].udp = udp_client;
     /* 创建和指控通信的句柄 */
-    NetworkUdp udp_guide_client(screen->getJsonValue()->server.ip, screen->getJsonValue()->server.port, screen->getJsonValue()->server.port);
+    NetworkUdp udp_broadcast_client = NetworkUdp("192.168.2.111", screen->getJsonValue()->server.port, screen->getJsonValue()->server.port);
+    gs_network_fd[1].udp = udp_broadcast_client;
+    screen_window_register(screen);
 
-    if (udp_guide_client.get_socket() > 0)
+    if (gs_network_fd[0].udp.get_socket() > 0)
     {
-        if (network_protocol_registe(NETWORK_PROTOCOL_TYPE_SEND_GUIDE, udp_guide_client) < 0)
+        if (network_protocol_registe(NETWORK_PROTOCOL_TYPE_SEND_GUIDE, gs_network_fd[0].udp) < 0)
         {
             red_debug_lite("Failed register network protocol.");
         }
@@ -44,26 +86,27 @@ void *network_thread(void *arg)
     }
 
     /* TODO just for test */
-    if (udp_guide_broadcast_client.get_socket() > 0)
+    if (gs_network_fd[1].udp.get_socket() > 0)
     {
-        if (network_protocol_registe(NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST, udp_guide_broadcast_client) < 0)
+        if (network_protocol_registe(NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST, gs_network_fd[1].udp) < 0)
         {
             red_debug_lite("Failed register network fd broadcast.");
         }
         else
         {
-            red_debug_lite("Register guide socket success.");
+            red_debug_lite("Register guide broadcast socket success.");
         }
     }
-    char buffer_recv[256] = {0};
 
-    prctl(PR_SET_NAME, "network");
+    std::thread gsNetwork0Thread(network_entry, &gs_network_fd[0]);
+    std::thread gsNetwork1Thread(network_entry, &gs_network_fd[1]);
+
+    gsNetwork0Thread.detach();
+    gsNetwork1Thread.detach();
+    
     while(1)
     {
-#if 0
-        test_udp_client.send2server("Hello World", strlen("Hello World"));
-        printf("send hello world to test\n");
-#endif
-        udp_guide_client.recv_from_server(buffer_recv, sizeof(buffer_recv));
+        /* 保活临时构造的 NetworkUdp 对象 */
+        sleep(100000);
     }
 }

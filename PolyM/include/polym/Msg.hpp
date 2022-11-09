@@ -26,6 +26,8 @@ using MsgUID = unsigned long long;
 
 #define    POLYM_TURNTABLE_MODE_SETTING   14 /* 模式设置 */
 
+#define    POLYM_TURNTABLE_POSITION_SETTING     15 /* 角度控制 */
+
 /* JSON 文件配置 ID */
 #define    POLYM_BUTTON_CONFIRM  2
 #define    POLYM_BUTTON_CANCEL   1
