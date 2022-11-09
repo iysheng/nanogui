@@ -29,6 +29,18 @@
 /* 上报系统关机信息 */
 #define NETWORK_SEND_OFF      0XE4
 
+typedef enum {
+    NETWORK_PROTOCOL_WHITE_LED_TYPE,
+    NETWORK_PROTOCOL_GREEN_LED_TYPE,
+    NETWORK_PROTOCOL_LED_TYPE_COUNTS,
+} network_protocol_led_type_E;
+
+typedef enum {
+    NETWORK_PROTOCOL_NORMAL_LED_MODE,
+    NETWORK_PROTOCOL_BINK_LED_MODE,
+    NETWORK_PROTOCOL_LED_MODE_COUNTS,
+} network_protocol_led_mode_E;
+
 
 typedef enum {
     NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST, /* 指控网络广播组 224.100.100.101 */
