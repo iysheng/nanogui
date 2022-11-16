@@ -80,7 +80,8 @@ int init_uart_port(uartport_t *uart)
         goto end;
     }
 
-    fd = open(uart->name, O_RDWR | O_NOCTTY | O_NDELAY | O_SYNC);
+    ////// 参考周立功提供的串口回环测试修改
+    fd = open(uart->name, O_RDWR | O_NOCTTY);
     if (fd <= 0)
     {
         red_debug_lite("Failed open %s err=%d.", uart->name, fd);
@@ -119,12 +120,21 @@ int init_uart_port(uartport_t *uart)
     {
         uart_setting.c_cflag &= ~CSTOPB;
     }
+
+    uart_setting.c_cflag &= ~CRTSCTS;
     uart_setting.c_cflag &= ~CSIZE;
     uart_setting.c_cflag |= uart->data_bit;
 
     /* 禁止将输出的 NL 转换为 CR-NL */
     uart_setting.c_oflag &= ~ONLCR;
     uart_setting.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
+    ////// 参考周立功提供的串口回环测试修改
+    uart_setting.c_lflag   &=   ~(ECHO   |   ICANON   |   IEXTEN   |   ISIG);
+    uart_setting.c_iflag   &=   ~(BRKINT   |   ICRNL   |   INPCK   |   ISTRIP   |   IXON);
+    uart_setting.c_oflag   &=   ~(OPOST);
+    uart_setting.c_cflag   &=   ~(CSIZE   |   PARENB);
+    uart_setting.c_cflag   |=   CS8;
+    ///////
     if((tcsetattr(fd, TCSANOW, &uart_setting)) != 0)
     {
         printf("Failed in Setting attributes");
