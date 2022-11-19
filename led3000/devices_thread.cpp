@@ -308,14 +308,14 @@ static void _do_with_turntable_mode_setting(led_device_t* devp, std::string mess
 
 static void _do_with_turntable_track_setting(led_device_t* devp, std::string message)
 {
-    int16_t x_pos, y_pos;
+    int x_pos, y_pos;
     uint16_t level = (uint16_t)stoi(message);
-    sscanf(message.c_str(), "%hd,%hd", &x_pos, &y_pos);
+    sscanf(message.c_str(), "%d,%d", &x_pos, &y_pos);
     uint8_t buffer[14] = {0X7E, 0X0A /* 帧长 */, 0X82, 0X11, 1 + devp->uart.index, 0X01 /* 停止手动,目标有效 */,
         x_pos >> 8, x_pos, y_pos >> 8, y_pos, 0X00 /* 不调焦 */, 0X00/* 不调视场 */, 0X00 /* 校验和 */, 0XE7};
 
     char tcp_buffer[16] = {0XAA, 0XAA, 0X00, 0X00, 0X00, 0X10, 0XFE /* zuobiaogenzong */,
-        0X00, 0X00, x_pos >> 8, x_pos, 0X00, 0X00, y_pos >> 8, y_pos, 0X00 /* 校验和 */};
+        x_pos >> 24, x_pos >> 16, x_pos >> 8, x_pos, y_pos >> 24, y_pos >> 16, y_pos >> 8, y_pos, 0X00 /* 校验和 */};
 
     buffer[12] = _get_xor(&buffer[2], 0X0A);
     tcp_buffer[15] = _get_sum(&buffer[0], 0X0E);
