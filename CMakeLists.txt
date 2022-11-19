@@ -480,6 +480,8 @@ list(APPEND NANOGUI_EXTRA
   led3000/joystick_thread.cpp
   led3000/network_udp.h
   led3000/network_udp.cpp
+  led3000/network_tcp.h
+  led3000/network_tcp.cpp
   led3000/network_package.h
   led3000/network_package.cpp
   led3000/network_protocol.cpp

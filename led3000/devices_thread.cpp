@@ -13,6 +13,7 @@
 #include <debug.h>
 #include <PolyM/include/polym/Msg.hpp>
 #include <PolyM/include/polym/Queue.hpp>
+#include <network_tcp.h>
 
 #include <termios.h>
 #include <unistd.h>
@@ -44,6 +45,7 @@ typedef struct {
 typedef struct {
     uartport_t uart;
     Led3000Window *screen;
+    NetworkTcp tcp_fd;
 } led_device_t;
 
 static led_device_t gs_led_devices[2] = {
@@ -168,47 +170,86 @@ static uint8_t _get_xor(uint8_t *src, int len)
     return xor_ans;
 }
 
+/**
+  * @brief 计算和
+  * @param uint8_t *src: 
+  * @param int len: 
+  * retval 异或和.
+  */
+static uint8_t _get_sum(uint8_t *src, int len)
+{
+    int i = 0;
+    uint8_t sum_ans = 0;
+
+    for (; i < len; i++)
+    {
+        sum_ans += src[i];
+    }
+
+    return sum_ans;
+}
+
 static void _do_with_turntable_left(led_device_t* devp, std::string message)
 {
+    int ret;
     uint16_t level = (uint16_t)stoi(message);
     uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X11 /* 左边手动 */,
         0X00, level, 0X00, 0X00, 0X00 /* 校验和 */, 0XE7};
 
     buffer[10] = _get_xor(&buffer[2], 8);
-    write(devp->uart.fd, buffer, sizeof(buffer));
+    ret = write(devp->uart.fd, buffer, sizeof(buffer));
+    if (ret != sizeof(buffer))
+    {
+        red_debug_lite("Failed --------------------------------------------------- %d %d", ret, errno);
+    }
     red_debug_lite("left:%u", level);
 }
 
 static void _do_with_turntable_right(led_device_t* devp, std::string message)
 {
+    int ret;
     uint16_t level = (uint16_t)stoi(message);
     uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X21 /* 右边手动 */,
         0X00, level, 0X00, 0X00, 0X00 /* 校验和 */, 0XE7};
 
     buffer[10] = _get_xor(&buffer[2], 8);
-    write(devp->uart.fd, buffer, sizeof(buffer));
+    ret = write(devp->uart.fd, buffer, sizeof(buffer));
+    if (ret != sizeof(buffer))
+    {
+        red_debug_lite("Failed --------------------------------------------------- %d %d", ret, errno);
+    }
     red_debug_lite("right:%s", message.c_str());
 }
 
 static void _do_with_turntable_down(led_device_t* devp, std::string message)
 {
+    int ret;
     uint16_t level = (uint16_t)stoi(message);
     uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X41 /* 下边手动 */,
         0X00, 0X00, 0X00, level, 0X00 /* 校验和 */, 0XE7};
 
     buffer[10] = _get_xor(&buffer[2], 8);
-    write(devp->uart.fd, buffer, sizeof(buffer));
+    ret = write(devp->uart.fd, buffer, sizeof(buffer));
+    if (ret != sizeof(buffer))
+    {
+        red_debug_lite("Failed --------------------------------------------------- %d %d", ret, errno);
+    }
     red_debug_lite("down:%s", message.c_str());
 }
 
 static void _do_with_turntable_up(led_device_t* devp, std::string message)
 {
+    int ret;
     uint16_t level = (uint16_t)stoi(message);
     uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X31 /* 上边手动 */,
         0X00, 0X00, 0X00, level, 0X00 /* 校验和 */, 0XE7};
 
     buffer[10] = _get_xor(&buffer[2], 8);
-    write(devp->uart.fd, buffer, sizeof(buffer));
+    ret = write(devp->uart.fd, buffer, sizeof(buffer));
+    if (ret != sizeof(buffer))
+    {
+        red_debug_lite("Failed --------------------------------------------------- %d %d", ret, errno);
+    }
     red_debug_lite("up:%s", message.c_str());
 }
 
@@ -273,8 +314,15 @@ static void _do_with_turntable_track_setting(led_device_t* devp, std::string mes
     uint8_t buffer[14] = {0X7E, 0X0A /* 帧长 */, 0X82, 0X11, 1 + devp->uart.index, 0X01 /* 停止手动,目标有效 */,
         x_pos >> 8, x_pos, y_pos >> 8, y_pos, 0X00 /* 不调焦 */, 0X00/* 不调视场 */, 0X00 /* 校验和 */, 0XE7};
 
+    char tcp_buffer[16] = {0XAA, 0XAA, 0X00, 0X00, 0X00, 0X10, 0XFE /* zuobiaogenzong */,
+        0X00, 0X00, x_pos >> 8, x_pos, 0X00, 0X00, y_pos >> 8, y_pos, 0X00 /* 校验和 */};
+
     buffer[12] = _get_xor(&buffer[2], 0X0A);
+    tcp_buffer[15] = _get_sum(&buffer[0], 0X0E);
     write(devp->uart.fd, buffer, sizeof(buffer));
+
+    devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
+    RedDebug::hexdump("TRACK TARGET", (char*)tcp_buffer, sizeof(tcp_buffer));
 
     red_debug_lite("track_setting:%s", message.c_str());
 }
@@ -576,8 +624,18 @@ void *devices_thread(void *arg)
     std::thread gsDevice0Thread(devices_entry, &gs_led_devices[0]);
     std::thread gsDevice1Thread(devices_entry, &gs_led_devices[1]);
 
+    NetworkTcp tcp_client = NetworkTcp("10.20.52.25", 5000);
+    gs_led_devices[0].tcp_fd = tcp_client;
+
     gsDevice0Thread.detach();
     gsDevice1Thread.detach();
+
+    tcp_client.send2server("Hello Red", strlen("Hello Red"));
+    printf("send data to network tcp----------------------------------\n");
+    while(1)
+    {
+        sleep(10000);
+    }
 
     return NULL;
 }
