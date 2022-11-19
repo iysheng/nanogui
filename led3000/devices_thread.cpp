@@ -46,6 +46,7 @@ typedef struct {
     uartport_t uart;
     Led3000Window *screen;
     NetworkTcp tcp_fd;
+    NetworkTcp tcp_fd_debug;
 } led_device_t;
 
 static led_device_t gs_led_devices[2] = {
@@ -176,10 +177,10 @@ static uint8_t _get_xor(uint8_t *src, int len)
   * @param int len: 
   * retval 异或和.
   */
-static uint8_t _get_sum(uint8_t *src, int len)
+static char _get_sum(char *src, int len)
 {
     int i = 0;
-    uint8_t sum_ans = 0;
+    char sum_ans = 0;
 
     for (; i < len; i++)
     {
@@ -318,11 +319,12 @@ static void _do_with_turntable_track_setting(led_device_t* devp, std::string mes
         x_pos >> 24, x_pos >> 16, x_pos >> 8, x_pos, y_pos >> 24, y_pos >> 16, y_pos >> 8, y_pos, 0X00 /* 校验和 */};
 
     buffer[12] = _get_xor(&buffer[2], 0X0A);
-    tcp_buffer[15] = _get_sum(&buffer[0], 0X0E);
-    write(devp->uart.fd, buffer, sizeof(buffer));
+    tcp_buffer[15] = _get_sum(&tcp_buffer[0], 0X0F);
 
     devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
+    devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
     RedDebug::hexdump("TRACK TARGET", (char*)tcp_buffer, sizeof(tcp_buffer));
+    write(devp->uart.fd, buffer, sizeof(buffer));
 
     red_debug_lite("track_setting:%s", message.c_str());
 }
@@ -624,8 +626,10 @@ void *devices_thread(void *arg)
     std::thread gsDevice0Thread(devices_entry, &gs_led_devices[0]);
     std::thread gsDevice1Thread(devices_entry, &gs_led_devices[1]);
 
-    NetworkTcp tcp_client = NetworkTcp("10.20.52.25", 5000);
+    NetworkTcp tcp_client = NetworkTcp("192.168.1.11", 1025);
     gs_led_devices[0].tcp_fd = tcp_client;
+    NetworkTcp tcp_client_debug = NetworkTcp("10.20.52.25", 5000);
+    gs_led_devices[0].tcp_fd_debug = tcp_client_debug;
 
     gsDevice0Thread.detach();
     gsDevice1Thread.detach();
