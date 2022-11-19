@@ -445,6 +445,28 @@ int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_b
     return ret;
 }
 
+void _do_reopen_prepare(AVFrame* p_frame, AVFormatContext *p_avformat_context, AVCodecContext *p_avcodec_context)
+{
+    int value;
+    char errbuf[128];
+    red_debug_lite("reopen prepare 555555555555555555\n");
+    if (p_frame)
+    {
+        av_frame_free(&p_frame);
+    }
+
+    value = avcodec_close(p_avcodec_context);
+    if (value)
+    {
+        av_strerror(value, errbuf, sizeof(errbuf));
+        red_debug_lite("Failed close av input:%d  %s\n", value, errbuf);
+    }
+    avformat_close_input(&p_avformat_context);
+    avcodec_free_context(&p_avcodec_context);
+    avformat_free_context(p_avformat_context);
+    red_debug_lite("reopen prepare 666666666666666666\n");
+}
+
 int VideoView::video_draw_handler(void *object)
 {
     VideoView *p_video_obj = (VideoView *)object;
@@ -473,13 +495,6 @@ int VideoView::video_draw_handler(void *object)
         return -1;
     }
 
-    p_avformat_context = avformat_alloc_context();
-    if (!p_avformat_context)
-    {
-        red_debug_lite("Failed avformat_alloc_context\n");
-        return -1;
-    }
-
     value = av_dict_set(&options, "rtsp_transport", "udp", 0);
     /* 修改超时时间，单位是 ms */
     value = av_dict_set(&options, "timeout", "5000", 0);
@@ -493,6 +508,14 @@ int VideoView::video_draw_handler(void *object)
     char errbuf[128];
     red_debug_lite("src_file=%s\n", p_video_obj->mSrcUrl);
 re_open:
+    if (!p_avformat_context)
+        p_avformat_context = avformat_alloc_context();
+    if (!p_avformat_context)
+    {
+        red_debug_lite("Failed avformat_alloc_context\n");
+        return -1;
+    }
+
     value = avformat_open_input(&p_avformat_context, p_video_obj->mSrcUrl, NULL, &options);
 
     if (value)
@@ -567,7 +590,8 @@ re_open:
 
     Vector2i top_left = Vector2i(p_video_obj->pixel_to_pos(Vector2f(0.f, 0.f))),
              size     = Vector2i(p_video_obj->pixel_to_pos(Vector2f(p_video_obj->size())) - Vector2f(top_left));
-    p_video_obj->m_pixels = (uint8_t *)malloc(10 * VIDEO_SHOW_FIXED_WIDTH * VIDEO_SHOW_FIXED_HEIGH * mpp_get_bpp_from_format(DST_FORMAT));
+    if (!p_video_obj->m_pixels)
+        p_video_obj->m_pixels = (uint8_t *)malloc(10 * VIDEO_SHOW_FIXED_WIDTH * VIDEO_SHOW_FIXED_HEIGH * mpp_get_bpp_from_format(DST_FORMAT));
     if (!p_video_obj->m_pixels)
     {
         red_debug_lite("Failed malloc memory for mpp\n");
@@ -588,9 +612,20 @@ just_draw:
         ret = av_read_frame(p_avformat_context, &packet);
         if (ret < 0)
         {
-            red_debug_lite("Failed get frame 00000000000\n");
+            red_debug_lite("Failed get frame 00000000000 %d\n", p_video_obj->m_no_frame_counts++);
             avcodec_send_packet(p_avcodec_context, NULL);
-            continue;
+            if (p_video_obj->m_no_frame_counts < 100)
+                continue;
+            else
+            {
+                p_video_obj->m_no_frame_counts = 0;
+                p_video_obj->mStatus = R_VIDEO_UNINITLED;
+                _do_reopen_prepare(p_frame, p_avformat_context, p_avcodec_context);
+                p_frame = NULL;
+                p_avformat_context = NULL;
+                p_avcodec_context = NULL;
+                goto re_open;
+            }
         }
         else if (packet.stream_index != video_stream_index)
         {
@@ -598,6 +633,7 @@ just_draw:
         }
         else
         {
+            p_video_obj->m_no_frame_counts = 0;
             mpp_decode_simple(&mpp_data, &packet, (char *)p_video_obj->m_pixels);
             if (p_video_obj->mStatus != R_VIDEO_RUNNING)
                 p_video_obj->mStatus = R_VIDEO_INITLED;
@@ -629,7 +665,7 @@ exit:
 }
 
 VideoView::VideoView(Widget* parent):ImageView(parent), m_texture(nullptr),
-    m_thread(nullptr), mSrcUrl("rtsp://admin:jariled123@192.168.100.64")
+    m_thread(nullptr), mSrcUrl("rtsp://admin:jariled123@192.168.100.64"), m_no_frame_counts(0)
 {
     Window * wnd = parent->window();
     int hh = wnd->theme()->m_window_header_height;
@@ -685,8 +721,8 @@ bool VideoView::mouse_button_event(const Vector2i &p, int button, bool down, int
         return false;
     track_p.v[0] = p.v[0] * VIDEO_TRACK_FIXED_WIDTH / VIDEO_SHOW_FIXED_WIDTH;
     track_p.v[1] = p.v[1] * VIDEO_TRACK_FIXED_HEIGH / VIDEO_SHOW_FIXED_HEIGH;
-    track_p.v[0] -= VIDEO_TRACK_FIXED_WIDTH / 2 ;
-    track_p.v[1] = VIDEO_TRACK_FIXED_HEIGH / 2 - track_p.v[1];
+    //track_p.v[0] -= VIDEO_TRACK_FIXED_WIDTH / 2 ;
+    //track_p.v[1] = VIDEO_TRACK_FIXED_HEIGH / 2 - track_p.v[1];
     snprintf(track_buffer, sizeof track_buffer, "%d,%d", track_p.v[0], track_p.v[1]);
     red_debug_lite("track buffer %s raw:%d,%d", track_buffer, p.v[0], p.v[1]);
     /* TODO 发送坐标信息进行目标追踪 */

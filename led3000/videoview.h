@@ -64,6 +64,7 @@ protected:
     VideoViewStatus mStatus;
     uint8_t* m_pixels;
     Texture *m_texture;
+    int m_no_frame_counts;
 };
 
 NAMESPACE_END(nanogui)
