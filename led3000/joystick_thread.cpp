@@ -30,12 +30,12 @@ using namespace std;
 static Led3000Window *gs_screen = nullptr;
 
 /* X 方向的点位信息 */
-#define X_LEFT_POINT     449
-#define X_RIGHT_POINT    531
+#define X_LEFT_POINT     400
+#define X_RIGHT_POINT    600
 
 /* Y 方向的点位信息 */
-#define Y_DOWN_POINT     449
-#define Y_UP_POINT    531
+#define Y_DOWN_POINT     400
+#define Y_UP_POINT    600
 
 #define MK_X_LEFT_SPEED(x)  (x * 64 / X_LEFT_POINT)
 #define MK_X_RIGHT_SPEED(x) (x * 64 / X_RIGHT_POINT)

@@ -150,7 +150,7 @@ int NetworkTcp::recv_from_server(char *buffer, uint16_t len, int flags)
         /* 为了测试暂时屏蔽该错误打印 */
         //printf("Failed recvfrom server :%d\n", errno);
     }
-    else
+    else if(ret > 0)
     {
         red_debug_lite("%s", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr));
         RedDebug::hexdump("TCP RECV_FROM_SEREVR", buffer, ret);
