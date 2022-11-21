@@ -273,6 +273,13 @@ static void _do_with_turntable_mode_track(led_device_t* devp, std::string messag
     buffer[10] = _get_xor(&buffer[2], 8);
     write(devp->uart.fd, buffer, sizeof(buffer));
     red_debug_lite("track:%s", message.c_str());
+
+    char tcp_buffer[9] = {0XAA, 0XAA, 0X00, 0X00, 0X00, 0X09, 0XFD /* setting track enable */,
+        0X01, 0X5B /* 校验和 */};
+    //tcp_buffer[8] = _get_sum(&tcp_buffer[0], 8);
+    devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
+    devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
+    RedDebug::hexdump("TRACK TARGET", (char*)tcp_buffer, sizeof(tcp_buffer));
 }
 
 static void _do_with_turntable_mode_scan(led_device_t* devp, std::string message)
@@ -283,6 +290,13 @@ static void _do_with_turntable_mode_scan(led_device_t* devp, std::string message
     buffer[10] = _get_xor(&buffer[2], 8);
     write(devp->uart.fd, buffer, sizeof(buffer));
     red_debug_lite("scan:%s", message.c_str());
+
+    char tcp_buffer[9] = {0XAA, 0XAA, 0X00, 0X00, 0X00, 0X09, 0XFD /* setting track disable */,
+        0X00, 0X5A /* 校验和 */};
+    //tcp_buffer[8] = _get_sum(&tcp_buffer[0], 8);
+    devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
+    devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
+    RedDebug::hexdump("TRACK TARGET", (char*)tcp_buffer, sizeof(tcp_buffer));
 }
 
 static void _do_with_turntable_mode_setting(led_device_t* devp, std::string message)
