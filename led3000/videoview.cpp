@@ -475,6 +475,7 @@ int VideoView::video_draw_handler(void *object)
     AVCodecContext *p_avcodec_context = NULL;
     const AVCodec *p_avcodec = NULL;
     AVDictionary* options = NULL;
+    int options_need_set = 1;
 
     enum AVPixelFormat src_fix_fmt;
     enum AVPixelFormat dst_fix_fmt;
@@ -495,19 +496,23 @@ int VideoView::video_draw_handler(void *object)
         return -1;
     }
 
-    value = av_dict_set(&options, "rtsp_transport", "udp", 0);
-    /* 修改超时时间，单位是 ms */
-    value = av_dict_set(&options, "timeout", "5000", 0);
-    value = av_dict_set(&options, "buffer_size", "10240000", 0);
-    if (value < 0)
-    {
-        red_debug_lite("Failed av_dict_set %d\n", value);
-        return -2;
-    }
-
     char errbuf[128];
     red_debug_lite("src_file=%s\n", p_video_obj->mSrcUrl);
 re_open:
+    if (options_need_set)
+    {
+        value = av_dict_set(&options, "rtsp_transport", "udp", 0);
+        /* 修改超时时间，单位是 ms */
+        value = av_dict_set(&options, "timeout", "5000", 0);
+        value = av_dict_set(&options, "buffer_size", "10240000", 0);
+        if (value < 0)
+        {
+            red_debug_lite("Failed av_dict_set %d\n", value);
+            return -2;
+        }
+        options_need_set = 0;
+    }
+
     if (!p_avformat_context)
         p_avformat_context = avformat_alloc_context();
     if (!p_avformat_context)
@@ -624,6 +629,10 @@ just_draw:
                 p_frame = NULL;
                 p_avformat_context = NULL;
                 p_avcodec_context = NULL;
+                /* 需要重新使能设置 options
+                 * 因为 avformat_open_input 成功后会释放 otions 的相关资源
+                 * */
+                options_need_set = 1;
                 goto re_open;
             }
         }
@@ -664,7 +673,7 @@ exit:
     return 0;
 }
 
-VideoView::VideoView(Widget* parent):ImageView(parent), m_texture(nullptr),
+VideoView::VideoView(Widget* parent):ImageView(parent), m_texture(nullptr), m_pixels(nullptr),
     m_thread(nullptr), mSrcUrl("rtsp://admin:jariled123@192.168.100.64"), m_no_frame_counts(0)
 {
     Window * wnd = parent->window();

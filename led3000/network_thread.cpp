@@ -66,10 +66,10 @@ void *network_thread(void *arg)
     /* TODO just for test */
     gs_network_fd[0].screen = screen;
     gs_network_fd[1].screen = screen;
-    NetworkUdp udp_client = NetworkUdp("192.168.1.111", screen->getJsonValue()->server.port, screen->getJsonValue()->server.port);
+    NetworkUdp udp_client("192.168.1.111", screen->getJsonValue()->server.port, screen->getJsonValue()->server.port);
     gs_network_fd[0].udp = udp_client;
     /* 创建和指控通信的句柄 */
-    NetworkUdp udp_broadcast_client = NetworkUdp("192.168.2.111", screen->getJsonValue()->server.port, screen->getJsonValue()->server.port);
+    NetworkUdp udp_broadcast_client("192.168.2.111", screen->getJsonValue()->server.port, screen->getJsonValue()->server.port);
     gs_network_fd[1].udp = udp_broadcast_client;
     screen_window_register(screen);
 

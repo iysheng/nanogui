@@ -34,6 +34,44 @@ int NetworkTcp::stamp()
     return stamp;
 }
 
+int NetworkTcp::try_to_connect(void)
+{
+    if (!m_addrinfo)
+    {
+        printf("invalid m_addrinfo for retry connect");
+        return -1;
+    }
+
+    m_socket = socket(m_addrinfo->ai_family, SOCK_STREAM | SOCK_CLOEXEC, IPPROTO_TCP);
+    if(m_socket == -1)
+    {
+        printf("could not retry create socket address or port: %s:%u\n");
+        return -1;
+    }
+#ifdef SOCKET_NO_BLOCK
+    struct timeval tv;
+    tv.tv_sec = 3;
+    tv.tv_usec = 0;
+    /* 设置接收超时 */
+    setsockopt(m_socket, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+#endif
+
+    int r;
+    r = connect(m_socket, m_addrinfo->ai_addr, m_addrinfo->ai_addrlen);
+    if(r != 0)
+    {
+        close(m_socket);
+        printf("could not try to bind TCP socket with port\n");
+        m_socket = 0;
+    }
+    else
+    {
+        printf("Try to create socket success.\n");
+    }
+
+    return m_socket;
+}
+
 NetworkTcp::NetworkTcp(string dstip, uint16_t dst_port):m_index(0)
 {
     char decimal_port[16];
@@ -57,7 +95,6 @@ NetworkTcp::NetworkTcp(string dstip, uint16_t dst_port):m_index(0)
     m_socket = socket(m_addrinfo->ai_family, SOCK_STREAM | SOCK_CLOEXEC, IPPROTO_TCP);
     if(m_socket == -1)
     {
-        freeaddrinfo(m_addrinfo);
         printf("could not create socket address or port: %s:%u\n", dstip.c_str(), dst_port);
         return;
     }
@@ -72,11 +109,14 @@ NetworkTcp::NetworkTcp(string dstip, uint16_t dst_port):m_index(0)
     r = connect(m_socket, m_addrinfo->ai_addr, m_addrinfo->ai_addrlen);
     if(r != 0)
     {
-        freeaddrinfo(m_addrinfo);
         close(m_socket);
         printf("could not bind TCP socket with port:%u\n", dst_port);
+        m_socket = 0;
     }
-    printf("Create socket success.\n");
+    else
+    {
+        printf("Create socket success.\n");
+    }
 }
 
 NetworkTcp::NetworkTcp(string dstip, uint16_t source_port, uint16_t dst_port):m_index(0)
@@ -130,11 +170,22 @@ NetworkTcp::NetworkTcp(string dstip, uint16_t source_port, uint16_t dst_port):m_
 int NetworkTcp::send2server(char *buffer, uint16_t len, int flags)
 {
     int ret;
+    if ((m_socket <= 0) && (try_to_connect() <= 0))
+    {
+        printf("invalid socket and try to connect server failed");
+        return -1;
+    }
     ret = send(m_socket, buffer, len, flags);
 
     if (-1 == ret)
     {
         printf("Failed send msg to server :%d\n", errno);
+        /* 对方关闭了这个 socket */
+        if (ECONNRESET == errno)
+        {
+            close(m_socket);
+            m_socket = 0;
+        }
     }
     m_index++;
 
@@ -144,6 +195,11 @@ int NetworkTcp::send2server(char *buffer, uint16_t len, int flags)
 int NetworkTcp::recv_from_server(char *buffer, uint16_t len, int flags)
 {
     int ret;
+    if ((m_socket <= 0) && (try_to_connect() <= 0))
+    {
+        printf("invalid socket, try to connect server now");
+        return -1;
+    }
     ret = recvfrom(m_socket, buffer, len, flags, m_addrinfo->ai_addr, &(m_addrinfo->ai_addrlen));
     if (-1 == ret)
     {

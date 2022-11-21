@@ -626,9 +626,9 @@ void *devices_thread(void *arg)
     std::thread gsDevice0Thread(devices_entry, &gs_led_devices[0]);
     std::thread gsDevice1Thread(devices_entry, &gs_led_devices[1]);
 
-    NetworkTcp tcp_client = NetworkTcp("192.168.1.11", 1025);
+    NetworkTcp tcp_client("192.168.1.11", 1025);
     gs_led_devices[0].tcp_fd = tcp_client;
-    NetworkTcp tcp_client_debug = NetworkTcp("10.20.52.25", 5000);
+    NetworkTcp tcp_client_debug("10.20.52.25", 5000);
     gs_led_devices[0].tcp_fd_debug = tcp_client_debug;
 
     gsDevice0Thread.detach();
