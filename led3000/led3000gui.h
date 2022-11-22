@@ -132,7 +132,7 @@ public:
             }
 #else
             /* 取消设备二激光授权,支持自锁按键 */
-            if (action == GLFW_REPEAT && mJsonValue.devices[1].green_led.auth == 1)
+            if (action == GLFW_PRESS)
             {
                 mJsonValue.devices[1].green_led.auth = 0;
                 m_dev_auth[1]->set_caption("未授权");
@@ -150,7 +150,7 @@ public:
           case GLFW_KEY_F2:
           {
             /* 取消设备一激光授权,支持自锁按键 */
-            if ((action == GLFW_REPEAT) && (mJsonValue.devices[0].green_led.auth == 1))
+            if (action == GLFW_PRESS)
             {
                 mJsonValue.devices[0].green_led.auth = 0;
                 m_dev_auth[0]->set_caption("未授权");
