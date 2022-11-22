@@ -18,4 +18,5 @@ class RedDebug {
     public:
       static void hexdump(char *title, char *buffer, uint16_t len);
       static void print_soft_info(void);
+      static void log(char *fmt, ...);
 };

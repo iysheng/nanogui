@@ -113,11 +113,12 @@ public:
     void init_json_file(void);
 #if 1
     virtual bool keyboard_event(int key, int scancode, int action, int modifiers) {
-        red_debug_lite("key=%d action=%d", key, action);
+        RedDebug::log("key=%d action=%d", key, action);
         switch (key)
         {
           case GLFW_KEY_F1:
           {
+#if 0
             if (!g_cwindow)
               g_cwindow = new Window(this, "TEST KEYBOARD");
             if (action == GLFW_PRESS)
@@ -129,11 +130,40 @@ public:
             g_cwindow->request_focus();
             g_cwindow->set_visible(true);
             }
+#else
+            /* 取消设备二激光授权,支持自锁按键 */
+            if (action == GLFW_REPEAT && mJsonValue.devices[1].green_led.auth == 1)
+            {
+                mJsonValue.devices[1].green_led.auth = 0;
+                m_dev_auth[1]->set_caption("未授权");
+                RedDebug::log("F1 catched");
+            }
+            else if (GLFW_RELEASE == action && mJsonValue.devices[1].green_led.auth == 0)
+            {
+                mJsonValue.devices[1].green_led.auth = 1;
+                m_dev_auth[1]->set_caption("已授权");
+                RedDebug::log("F1 release");
+            }
+#endif
           }
-              break;
+          break;
           case GLFW_KEY_F2:
-            g_cwindow->set_visible(false);
-            break;
+          {
+            /* 取消设备一激光授权,支持自锁按键 */
+            if ((action == GLFW_REPEAT) && (mJsonValue.devices[0].green_led.auth == 1))
+            {
+                mJsonValue.devices[0].green_led.auth = 0;
+                m_dev_auth[0]->set_caption("未授权");
+                RedDebug::log("F2 catched");
+            }
+            else if ((GLFW_RELEASE == action) && (mJsonValue.devices[0].green_led.auth == 0))
+            {
+                mJsonValue.devices[0].green_led.auth = 1;
+                m_dev_auth[0]->set_caption("已授权");
+                RedDebug::log("F2 release");
+            }
+          }
+          break;
           default:
             break;
         }
