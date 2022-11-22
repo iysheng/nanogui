@@ -38,9 +38,9 @@ static Led3000Window *gs_screen = nullptr;
 #define Y_UP_POINT    600
 
 #define MK_X_LEFT_SPEED(x)  (x * 64 / X_LEFT_POINT)
-#define MK_X_RIGHT_SPEED(x) (x * 64 / X_RIGHT_POINT)
+#define MK_X_RIGHT_SPEED(x) (x * 64 / (1023 - X_RIGHT_POINT))
 #define MK_Y_DOWN_SPEED(y)  (y * 64 / Y_DOWN_POINT)
-#define MK_Y_UP_SPEED(y)    (y * 64 / Y_UP_POINT)
+#define MK_Y_UP_SPEED(y)    (y * 64 / (1023 -Y_UP_POINT))
 
 /**
   * @brief 左转运动
