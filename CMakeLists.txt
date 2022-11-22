@@ -462,6 +462,26 @@ list(APPEND NANOGUI_EXTRA
 )
 endif()
 
+set(LED3000_MAJOR_VERSION 0)
+set(LED3000_MINOR_VERSION 9)
+set(LED3000_PATCH_VERSION 0)
+
+execute_process(
+    COMMAND git rev-parse --short HEAD
+    OUTPUT_VARIABLE LED3000_COMMIT_ID
+    ECHO_OUTPUT_VARIABLE
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_VARIABLE FAILED_GET_LED3000_COMMIT_ID
+)
+
+if(FAILED_GET_LED3000_COMMIT_ID)
+  message(FATAL_ERROR ${FAILED_GET_LED3000_COMMIT_ID})
+endif(FAILED_GET_LED3000_COMMIT_ID)
+
+configure_file(${CMAKE_SOURCE_DIR}/led3000/version.h.in 
+    ${CMAKE_SOURCE_DIR}/led3000/version.h
+)
+
 include_directories(${CMAKE_SOURCE_DIR}/led3000)
 include_directories(${CMAKE_SOURCE_DIR}/led3000/include)
 include_directories(${CMAKE_SOURCE_DIR}/led3000/osal/inc)

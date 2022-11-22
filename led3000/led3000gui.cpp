@@ -10,12 +10,12 @@
 #include <led3000gui.h>
 #include <stdlib.h>
 #include <string>
+#include <version.h>
 
 using namespace nanogui;
 using std::cout;
 using std::endl;
 
-#define LED3000_VERSION    9u
 #define LED3000_ID         11000001u
 
 void do_paint_sysconfig(Widget *widget)

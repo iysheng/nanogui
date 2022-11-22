@@ -25,3 +25,7 @@ void RedDebug::hexdump(char *title, char *buffer, uint16_t len)
     }
 }
 
+void RedDebug::print_soft_info()
+{
+    fprintf(stdout, RED_DEBUG_PREFIX"CompileTime:%s %s", __DATE__, __TIME__);
+}

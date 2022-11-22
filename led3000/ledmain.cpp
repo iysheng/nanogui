@@ -14,6 +14,7 @@
 
 #include <thread>
 #include <unistd.h>
+#include <debug.h>
 
 using std::cout;
 using std::cerr;
@@ -32,6 +33,7 @@ using namespace rapidjson;
 int g_test_btn_len;
 int main(int /* argc */, char ** /* argv */)
 {
+    RedDebug::print_soft_info();
     /* 创建了测试窗口类 */
     try
     {
