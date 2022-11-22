@@ -7,6 +7,7 @@
 *****************************************************************************/
 
 #include "debug.h"
+#include "version.h"
 
 using namespace std;
 
@@ -27,5 +28,6 @@ void RedDebug::hexdump(char *title, char *buffer, uint16_t len)
 
 void RedDebug::print_soft_info()
 {
-    fprintf(stdout, RED_DEBUG_PREFIX"CompileTime:%s %s", __DATE__, __TIME__);
+    fprintf(stdout, RED_DEBUG_PREFIX"Version:%#x CommitID:%s\n", LED3000_VERSION, LED3000_COMMIT_ID);
+    fprintf(stdout, RED_DEBUG_PREFIX"CompileTime:%s %s\n", __DATE__, __TIME__);
 }
