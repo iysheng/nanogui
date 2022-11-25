@@ -25,6 +25,7 @@ class NetworkUdp {
     /* 表示该函数不会抛出异常 */
     NetworkUdp& operator=(NetworkUdp& r) noexcept;
 
+    int try_to_connect(void);
     int send2server(char *buffer, uint16_t len, int flags = 0);
     int recv_from_server(char *buffer, uint16_t len, int flags = 0);
 

@@ -34,7 +34,44 @@ int NetworkUdp::stamp()
     return stamp;
 }
 
-NetworkUdp::NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port):m_index(0)
+int NetworkUdp::try_to_connect(void)
+{
+    if (!m_addrinfo)
+    {
+        printf("invalid m_addrinfo for retry connect");
+        return -1;
+    }
+
+    m_socket = socket(m_addrinfo->ai_family, SOCK_DGRAM | SOCK_CLOEXEC, IPPROTO_UDP);
+    if(m_socket == -1)
+    {
+        printf("could not retry create udp socket\n");
+        return -1;
+    }
+#ifdef SOCKET_NO_BLOCK
+    struct timeval tv;
+    tv.tv_sec = 3;
+    tv.tv_usec = 0;
+    /* 设置接收超时 */
+    setsockopt(m_socket, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+#endif
+
+    int r;
+    r = bind(m_socket, (struct sockaddr *) &m_source_sin, sizeof m_source_sin);
+    if(r != 0)
+    {
+        close(m_socket);
+        m_socket = -1;
+        printf("could not try to bind UDP socket with port\n");
+    }
+    else
+    {
+        printf("Try to create socket success.\n");
+    }
+
+    return m_socket;
+}
+NetworkUdp::NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port):m_index(0), m_socket(-1)
 {
     char decimal_port[16];
     snprintf(decimal_port, sizeof(decimal_port), "%u", source_port);
@@ -77,14 +114,23 @@ NetworkUdp::NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port):m_
     {
         freeaddrinfo(m_addrinfo);
         close(m_socket);
+        m_socket = -1;
         printf("could not bind UDP socket with port:%u\n", source_port);
     }
-    printf("Create socket success.\n");
+    else
+    {
+        printf("Create socket success.\n");
+    }
 }
 
 int NetworkUdp::send2server(char *buffer, uint16_t len, int flags)
 {
     int ret;
+    if ((m_socket <= 0) && (try_to_connect() <= 0))
+    {
+        printf("invalid udp socket and try to connect server failed");
+        return -1;
+    }
     ret = sendto(m_socket, buffer, len, flags, m_addrinfo->ai_addr, m_addrinfo->ai_addrlen);
     if (-1 == ret)
     {
@@ -98,6 +144,11 @@ int NetworkUdp::send2server(char *buffer, uint16_t len, int flags)
 int NetworkUdp::recv_from_server(char *buffer, uint16_t len, int flags)
 {
     int ret;
+    if ((m_socket <= 0) && (try_to_connect() <= 0))
+    {
+        printf("invalid udp socket and try to connect server failed");
+        return -1;
+    }
     ret = recvfrom(m_socket, buffer, len, flags, m_addrinfo->ai_addr, &(m_addrinfo->ai_addrlen));
     if (-1 == ret)
     {

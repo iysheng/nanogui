@@ -45,7 +45,7 @@ int NetworkTcp::try_to_connect(void)
     m_socket = socket(m_addrinfo->ai_family, SOCK_STREAM | SOCK_CLOEXEC, IPPROTO_TCP);
     if(m_socket == -1)
     {
-        printf("could not retry create socket address or port: %s:%u\n");
+        printf("could not retry create tcp socket\n");
         return -1;
     }
 #ifdef SOCKET_NO_BLOCK
