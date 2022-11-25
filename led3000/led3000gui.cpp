@@ -372,9 +372,6 @@ void do_paint_green_light_normal(Widget *widget)
     else
     {
         MessageDialog * msg_dlg = dynamic_cast<MessageDialog *>(widget);
-        auto * blink_title = widget->add<Label>("是否开启绿灯常亮功能", "sans-bold");
-        blink_title->set_font_size(20);
-        blink_title->set_position(Vector2i(158, 186));
         widget->window()->set_fixed_size(Vector2i(480, 324));
         widget->window()->set_background_image(RED_LED3000_ASSETS_DIR"/set_msgdlg2.png");
 
