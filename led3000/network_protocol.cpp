@@ -21,6 +21,7 @@ using namespace std;
 
 static NetworkUdp gs_network_udp[NETWORK_PROTOCOL_TYPE_COUNTS];
 static Led3000Window *gs_screen = nullptr;
+static TurntableAttitude gs_turntable_attitude[2];
 
 /**
   * @brief 处理指控发送的舰艇姿态信息
@@ -49,7 +50,11 @@ static int do_with_network_attitude_info(NetworkPackage &net_package)
     horizon_info = net_package.payload()[10] << 8 | net_package.payload()[11] << 16 |
         net_package.payload()[12] << 8 | net_package.payload()[13];
 
-    red_debug_lite("flag:%hx direction:%x vertical:%x horizon:%x", info_valid_flags,
+    /* Update ship attitude info */
+    gs_turntable_attitude[0].update_attitude_info(direction_info, vertical_info, horizon_info);
+    gs_turntable_attitude[1].update_attitude_info(direction_info, vertical_info, horizon_info);
+
+    red_debug_lite("flag:%hx direction:%d vertical:%d horizon:%d", info_valid_flags,
         direction_info, vertical_info, horizon_info);
     return 0;
 }
@@ -119,6 +124,9 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
     target_distance = net_package.payload()[4] << 24 | net_package.payload()[5] << 16 | net_package.payload()[6] << 8 | net_package.payload()[7];
     target_direction = net_package.payload()[8] << 8 | net_package.payload()[9];
     target_elevation = net_package.payload()[10] << 8 | net_package.payload()[11];
+    /* TODO correct target info with attitude */
+    gs_turntable_attitude[dev_num].correct_target_info(target_direction, target_elevation);
+
     /* 方向,俯仰 */
     snprintf(target_position_buffer, sizeof(target_position_buffer), "%hd,%hd", target_direction, target_elevation);
 
@@ -193,6 +201,11 @@ int handle_with_network_buffer(char *buffer, int size)
             break;
         case NETWORK_RECV_OFF:
             red_debug_lite("TODO with OFF");
+            break;
+        case NETWORK_PINPONG_TEST:
+            red_debug_lite("TODO with pingpong test");
+            /* 返回 99 表示测试 pingong */
+            ret = 99;
             break;
         default:
             break;

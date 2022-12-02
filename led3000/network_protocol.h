@@ -50,6 +50,62 @@ typedef enum {
     NETWORK_PROTOCOL_TYPE_COUNTS,
 } network_protocol_type_E;
 
+class TurntableAttitude {
+#define VERCTICAL_INFO_ANGLE_MAX    30
+public:
+    TurntableAttitude():m_direction_info(0), m_vertical_info(0), m_horizon_info(0), m_delta_info(0){};
+    TurntableAttitude(int delta_info):m_direction_info(0), m_vertical_info(0), m_horizon_info(0), m_delta_info(delta_info){};
+    void set_delta_info(int delta_info){m_delta_info = delta_info;};
+    void update_attitude_info(int direction_info, int vertical_info, int horizon_info)
+    {
+#if 1
+        m_direction_info = direction_info;
+#else
+        if (direction_info <= 180)
+        {
+            m_direction_info = direction_info;
+        }
+        else if (direction_info <= 360)
+        {
+            m_direction_info = direction_info - 360;
+        }
+#endif
+        m_vertical_info = vertical_info;
+        m_horizon_info = horizon_info;
+    }
+    void correct_target_info(short int &direction_info, short int &vertical_info)
+    {
+        /* TODO use shipinfo correct target info */
+        direction_info -= m_direction_info;
+        if (direction_info > 180)
+        {
+            /* correct direction info with -180 ~ 0 */
+            direction_info -= 360;
+        }
+
+        vertical_info -= m_vertical_info;
+        /* correct with cirtical value */
+        if (vertical_info > VERCTICAL_INFO_ANGLE_MAX)
+        {
+            vertical_info = VERCTICAL_INFO_ANGLE_MAX;
+        }
+        else if (vertical_info < -VERCTICAL_INFO_ANGLE_MAX)
+        {
+            vertical_info = -VERCTICAL_INFO_ANGLE_MAX;
+        }
+    }
+
+
+private:
+    /* 航向角 */
+    int m_direction_info;
+    /* 横摇角 */
+    int m_vertical_info;
+    /* 纵摇角 */
+    int m_horizon_info;
+    int m_delta_info;
+};
+
 /**
   * @brief 注册指定类型的 NetworkUdp 句柄
   * @param char fd_type: 
