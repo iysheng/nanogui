@@ -52,7 +52,10 @@ void *network_entry(void *arg)
     {
         len = network_devp->udp.recv_from_server(buffer_recv, sizeof(buffer_recv));
         if (len > 0)
-            handle_with_network_buffer(buffer_recv, len);
+            if (99 == handle_with_network_buffer(buffer_recv, len))
+            {
+                len = network_devp->udp.send2server("RED PINGPONG TEST", strlen("RED PINGPONG TEST"));
+            }
     }
 }
 
