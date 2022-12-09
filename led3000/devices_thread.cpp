@@ -575,6 +575,8 @@ void *devices_entry(void *arg)
             msg_id = dm.getMsgId();
             msg_payload = dm.getPayload();
             red_debug_lite("Device%d thread :%u@%s", led_devp->uart.index, msg_id, msg_payload.c_str());
+extern int update_sysinfo2network(void);
+            update_sysinfo2network();
         }
 
         switch (msg_id)

@@ -135,13 +135,13 @@ public:
             if (action == GLFW_PRESS)
             {
                 mJsonValue.devices[1].green_led.auth = 0;
-                m_dev_auth[1]->set_caption("未授权");
+                m_dev_auth[1]->set_caption("禁止射击");
                 RedDebug::log("F1 catched");
             }
             else if (GLFW_RELEASE == action && mJsonValue.devices[1].green_led.auth == 0)
             {
                 mJsonValue.devices[1].green_led.auth = 1;
-                m_dev_auth[1]->set_caption("已授权");
+                m_dev_auth[1]->set_caption("允许射击");
                 RedDebug::log("F1 release");
             }
 #endif
@@ -153,13 +153,13 @@ public:
             if (action == GLFW_PRESS)
             {
                 mJsonValue.devices[0].green_led.auth = 0;
-                m_dev_auth[0]->set_caption("未授权");
+                m_dev_auth[0]->set_caption("禁止射击");
                 RedDebug::log("F2 catched");
             }
             else if ((GLFW_RELEASE == action) && (mJsonValue.devices[0].green_led.auth == 0))
             {
                 mJsonValue.devices[0].green_led.auth = 1;
-                m_dev_auth[0]->set_caption("已授权");
+                m_dev_auth[0]->set_caption("允许射击");
                 RedDebug::log("F2 release");
             }
           }

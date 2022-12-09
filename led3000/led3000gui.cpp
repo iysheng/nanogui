@@ -175,7 +175,8 @@ void do_with_power_off(Widget *widget, int choose)
   if (choose == 1)
   {
       /* TODO 发送关机消息到一体化网络 */
-
+extern int update_offinfo2network(void);
+      update_offinfo2network();
       /* do power off */
       system("poweroff");
   }
@@ -762,7 +763,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           m_dev_morse_code[0]->set_position(Vector2i(930, 46));
           m_dev_morse_code[0]->set_fixed_size(Vector2i(200, 50));
           m_dev_auth[0] = new Label(swindow, "", "sans");
-          m_dev_auth[0]->set_caption_merge((mJsonValue.devices[0].green_led.auth ? "已" : "未"), "授权", '\0');
+          m_dev_auth[0]->set_caption_merge((mJsonValue.devices[0].green_led.auth ? "允许" : "禁止"), "射击", '\0');
           m_dev_auth[0]->set_position(Vector2i(1135, 62));
 
           label = swindow->add<Label>("灯光装置终端二", "sans-bold");
@@ -780,7 +781,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           m_dev_morse_code[1]->set_position(Vector2i(930, 109));
           m_dev_morse_code[1]->set_fixed_size(Vector2i(200, 50));
           m_dev_auth[1] = new Label(swindow, "", "sans");
-          m_dev_auth[1]->set_caption_merge((mJsonValue.devices[1].green_led.auth ? "已" : "未"), "授权", '\0');
+          m_dev_auth[1]->set_caption_merge((mJsonValue.devices[1].green_led.auth ? "允许" : "禁止"), "射击", '\0');
           m_dev_auth[1]->set_position(Vector2i(1135, 125));
         }
 
