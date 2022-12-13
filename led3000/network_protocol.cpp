@@ -89,22 +89,12 @@ static int do_with_network_recv_force(NetworkPackage &net_package)
   */
 static int do_with_network_recv_probe(NetworkPackage &net_package)
 {
-    short command_word /* 命令字 */;
-    uint8_t dev_num, force_control;
-
-    if (net_package.payload_len() != 4)
+    if (net_package.payload_len() != 0)
     {
-        red_debug_lite("Invalid payload_len4recv_guide");
+        red_debug_lite("Invalid payload_len4recv_probe");
         return -1;
     }
-    command_word = net_package.payload()[0] << 8 | net_package.payload()[1];
-    dev_num = command_word >> 3 & 0x01;
-    /* 1: 允许射击 2：禁止射击 */
-    force_control = command_word & 0x07;
-    red_debug_lite("dev_num:%u force_control:%u", dev_num, force_control);
-    /* 更新界面显示和授权状态更新 */
-    gs_screen->getJsonValue()->devices[dev_num].green_led.auth = 2 - force_control;
-    gs_screen->get_dev_auth_label(dev_num)->set_caption((2 - force_control) ? "允许射击" : "禁止射击");
+    return 0;
 }
 /**
   * @brief 处理指控发送的引导指令
@@ -186,6 +176,7 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
             gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_GREEN_BLINK_SETTING, to_string(5)));
         }
     }
+    return 0;
 }
 
 /* 上报信息到一体化网络 */

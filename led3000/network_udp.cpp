@@ -89,7 +89,7 @@ NetworkUdp::NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port):m_
     }
     else
     {
-        red_debug_lite("udp socket create to:%s success. -------------------------------", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr));
+        red_debug_lite("udp socket create to:%p %ssuccess. -------------------------------", m_addrinfo, inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr));
     }
     m_socket = socket(m_addrinfo->ai_family, SOCK_DGRAM | SOCK_CLOEXEC, IPPROTO_UDP);
     if(m_socket == -1)
@@ -105,6 +105,19 @@ NetworkUdp::NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port):m_
     /* 设置接收超时 */
     setsockopt(m_socket, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
 #endif
+    int ret;
+    struct ip_mreq req = {0};//结构体对象
+	req.imr_multiaddr.s_addr = inet_addr(dstip.c_str());//设置组播地址
+	req.imr_interface.s_addr = INADDR_ANY;//本地地址
+	ret  = setsockopt(m_socket, IPPROTO_IP, IP_ADD_MEMBERSHIP, &(req), sizeof(req));//IPPROTO_IP通过IP组播，IP_ADD_MEMBERSHIP -> 加入组播组
+	if(ret < 0)
+    {
+        RedDebug::log("add multi error -------------------------\n");
+	}
+    else
+    {
+        RedDebug::log("add multi to %s success ------------------------\n", dstip);
+    }
 
     m_source_sin.sin_addr.s_addr = htonl(INADDR_ANY);
     m_source_sin.sin_family = AF_INET;
@@ -146,18 +159,19 @@ int NetworkUdp::recv_from_server(char *buffer, uint16_t len, int flags)
     int ret;
     if ((m_socket <= 0) && (try_to_connect() <= 0))
     {
-        //RedDebug::log("invalid udp socket and try to connect server failed");
+        RedDebug::log("invalid udp socket and try to connect server failed");
         return -1;
     }
     ret = recvfrom(m_socket, buffer, len, flags, m_addrinfo->ai_addr, &(m_addrinfo->ai_addrlen));
     if (-1 == ret)
     {
         /* 为了测试暂时屏蔽该错误打印 */
-        //printf("Failed recvfrom server :%d\n", errno);
+        printf("Failed recvfrom server :%d\n", errno);
+        RedDebug::log("%s %p", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr), m_addrinfo);
     }
     else if(ret > 0)
     {
-        red_debug_lite("%s", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr));
+        red_debug_lite("%s %p", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr), m_addrinfo);
         RedDebug::hexdump("RECV_FROM_SEREVR", buffer, ret);
     }
 
