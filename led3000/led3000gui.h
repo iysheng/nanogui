@@ -55,6 +55,12 @@ typedef enum {
     TURNTABLE_RESET_MODE,
 } turntable_mode_E;
 
+typedef enum {
+    LED_NORMAL_MODE,
+    LED_BLINK_MODE,
+    LED_MOCODE_MODE,
+} led_mode_E;
+
 using namespace rapidjson;
 NAMESPACE_BEGIN(nanogui)
 

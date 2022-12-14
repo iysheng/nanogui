@@ -198,7 +198,7 @@ int _do_report_msg2net(NetworkUdp &net_fd, NetworkPackage &network_package)
 int do_report_dev_status(char dev1_status, char dev1_green_status, char dev1_white_status,
     char dev2_status, char dev2_green_status, char dev2_white_status)
 {
-    if (gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].get_socket() <= 0)
+    if (gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].get_socket() <= 0)
     {
         red_debug_lite("Novalid socket for network udp");
         return -EINVAL;
@@ -211,9 +211,9 @@ int do_report_dev_status(char dev1_status, char dev1_green_status, char dev1_whi
     dev_status_buffer[2] = 0x00;
     dev_status_buffer[3] = 0x00;
 
-    NetworkPackage dev_status(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].index(), NETWORK_SEND_STATUS, 0X0C, gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].stamp(), dev_status_buffer);
+    NetworkPackage dev_status(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].index(), NETWORK_SEND_STATUS, 0X0C, gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].stamp(), dev_status_buffer);
 
-    return _do_report_msg2net(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE], dev_status);
+    return _do_report_msg2net(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST], dev_status);
 }
 
 /**
@@ -233,6 +233,17 @@ int do_report_dev_off()
     return _do_report_msg2net(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST], dev_off);
 }
 
+#define DIMENSION_90_SHORT    (90.0 / (2 << 13))
+
+static inline short _do_format_dev_value_short(float value, double dimension)
+{
+    RedDebug::log("%f = %hd\n", value, short((value + 0.5 * dimension)/dimension));
+    if (value < 0)
+        return htonl(short((value - 0.5 * dimension)/dimension));
+    else
+        return htons(short((value + 0.5 * dimension)/dimension));
+}
+
 /**
   * @brief 上报设备数据
   * @param short dev1_direction: 设备一指向角， 指向角，右边为正，左边为负，+-180
@@ -243,26 +254,30 @@ int do_report_dev_off()
   */
 int do_report_dev_info(short dev1_direction, short dev1_elevation, short dev2_direction, short dev2_elevation)
 {
-    if (gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].get_socket() <= 0)
+    if (gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].get_socket() <= 0)
     {
         red_debug_lite("Novalid socket for network udp");
         return -EINVAL;
     }
     char dev_info_buffer[NETWORK_PACKGE_LEN_MAX] = {0};
 
+    dev1_direction = _do_format_dev_value_short(dev1_direction, DIMENSION_90_SHORT);
     dev_info_buffer[6] = dev1_direction >> 8 & 0xff;
     dev_info_buffer[7] = dev1_direction & 0xff;
+    dev1_elevation = _do_format_dev_value_short(dev1_elevation, DIMENSION_90_SHORT);
     dev_info_buffer[8] = dev1_elevation >> 8 & 0xff;
     dev_info_buffer[9] = dev1_elevation & 0xff;
 
+    dev2_direction = _do_format_dev_value_short(dev2_direction, DIMENSION_90_SHORT);
     dev_info_buffer[14] = dev2_direction >> 8 & 0xff;
     dev_info_buffer[15] = dev2_direction & 0xff;
+    dev2_elevation = _do_format_dev_value_short(dev2_elevation, DIMENSION_90_SHORT);
     dev_info_buffer[16] = dev2_elevation >> 8 & 0xff;
     dev_info_buffer[17] = dev2_elevation & 0xff;
 
-    NetworkPackage dev_info(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].index(), NETWORK_SEND_INFO, 0X1A, gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].stamp(), dev_info_buffer);
+    NetworkPackage dev_info(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].index(), NETWORK_SEND_INFO, 0X1A, gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].stamp(), dev_info_buffer);
 
-    return _do_report_msg2net(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE], dev_info);
+    return _do_report_msg2net(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST], dev_info);
 }
 
 /**
@@ -271,28 +286,41 @@ int do_report_dev_info(short dev1_direction, short dev1_elevation, short dev2_di
   */
 int do_probe_respon(void)
 {
-    char dev_status[2] = {0}; char dev_green_status[2] = {0}; char dev_white_status[2] = {1, 1};
+    char dev_status[2] = {0}; char dev_green_status[2] = {0, 0}; char dev_white_status[2] = {0, 0};
     short int direction[2], elevation[2];
     std::string dev_info_str, direction_str, elevation_str;
     std::size_t split_index = 0;
+    const led3000_config_t *json_value_ptr = gs_screen->getJsonValue();
     int index = 0;
 
     for (; index < 2; index++)
     {
         if (gs_screen->get_dev_state_label(index)->caption() == std::string("故障"))
             dev_status[index] = 1;
-        if (gs_screen->get_dev_auth_label(index)->caption() == std::string("允许射击"))
+        if (json_value_ptr->devices[index].white_led.mode == LED_NORMAL_MODE && 
+            json_value_ptr->devices[index].white_led.normal_status == 0)
+        {
+            dev_white_status[index] = 1;
+        }
+        if ((gs_screen->get_dev_auth_label(index)->caption() == std::string("禁止射击")) || 
+            (json_value_ptr->devices[index].green_led.mode == LED_NORMAL_MODE && 
+            json_value_ptr->devices[index].green_led.normal_status == 0))
+        {
             dev_green_status[index] = 1;
+        }
         dev_info_str = gs_screen->get_dev_angle_label(index)->caption();
         split_index = dev_info_str.find("/");
         direction_str = dev_info_str.substr(0, split_index);
         elevation_str = dev_info_str.substr(1 + split_index);
+        RedDebug::log("gre:%s dire:%s elevation:%s whole:%s\n", gs_screen->get_dev_auth_label(index)->caption().c_str(),
+            direction_str.c_str(), elevation_str.c_str(), dev_info_str.c_str());
         direction[index] = std::atoi(direction_str.c_str());
         elevation[index] = std::atoi(elevation_str.c_str());
     }
     do_report_dev_status(dev_status[0], dev_green_status[0], dev_white_status[0],
         dev_status[1], dev_green_status[1], dev_white_status[1]);
-    do_report_dev_info(direction[0], direction[1], elevation[0], elevation[1]);
+    do_report_dev_info(direction[0], elevation[0], direction[1], elevation[1]);
+    RedDebug::log("respon 2 network\n");
 }
 
 /**

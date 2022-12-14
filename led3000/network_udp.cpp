@@ -138,16 +138,50 @@ NetworkUdp::NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port):m_
 
 int NetworkUdp::send2server(char *buffer, uint16_t len, int flags)
 {
+#define MAX_BUFFER_LEN    256
+    static char s_counts;
     int ret;
+    uint32_t dstip;
+    char buffer_full[MAX_BUFFER_LEN] = {0};
+//((sockaddr_in *)(m_addrinfo->ai_addr))->sin_addr
+//    inet_ntop(AF_INET, (((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr), dstip, 64);
     if ((m_socket <= 0) && (try_to_connect() <= 0))
     {
         //RedDebug::log("invalid udp socket and try to connect server failed");
         return -1;
     }
-    ret = sendto(m_socket, buffer, len, flags, m_addrinfo->ai_addr, m_addrinfo->ai_addrlen);
+    buffer_full[0] = len + 16 >> 8;
+    buffer_full[1] = len + 16 & 0xff;
+    buffer_full[2] = 0x00;
+    buffer_full[3] = 0x00;
+
+    buffer_full[4] = 168;
+    buffer_full[5] = 9;
+    buffer_full[6] = 0;
+    buffer_full[7] = 1;
+
+    dstip = (uint32_t)htonl(((sockaddr_in*)m_addrinfo->ai_addr)->sin_addr.s_addr);
+    buffer_full[8] = dstip >> 24 & 0xff;
+    buffer_full[9] = dstip >> 16 & 0xff;
+    buffer_full[10] = dstip >> 8 & 0xff;
+    buffer_full[11] = dstip & 0xff;
+
+    buffer_full[12] = s_counts;
+    buffer_full[13] = 0x00;
+    buffer_full[14] = 0x01;
+    buffer_full[15] = 1;
+    memcpy(&buffer_full[16], buffer, len);
+
+    ret = sendto(m_socket, buffer_full, len + 16, flags, m_addrinfo->ai_addr, m_addrinfo->ai_addrlen);
     if (-1 == ret)
     {
         printf("Failed send msg to server :%d\n", errno);
+        RedDebug::log("Send msg to server %s failed\n", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr));
+    }
+    else
+    {
+        RedDebug::log("Send msg to server %s success\n", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr));
+        RedDebug::hexdump("UDP SEND", (char *)buffer_full, len + 16);
     }
     m_index++;
 
