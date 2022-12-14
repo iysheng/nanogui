@@ -33,6 +33,7 @@ using namespace rapidjson;
 int g_test_btn_len;
 int main(int /* argc */, char ** /* argv */)
 {
+    RedDebug::init("/tmp/ledmain_log.txt");
     RedDebug::print_soft_info();
     /* 创建了测试窗口类 */
     try
