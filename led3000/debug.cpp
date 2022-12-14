@@ -9,6 +9,7 @@
 #include <stdarg.h>
 #include "debug.h"
 #include "version.h"
+#include "spdlog/spdlog.h"
 
 using namespace std;
 
@@ -35,6 +36,7 @@ void RedDebug::print_soft_info()
 
 void RedDebug::log(char *fmt, ...)
 {
+#if 1
 	char buf[4096] = {0};
 	va_list args;
 	va_start(args, fmt);
@@ -43,5 +45,7 @@ void RedDebug::log(char *fmt, ...)
 
 	//std::string time_now = FormatDateTime(std::chrono::system_clock::now());
 	//fprintf(stdout, "%s\n", time_now.c_str(), buf);
-	fprintf(stdout, RED_DEBUG_PREFIX"%s\n", buf);
+	//fprintf(stdout, RED_DEBUG_PREFIX"%s\n", buf);
+    spdlog::info(buf);
+#endif
 }

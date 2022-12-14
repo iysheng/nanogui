@@ -390,6 +390,10 @@ if (NANOGUI_BUILD_POLYM)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/PolyM/include)
 endif()
 
+set(NANOGUI_BUILD_SPDLOG ON)
+if (NANOGUI_BUILD_SPDLOG)
+  #include_directories(${CMAKE_CURRENT_SOURCE_DIR}/led3000/include)
+endif()
 
 # Set library type
 if (NANOGUI_BUILD_SHARED)
@@ -727,7 +731,7 @@ if (NANOGUI_BUILD_EXAMPLES)
 #  add_executable(example_icons src/example_icons.cpp)
 
   target_link_libraries(example1     nanogui)
-  target_link_libraries(ledmain      nanogui ${NANOGUI_LIBS} ${FFmpeg_LIBRARY} ${ROCKCHIPmpp_LIBRARY})
+  target_link_libraries(ledmain      nanogui ${NANOGUI_LIBS} ${FFmpeg_LIBRARY} ${ROCKCHIPmpp_LIBRARY} led3000/libspdlog.a)
 #  target_link_libraries(example2      nanogui)
 #  target_link_libraries(example3      nanogui ${NANOGUI_LIBS}) # For OpenGL
 #  target_link_libraries(example4      nanogui)
