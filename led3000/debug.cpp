@@ -42,23 +42,13 @@ int RedDebug::init(char *filename)
 
 void RedDebug::hexdump(char *title, char *buffer, uint16_t len)
 {
-    int i;
-
-    printf("[%s(%d)]", title, len);
-    if (buffer)
-    {
-        for (i = 0; i < len; i++)
-        {
-            printf("%02hhX ", buffer[i]);
-        }
-        printf("\n");
-    }
+    RedDebug::m_logger->info("{0:s} {1:n}", title, spdlog::to_hex(buffer, buffer + len));
 }
 
 void RedDebug::print_soft_info()
 {
-    fprintf(stdout, RED_DEBUG_PREFIX"Version:%#x CommitID:%s\n", LED3000_VERSION, LED3000_COMMIT_ID);
-    fprintf(stdout, RED_DEBUG_PREFIX"CompileTime:%s %s\n", __DATE__, __TIME__);
+    RedDebug::m_logger->info(RED_DEBUG_PREFIX"Version:{0:x} CommitID:{1:s}\n", LED3000_VERSION, LED3000_COMMIT_ID);
+    RedDebug::m_logger->info(RED_DEBUG_PREFIX"CompileTime:{0:s} {1:s}\n", __DATE__, __TIME__);
 }
 
 void RedDebug::log(char *fmt, ...)

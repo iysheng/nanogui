@@ -80,11 +80,11 @@ void *network_thread(void *arg)
     {
         if (network_protocol_registe(NETWORK_PROTOCOL_TYPE_SEND_GUIDE, gs_network_fd[0].udp) < 0)
         {
-            red_debug_lite("Failed register network protocol.");
+            RedDebug::log("Failed register network protocol.");
         }
         else
         {
-            red_debug_lite("Register guide socket success.");
+            RedDebug::log("Register guide socket success.");
         }
     }
 
@@ -93,11 +93,11 @@ void *network_thread(void *arg)
     {
         if (network_protocol_registe(NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST, gs_network_fd[1].udp) < 0)
         {
-            red_debug_lite("Failed register network fd broadcast.");
+            RedDebug::log("Failed register network fd broadcast.");
         }
         else
         {
-            red_debug_lite("Register guide broadcast socket success.");
+            RedDebug::log("Register guide broadcast socket success.");
         }
     }
 
