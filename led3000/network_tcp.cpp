@@ -38,14 +38,14 @@ int NetworkTcp::try_to_connect(void)
 {
     if (!m_addrinfo)
     {
-        printf("invalid m_addrinfo for retry connect");
+        RedDebug::log("invalid m_addrinfo for retry connect");
         return -1;
     }
 
     m_socket = socket(m_addrinfo->ai_family, SOCK_STREAM | SOCK_CLOEXEC, IPPROTO_TCP);
     if(m_socket == -1)
     {
-        printf("could not retry create tcp socket\n");
+        RedDebug::log("could not retry create tcp socket\n");
         return -1;
     }
 #ifdef SOCKET_NO_BLOCK
@@ -61,12 +61,12 @@ int NetworkTcp::try_to_connect(void)
     if(r != 0)
     {
         close(m_socket);
-        printf("could not try to bind TCP socket with port\n");
+        RedDebug::log("could not try to bind TCP socket with port\n");
         m_socket = 0;
     }
     else
     {
-        printf("Try to create socket success.\n");
+        RedDebug::log("Try to create socket success.\n");
     }
 
     return m_socket;
@@ -85,17 +85,17 @@ NetworkTcp::NetworkTcp(string dstip, uint16_t dst_port):m_index(0)
     int r(getaddrinfo(dstip.c_str(), decimal_port, &hints, &m_addrinfo));
     if(r != 0 || m_addrinfo == NULL)
     {
-        printf("invalid address or port: %s:%u\n", dstip.c_str(), dst_port);
+        RedDebug::log("invalid address or port: %s:%u\n", dstip.c_str(), dst_port);
         return;
     }
     else
     {
-        red_debug_lite("tcp socket create to:%s success. -------------------------------", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr));
+        RedDebug::log("tcp socket create to:%s success. -------------------------------", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr));
     }
     m_socket = socket(m_addrinfo->ai_family, SOCK_STREAM | SOCK_CLOEXEC, IPPROTO_TCP);
     if(m_socket == -1)
     {
-        printf("could not create socket address or port: %s:%u\n", dstip.c_str(), dst_port);
+        RedDebug::log("could not create socket address or port: %s:%u\n", dstip.c_str(), dst_port);
         return;
     }
 #ifdef SOCKET_NO_BLOCK
@@ -110,12 +110,12 @@ NetworkTcp::NetworkTcp(string dstip, uint16_t dst_port):m_index(0)
     if(r != 0)
     {
         close(m_socket);
-        printf("could not bind TCP socket with port:%u\n", dst_port);
+        RedDebug::log("could not bind TCP socket with port:%u\n", dst_port);
         m_socket = 0;
     }
     else
     {
-        printf("Create socket success.\n");
+        RedDebug::log("Create socket success.\n");
     }
 }
 
@@ -132,18 +132,18 @@ NetworkTcp::NetworkTcp(string dstip, uint16_t source_port, uint16_t dst_port):m_
     int r(getaddrinfo(dstip.c_str(), decimal_port, &hints, &m_addrinfo));
     if(r != 0 || m_addrinfo == NULL)
     {
-        printf("invalid address or port: %s:%u\n", dstip.c_str(), source_port);
+        RedDebug::log("invalid address or port: %s:%u\n", dstip.c_str(), source_port);
         return;
     }
     else
     {
-        red_debug_lite("tcp socket create to:%s success. -------------------------------", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr));
+        RedDebug::log("tcp socket create to:%s success. -------------------------------", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr));
     }
     m_socket = socket(m_addrinfo->ai_family, SOCK_STREAM | SOCK_CLOEXEC, IPPROTO_TCP);
     if(m_socket == -1)
     {
         freeaddrinfo(m_addrinfo);
-        printf("could not create socket address or port: %s:%u\n", dstip.c_str(), dst_port);
+        RedDebug::log("could not create socket address or port: %s:%u\n", dstip.c_str(), dst_port);
         return;
     }
 #ifdef SOCKET_NO_BLOCK
@@ -162,9 +162,9 @@ NetworkTcp::NetworkTcp(string dstip, uint16_t source_port, uint16_t dst_port):m_
     {
         freeaddrinfo(m_addrinfo);
         close(m_socket);
-        printf("could not bind UDP socket with port:%u\n", source_port);
+        RedDebug::log("could not bind UDP socket with port:%u\n", source_port);
     }
-    printf("Create socket success.\n");
+    RedDebug::log("Create socket success.\n");
 }
 
 int NetworkTcp::send2server(char *buffer, uint16_t len, int flags)
@@ -172,14 +172,14 @@ int NetworkTcp::send2server(char *buffer, uint16_t len, int flags)
     int ret;
     if ((m_socket <= 0) && (try_to_connect() <= 0))
     {
-        printf("invalid socket and try to connect server failed");
+        RedDebug::log("invalid socket and try to connect server failed");
         return -1;
     }
     ret = send(m_socket, buffer, len, flags);
 
     if (-1 == ret)
     {
-        printf("Failed send msg to server :%d\n", errno);
+        RedDebug::log("Failed send msg to server :%d\n", errno);
         /* 对方关闭了这个 socket */
         if (ECONNRESET == errno)
         {
@@ -197,18 +197,18 @@ int NetworkTcp::recv_from_server(char *buffer, uint16_t len, int flags)
     int ret;
     if ((m_socket <= 0) && (try_to_connect() <= 0))
     {
-        printf("invalid socket, try to connect server now");
+        RedDebug::log("invalid socket, try to connect server now");
         return -1;
     }
     ret = recvfrom(m_socket, buffer, len, flags, m_addrinfo->ai_addr, &(m_addrinfo->ai_addrlen));
     if (-1 == ret)
     {
         /* 为了测试暂时屏蔽该错误打印 */
-        //printf("Failed recvfrom server :%d\n", errno);
+        //RedDebug::log("Failed recvfrom server :%d\n", errno);
     }
     else if(ret > 0)
     {
-        red_debug_lite("%s", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr));
+        RedDebug::log("%s", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr));
         RedDebug::hexdump("TCP RECV_FROM_SEREVR", buffer, ret);
     }
 
