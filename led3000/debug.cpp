@@ -42,7 +42,8 @@ int RedDebug::init(char *filename)
 
 void RedDebug::hexdump(char *title, char *buffer, uint16_t len)
 {
-    RedDebug::m_logger->info("{0:s} {1:n}", title, spdlog::to_hex(buffer, buffer + len));
+    RedDebug::m_logger->info("{0:s}[{1:d}]{2:n}", title, len, spdlog::to_hex(buffer, buffer + len));
+    spdlog::info("{0:s}[{1:d}]{2:n}", title, len, spdlog::to_hex(buffer, buffer + len));
 }
 
 void RedDebug::print_soft_info()
@@ -60,4 +61,5 @@ void RedDebug::log(char *fmt, ...)
 	va_end(args);
 
     RedDebug::m_logger->info(buf);
+    spdlog::info(buf);
 }

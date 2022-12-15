@@ -55,8 +55,8 @@ typedef enum {
  * */
 
 typedef enum {
-    NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST, /* 组 1 指控网络广播组 224.100.100.101 */
-    NETWORK_PROTOCOL_TYPE_SEND_GUIDE, /* 组 2 综合指挥网络 224.100.100.102  */
+    NETWORK_PROTOCOL_TYPE_SEND_GUIDE, /* 组 1 综合指挥网络 224.100.100.101  */
+    NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST, /* 组 2 指控网络广播组 224.100.100.102 */
     NETWORK_PROTOCOL_TYPE_COUNTS,
 } network_protocol_type_E;
 

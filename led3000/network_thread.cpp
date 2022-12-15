@@ -47,32 +47,35 @@ void *network_entry(void *arg)
         prctl(PR_SET_NAME, network_devp->name);
 
     network_devp->udp.send2server("Hello World", strlen("Hello World"));
-    printf("send hello world to test\n");
+    RedDebug::log("send hello world to test\n");
     while(1)
     {
         len = network_devp->udp.recv_from_server(buffer_recv, sizeof(buffer_recv));
-        if (len > 0)
+        if (len > 0 && len == buffer_recv[0] << 8 | buffer_recv[1])
+        {
             if (99 == handle_with_network_buffer(buffer_recv, len))
             {
                 len = network_devp->udp.send2server("RED PINGPONG TEST", strlen("RED PINGPONG TEST"));
             }
+        }
     }
 }
 
 void *network_thread(void *arg)
 {
     Led3000Window *screen = (Led3000Window *)arg;
-    red_debug_lite("Hello Network Thread json file path:%s", screen->getFileName().c_str());
-    red_debug_lite("connect:%s@%u", screen->getJsonValue()->server.ip, screen->getJsonValue()->server.port);
+    RedDebug::log("Hello Network Thread json file path:%s", screen->getFileName().c_str());
+    RedDebug::log("connect:%s@%u", screen->getJsonValue()->server.ip, screen->getJsonValue()->server.port);
 
     /* 创建和指控广播组通信的句柄 */
     /* TODO just for test */
     gs_network_fd[0].screen = screen;
     gs_network_fd[1].screen = screen;
-    NetworkUdp udp_client("192.168.1.111", screen->getJsonValue()->server.port, screen->getJsonValue()->server.port);
+    NetworkUdp udp_client("224.100.100.101", screen->getJsonValue()->server.port, screen->getJsonValue()->server.port);
+    //NetworkUdp udp_client("10.20.52.39", screen->getJsonValue()->server.port, screen->getJsonValue()->server.port);
     gs_network_fd[0].udp = udp_client;
     /* 创建和指控通信的句柄 */
-    NetworkUdp udp_broadcast_client("192.168.2.111", screen->getJsonValue()->server.port, screen->getJsonValue()->server.port);
+    NetworkUdp udp_broadcast_client("224.100.100.102", screen->getJsonValue()->server.port, screen->getJsonValue()->server.port, udp_client.get_socket());
     gs_network_fd[1].udp = udp_broadcast_client;
     screen_window_register(screen);
 
