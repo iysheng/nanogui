@@ -131,6 +131,17 @@ NetworkUdp::NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port, in
         {
             printf("Create socket success.\n");
         }
+#if 1   /* 根据对方要求修改 TTL */
+        char ttl = 8;
+        if (setsockopt(m_socket, IPPROTO_IP, IP_MULTICAST_TTL, (char *)&ttl, sizeof(ttl)) != 0)
+        {
+            RedDebug::log("Failed set ttl to %d", ttl);
+        }
+        else
+        {
+            RedDebug::log("Success set ttl to %d", ttl);
+        }
+#endif
     }
 
     int ret;
