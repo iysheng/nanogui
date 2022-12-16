@@ -186,7 +186,7 @@ int _do_report_msg2net(NetworkUdp &net_fd, NetworkPackage &network_package)
     /* Fix dstip == 0.0.0.0 */
     if (network_package.dst_ip_n() == 0X00000000)
     {
-        network_package.set_dst_ip_n(((sockaddr_in *)net_fd.addrinfo()->ai_addr)->sin_addr.s_addr);
+        network_package.set_dst_ip_n(ntohl(((sockaddr_in *)net_fd.addrinfo()->ai_addr)->sin_addr.s_addr));
     }
 
     if (network_package.convert_to_buffer(buffer, NETWORK_PACKGE_LEN_MAX))
@@ -243,7 +243,7 @@ int do_report_dev_off(NetworkPackage &net_package)
     char dev_off_buffer[NETWORK_PACKGE_LEN_MAX] = {0};
     
     NetworkPackage dev_off(net_package.src_ip_n(),
-        ((sockaddr_in *)gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].addrinfo()->ai_addr)->sin_addr.s_addr,
+        ntohl(((sockaddr_in *)gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].addrinfo()->ai_addr)->sin_addr.s_addr),
         gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].sn(),
         0X00,
         0X01,
