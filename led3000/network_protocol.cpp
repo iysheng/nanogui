@@ -201,9 +201,13 @@ int _do_report_msg2net(NetworkUdp &net_fd, NetworkPackage &network_package)
   * @brief 上报设备状态到指控
   * retval Linux/errno.
   */
-int do_report_dev_status(NetworkPackage &net_package, char dev1_status, char dev1_green_status, char dev1_white_status,
-    char dev2_status, char dev2_green_status, char dev2_white_status)
+int do_report_dev_status(NetworkPackage &net_package, char dev1_status, char dev1_green_status, char dev1_white_status, char dev1_auth,
+    char dev2_status, char dev2_green_status, char dev2_white_status, char dev2_auth)
 {
+    short raw_status = (short)dev1_status << 14 | (short)dev1_green_status << 12 | (short)dev1_white_status << 10 |
+        (short)dev1_auth << 9 | (short)dev2_status << 7 | (short)dev2_green_status << 5 |
+        (short)dev2_white_status << 3 | (short)dev2_auth << 2;
+
     if (gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].get_socket() <= 0)
     {
         RedDebug::log("Novalid socket for network udp");
@@ -211,13 +215,14 @@ int do_report_dev_status(NetworkPackage &net_package, char dev1_status, char dev
     }
     char dev_status_buffer[NETWORK_PACKGE_LEN_MAX] = {0};
 
-    dev_status_buffer[0] = dev1_status << 7 | dev1_green_status << 6 | dev1_white_status << 5 |
-        dev2_status << 4 | dev2_green_status << 3 | dev2_white_status << 2;
-    dev_status_buffer[1] = 0x00;
+    raw_status = htons(raw_status);
+    memcpy(dev_status_buffer, &raw_status, sizeof(raw_status));
+
     dev_status_buffer[2] = 0x00;
     dev_status_buffer[3] = 0x00;
 
-    NetworkPackage dev_status(net_package.src_ip_n(), net_package.dst_ip_n(),
+    NetworkPackage dev_status(net_package.src_ip_n(),
+        net_package.dst_ip_n(),
         gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].sn(),
         0X00,
         0X01,
@@ -338,7 +343,9 @@ int do_force_respon(NetworkPackage &net_package)
   */
 int do_probe_respon(NetworkPackage &network_package)
 {
-    char dev_status[2] = {0}; char dev_green_status[2] = {0, 0}; char dev_white_status[2] = {0, 0};
+    char dev_status[2] = {0, 0}; char dev_green_status[2] = {0, 0}; char dev_white_status[2] = {0, 0};
+    char dev_auth_status[2] = {0, 0};
+
     short int direction[2], elevation[2];
     std::string dev_info_str, direction_str, elevation_str;
     std::size_t split_index = 0;
@@ -349,17 +356,49 @@ int do_probe_respon(NetworkPackage &network_package)
     {
         if (gs_screen->get_dev_state_label(index)->caption() == std::string("故障"))
             dev_status[index] = 1;
+        else if (gs_screen->get_dev_state_label(index)->caption() == std::string("离线"))
+            dev_status[index] = 2;
+        RedDebug::log("%s\n", gs_screen->get_dev_state_label(index)->caption().c_str());
+
         if (json_value_ptr->devices[index].white_led.mode == LED_NORMAL_MODE && 
             json_value_ptr->devices[index].white_led.normal_status == 0)
         {
+            dev_white_status[index] = 3;
+        }
+        else if(json_value_ptr->devices[index].white_led.mode == LED_MOCODE_MODE)
+        {
+            dev_white_status[index] = 2;
+        }
+        else if(json_value_ptr->devices[index].white_led.mode == LED_BLINK_MODE)
+        {
             dev_white_status[index] = 1;
         }
-        if ((gs_screen->get_dev_auth_label(index)->caption() == std::string("禁止射击")) || 
-            (json_value_ptr->devices[index].green_led.mode == LED_NORMAL_MODE && 
-            json_value_ptr->devices[index].green_led.normal_status == 0))
+
+        if (json_value_ptr->devices[index].green_led.mode == LED_NORMAL_MODE && 
+            json_value_ptr->devices[index].green_led.normal_status == 0)
+        {
+            dev_green_status[index] = 3;
+        }
+        else if(json_value_ptr->devices[index].green_led.mode == LED_MOCODE_MODE)
+        {
+            dev_green_status[index] = 2;
+        }
+        else if(json_value_ptr->devices[index].green_led.mode == LED_BLINK_MODE)
         {
             dev_green_status[index] = 1;
         }
+
+        if (gs_screen->get_dev_auth_label(index)->caption() == std::string("禁止射击"))
+        {
+            dev_auth_status[index] = 1;
+        }
+        RedDebug::log("%d: status:%d green_status:%d white_status=%d auth:%d\n",
+            index,
+            dev_status[index],
+            dev_green_status[index],
+            dev_white_status[index],
+            dev_auth_status[index]);
+
         dev_info_str = gs_screen->get_dev_angle_label(index)->caption();
         split_index = dev_info_str.find("/");
         direction_str = dev_info_str.substr(0, split_index);
@@ -369,8 +408,8 @@ int do_probe_respon(NetworkPackage &network_package)
         direction[index] = std::atoi(direction_str.c_str());
         elevation[index] = std::atoi(elevation_str.c_str());
     }
-    do_report_dev_status(network_package, dev_status[0], dev_green_status[0], dev_white_status[0],
-        dev_status[1], dev_green_status[1], dev_white_status[1]);
+    do_report_dev_status(network_package, dev_status[0], dev_green_status[0], dev_white_status[0], dev_auth_status[0],
+        dev_status[1], dev_green_status[1], dev_white_status[1], dev_auth_status[1]);
     do_report_dev_info(network_package, direction[0], elevation[0], direction[1], elevation[1]);
     RedDebug::log("respon 2 network\n");
 }
