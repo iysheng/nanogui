@@ -183,6 +183,12 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
 int _do_report_msg2net(NetworkUdp &net_fd, NetworkPackage &network_package)
 {
     char buffer[NETWORK_PACKGE_LEN_MAX] = {0};
+    /* Fix dstip == 0.0.0.0 */
+    if (network_package.dst_ip_n() == 0X00000000)
+    {
+        network_package.set_dst_ip_n(((sockaddr_in *)net_fd.addrinfo()->ai_addr)->sin_addr.s_addr);
+    }
+
     if (network_package.convert_to_buffer(buffer, NETWORK_PACKGE_LEN_MAX))
     {
         return -ENOMEM;
@@ -195,7 +201,7 @@ int _do_report_msg2net(NetworkUdp &net_fd, NetworkPackage &network_package)
   * @brief 上报设备状态到指控
   * retval Linux/errno.
   */
-int do_report_dev_status(char dev1_status, char dev1_green_status, char dev1_white_status,
+int do_report_dev_status(NetworkPackage &net_package, char dev1_status, char dev1_green_status, char dev1_white_status,
     char dev2_status, char dev2_green_status, char dev2_white_status)
 {
     if (gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].get_socket() <= 0)
@@ -211,7 +217,14 @@ int do_report_dev_status(char dev1_status, char dev1_green_status, char dev1_whi
     dev_status_buffer[2] = 0x00;
     dev_status_buffer[3] = 0x00;
 
-    NetworkPackage dev_status(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].index(), NETWORK_SEND_STATUS, MK_MSG_FULL_LEN(0X0C), gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].stamp(), dev_status_buffer);
+    NetworkPackage dev_status(net_package.src_ip_n(), net_package.dst_ip_n(),
+        gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].sn(),
+        0X00,
+        0X01,
+        0X01,
+        0X01, NETWORK_SEND_STATUS, MK_MSG_FULL_LEN(0X0C),
+        gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].stamp(),
+        dev_status_buffer);
 
     return _do_report_msg2net(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST], dev_status);
 }
@@ -220,7 +233,7 @@ int do_report_dev_status(char dev1_status, char dev1_green_status, char dev1_whi
   * @brief 上报设备关机事件
   * retval Linux/errno.
   */
-int do_report_dev_off()
+int do_report_dev_off(NetworkPackage &net_package)
 {
     if (gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].get_socket() <= 0)
     {
@@ -228,7 +241,16 @@ int do_report_dev_off()
         return -EINVAL;
     }
     char dev_off_buffer[NETWORK_PACKGE_LEN_MAX] = {0};
-    NetworkPackage dev_off(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].index(), NETWORK_SEND_OFF, MK_MSG_FULL_LEN(0X8), gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].stamp(), dev_off_buffer);
+    
+    NetworkPackage dev_off(net_package.src_ip_n(),
+        ((sockaddr_in *)gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].addrinfo()->ai_addr)->sin_addr.s_addr,
+        gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].sn(),
+        0X00,
+        0X01,
+        0X01,
+        0X01,
+        NETWORK_SEND_OFF, MK_MSG_FULL_LEN(0X8),
+        gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].stamp(), dev_off_buffer);
 
     return _do_report_msg2net(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE], dev_off);
 }
@@ -252,7 +274,7 @@ static inline short _do_format_dev_value_short(float value, double dimension)
   * @param short dev2_elevation: 设备二仰角
   * retval Linux/errno.
   */
-int do_report_dev_info(short dev1_direction, short dev1_elevation, short dev2_direction, short dev2_elevation)
+int do_report_dev_info(NetworkPackage &net_package, short dev1_direction, short dev1_elevation, short dev2_direction, short dev2_elevation)
 {
     if (gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].get_socket() <= 0)
     {
@@ -275,7 +297,13 @@ int do_report_dev_info(short dev1_direction, short dev1_elevation, short dev2_di
     dev_info_buffer[16] = dev2_elevation >> 8 & 0xff;
     dev_info_buffer[17] = dev2_elevation & 0xff;
 
-    NetworkPackage dev_info(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].index(), NETWORK_SEND_INFO, MK_MSG_FULL_LEN(0X1A), gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].stamp(), dev_info_buffer);
+    NetworkPackage dev_info(net_package.src_ip_n(), net_package.dst_ip_n(),
+        gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].sn(),
+        0X00,
+        0X01,
+        0X01,
+        0X01,
+        NETWORK_SEND_INFO, MK_MSG_FULL_LEN(0X1A), gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].stamp(), dev_info_buffer);
 
     return _do_report_msg2net(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST], dev_info);
 }
@@ -292,9 +320,13 @@ int do_force_respon(NetworkPackage &net_package)
         return -EINVAL;
     }
     char force_respon_buffer[NETWORK_PACKGE_LEN_MAX] = {0};
-    NetworkPackage force_respon(net_package.src_ip_n(), net_package.dst_ip_n(), net_package.sn(),
-        net_package.ack(), net_package.flag(), net_package.count(),
-        gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].index(), MK_MSG_FULL_LEN(0X0), 0X0, 0X0, nullptr);
+    NetworkPackage force_respon(net_package.src_ip_n(), 
+        net_package.dst_ip_n(),
+        gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].sn(),
+        net_package.ack(),
+        0X03,
+        0X00,
+        gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].index(), 0X0, MK_MSG_FULL_LEN(0X0), 0X0, nullptr);
 
     RedDebug::log("force respon 2 network\n");
     return _do_report_msg2net(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST], force_respon);
@@ -304,7 +336,7 @@ int do_force_respon(NetworkPackage &net_package)
   * @brief 针对探测报文的应答
   * retval Linux/errno.
   */
-int do_probe_respon(void)
+int do_probe_respon(NetworkPackage &network_package)
 {
     char dev_status[2] = {0}; char dev_green_status[2] = {0, 0}; char dev_white_status[2] = {0, 0};
     short int direction[2], elevation[2];
@@ -337,9 +369,9 @@ int do_probe_respon(void)
         direction[index] = std::atoi(direction_str.c_str());
         elevation[index] = std::atoi(elevation_str.c_str());
     }
-    do_report_dev_status(dev_status[0], dev_green_status[0], dev_white_status[0],
+    do_report_dev_status(network_package, dev_status[0], dev_green_status[0], dev_white_status[0],
         dev_status[1], dev_green_status[1], dev_white_status[1]);
-    do_report_dev_info(direction[0], elevation[0], direction[1], elevation[1]);
+    do_report_dev_info(network_package, direction[0], elevation[0], direction[1], elevation[1]);
     RedDebug::log("respon 2 network\n");
 }
 
@@ -424,7 +456,7 @@ int handle_with_network_buffer(char *buffer, int size)
         case NETWORK_RECV_PROBE:
             RedDebug::log("TODO with PROBE");
             do_with_network_recv_probe(net_package);
-            do_probe_respon();
+            do_probe_respon(net_package);
             break;
         case NETWORK_RECV_OFF:
             RedDebug::log("TODO with OFF");
@@ -444,11 +476,13 @@ int handle_with_network_buffer(char *buffer, int size)
 /******************** export function ****************************/
 int update_sysinfo2network(void)
 {
-    do_probe_respon();
+    NetworkPackage network_package;
+    do_probe_respon(network_package);
 }
 
 int update_offinfo2network(void)
 {
-    do_report_dev_off();
+    NetworkPackage network_package;
+    do_report_dev_off(network_package);
 }
 

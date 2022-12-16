@@ -13,16 +13,29 @@
 #pragma once
 
 using namespace std;
-/* 获取时戳总长度 */
-#define MK_PAYLOAD_LEN(x)    (x - 8)
 
-/* 获取软件包总长度 */
-#define MK_PACKAGE_LEN(x)    (x + 8)
+/* A full cssmxp message demonstrate
+ *
+ * msg
+ * package
+ * package
+ * package
+ * ...
+ * */
 
 /* network cssmxp msg prefix len */
 #define CSSMXP_MSG_PREFIX    16
 
 #define MK_MSG_FULL_LEN(x)   (x + CSSMXP_MSG_PREFIX)
+
+/* network cssmxp package prefix len */
+#define CSSMXP_PACKAGE_PREFIX    8
+
+/* 获取时戳总长度 */
+#define MK_PAYLOAD_LEN(x)    (x - CSSMXP_PACKAGE_PREFIX)
+
+/* 获取软件包总长度 */
+#define MK_PACKAGE_LEN(x)    (x + CSSMXP_PACKAGE_PREFIX)
 
 #define NETWORK_PACKAGE_PAYLOAD_LEN    128
 #define NETWORK_PACKGE_LEN_MAX         MK_PACKAGE_LEN(NETWORK_PACKAGE_PAYLOAD_LEN)
@@ -47,6 +60,7 @@ public:
 
     uint32_t src_ip_n(){return m_src_ip_n;};
     uint32_t dst_ip_n(){return m_dst_ip_n;};
+    void set_dst_ip_n(uint32_t dstip_n){m_dst_ip_n = dstip_n;};
     uint8_t sn(){return m_sn;};
     uint8_t ack(){return m_ack;};
     uint8_t flag(){return m_flag;};

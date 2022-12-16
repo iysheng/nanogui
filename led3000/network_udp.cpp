@@ -72,7 +72,7 @@ int NetworkUdp::try_to_connect(void)
     return m_socket;
 }
 
-NetworkUdp::NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port, int socket_fd):m_index(0), m_socket(socket_fd)
+NetworkUdp::NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port, int socket_fd):m_sn(1), m_socket(socket_fd)
 {
     char decimal_port[16];
     snprintf(decimal_port, sizeof(decimal_port), "%u", source_port);
@@ -131,7 +131,7 @@ NetworkUdp::NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port, in
         {
             printf("Create socket success.\n");
         }
-#if 1   /* 根据对方要求修改 TTL */
+        /* 根据对方要求修改 TTL */
         char ttl = 8;
         if (setsockopt(m_socket, IPPROTO_IP, IP_MULTICAST_TTL, (char *)&ttl, sizeof(ttl)) != 0)
         {
@@ -141,7 +141,6 @@ NetworkUdp::NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port, in
         {
             RedDebug::log("Success set ttl to %d", ttl);
         }
-#endif
     }
 
     int ret;
@@ -155,9 +154,8 @@ NetworkUdp::NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port, in
 	}
     else
     {
-        RedDebug::log("add multi to %s success ------------------------\n", dstip);
+        RedDebug::log("add multi to %s success ------------------------\n", dstip.c_str());
     }
-
 }
 
 int NetworkUdp::send2server(char *buffer, uint16_t len, int flags)
@@ -174,16 +172,20 @@ int NetworkUdp::send2server(char *buffer, uint16_t len, int flags)
     ret = sendto(m_socket, buffer, len, flags, m_addrinfo->ai_addr, m_addrinfo->ai_addrlen);
     if (-1 == ret)
     {
-        RedDebug::log("Failed send msg to server :%d\n", errno);
-        RedDebug::log("Send msg to server %s failed\n", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr));
+        RedDebug::log("Send msg to server %s failed:%d\n",
+            inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr), errno);
+        RedDebug::hexdump("UDP SEND", (char *)buffer, len);
     }
     else
     {
         RedDebug::log("Send msg to server %s success\n", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr));
         RedDebug::hexdump("UDP SEND", (char *)buffer, len);
     }
-    m_index++;
-    m_sn++;
+    if (0 == ++m_sn)
+    {
+      m_sn = 1;
+    }
+
 
     return ret;
 }
