@@ -87,7 +87,7 @@ int init_uart_port(uartport_t *uart)
     fd = open(uart->name, O_RDWR | O_NOCTTY);
     if (fd <= 0)
     {
-        red_debug_lite("Failed open %s err=%d.", uart->name, fd);
+        RedDebug::log("Failed open %s err=%d.", uart->name, fd);
         return -1;
     }
 
@@ -201,9 +201,9 @@ static void _do_with_turntable_left(led_device_t* devp, std::string message)
     ret = write(devp->uart.fd, buffer, sizeof(buffer));
     if (ret != sizeof(buffer))
     {
-        red_debug_lite("Failed --------------------------------------------------- %d %d", ret, errno);
+        RedDebug::log("Failed --------------------------------------------------- %d %d", ret, errno);
     }
-    red_debug_lite("left:%u", level);
+    RedDebug::log("left:%u", level);
 }
 
 static void _do_with_turntable_right(led_device_t* devp, std::string message)
@@ -217,9 +217,9 @@ static void _do_with_turntable_right(led_device_t* devp, std::string message)
     ret = write(devp->uart.fd, buffer, sizeof(buffer));
     if (ret != sizeof(buffer))
     {
-        red_debug_lite("Failed --------------------------------------------------- %d %d", ret, errno);
+        RedDebug::log("Failed --------------------------------------------------- %d %d", ret, errno);
     }
-    red_debug_lite("right:%s", message.c_str());
+    RedDebug::log("right:%s", message.c_str());
 }
 
 static void _do_with_turntable_down(led_device_t* devp, std::string message)
@@ -233,9 +233,9 @@ static void _do_with_turntable_down(led_device_t* devp, std::string message)
     ret = write(devp->uart.fd, buffer, sizeof(buffer));
     if (ret != sizeof(buffer))
     {
-        red_debug_lite("Failed --------------------------------------------------- %d %d", ret, errno);
+        RedDebug::log("Failed --------------------------------------------------- %d %d", ret, errno);
     }
-    red_debug_lite("down:%s", message.c_str());
+    RedDebug::log("down:%s", message.c_str());
 }
 
 static void _do_with_turntable_up(led_device_t* devp, std::string message)
@@ -249,9 +249,9 @@ static void _do_with_turntable_up(led_device_t* devp, std::string message)
     ret = write(devp->uart.fd, buffer, sizeof(buffer));
     if (ret != sizeof(buffer))
     {
-        red_debug_lite("Failed --------------------------------------------------- %d %d", ret, errno);
+        RedDebug::log("Failed --------------------------------------------------- %d %d", ret, errno);
     }
-    red_debug_lite("up:%s", message.c_str());
+    RedDebug::log("up:%s", message.c_str());
 }
 
 static void _do_with_turntable_stop(led_device_t* devp, std::string message)
@@ -262,7 +262,7 @@ static void _do_with_turntable_stop(led_device_t* devp, std::string message)
 
     buffer[10] = _get_xor(&buffer[2], 8);
     write(devp->uart.fd, buffer, sizeof(buffer));
-    red_debug_lite("stop:%s", message.c_str());
+    RedDebug::log("stop:%s", message.c_str());
 }
 
 static void _do_with_turntable_mode_track(led_device_t* devp, std::string message)
@@ -272,7 +272,7 @@ static void _do_with_turntable_mode_track(led_device_t* devp, std::string messag
 
     buffer[10] = _get_xor(&buffer[2], 8);
     write(devp->uart.fd, buffer, sizeof(buffer));
-    red_debug_lite("track:%s", message.c_str());
+    RedDebug::log("track:%s", message.c_str());
 
     char tcp_buffer[9] = {0XAA, 0XAA, 0X00, 0X00, 0X00, 0X09, 0XFD /* setting track enable */,
         0X01, 0X5B /* 校验和 */};
@@ -289,7 +289,7 @@ static void _do_with_turntable_mode_scan(led_device_t* devp, std::string message
 
     buffer[10] = _get_xor(&buffer[2], 8);
     write(devp->uart.fd, buffer, sizeof(buffer));
-    red_debug_lite("scan:%s", message.c_str());
+    RedDebug::log("scan:%s", message.c_str());
 
     char tcp_buffer[9] = {0XAA, 0XAA, 0X00, 0X00, 0X00, 0X09, 0XFD /* setting track disable */,
         0X00, 0X5A /* 校验和 */};
@@ -318,7 +318,7 @@ static void _do_with_turntable_mode_setting(led_device_t* devp, std::string mess
         default:
             break;
     }
-    red_debug_lite("mode_setting:%s", message.c_str());
+    RedDebug::log("mode_setting:%s", message.c_str());
 }
 
 static void _do_with_turntable_track_setting(led_device_t* devp, std::string message)
@@ -340,7 +340,7 @@ static void _do_with_turntable_track_setting(led_device_t* devp, std::string mes
     RedDebug::hexdump("TRACK TARGET", (char*)tcp_buffer, sizeof(tcp_buffer));
     write(devp->uart.fd, buffer, sizeof(buffer));
 
-    red_debug_lite("track_setting:%s", message.c_str());
+    RedDebug::log("track_setting:%s", message.c_str());
 }
 
 static void _do_with_turntable_position_setting(led_device_t* devp, std::string message)
@@ -348,14 +348,19 @@ static void _do_with_turntable_position_setting(led_device_t* devp, std::string 
     int16_t direction, elevation;
     uint16_t level = (uint16_t)stoi(message);
     sscanf(message.c_str(), "%hd,%hd", &direction, &elevation);
+    direction *= 100;
+    elevation *= 100;
+
     uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X51 /* 手动,角度 */,
         direction >> 8, direction, elevation >> 8, elevation, 0X00 /* 校验和 */, 0XE7};
 
     buffer[12] = _get_xor(&buffer[2], 0X08);
     write(devp->uart.fd, buffer, sizeof(buffer));
 
-    red_debug_lite("position_setting:%s", message.c_str());
+    RedDebug::log("position_setting:%s direction=%hd elevation=%hd", message.c_str(), direction, elevation);
+    RedDebug::hexdump("TURNTABLE_POS", (char *)buffer, sizeof(buffer));
 }
+
 static void _do_with_focal(led_device_t* devp, std::string message)
 {
     uint8_t buffer[14] = {0X7E, 0X0A /* 帧长 */, 0X82, 0X11, 1 + devp->uart.index, 0X00 /* 坐标无效 */,
@@ -372,7 +377,7 @@ static void _do_with_focal(led_device_t* devp, std::string message)
     buffer[12] = _get_xor(&buffer[2], 0X0A);
     write(devp->uart.fd, buffer, sizeof(buffer));
 
-    red_debug_lite("focal:%s", message.c_str());
+    RedDebug::log("focal:%s", message.c_str());
 }
 
 static void _do_with_green_mocode(led_device_t* devp, std::string message)
@@ -392,7 +397,7 @@ static void _do_with_green_mocode(led_device_t* devp, std::string message)
     buffer[10 + len] = _get_xor(&buffer[2], len + 0X08);
     buffer[11 + len] = 0XE7;
     write(devp->uart.fd, buffer, 12 + len);
-    red_debug_lite("mocode:%s", message.c_str());
+    RedDebug::log("green mocode:%s", message.c_str());
 }
 
 static void _do_with_green_blink(led_device_t* devp, std::string message)
@@ -403,7 +408,7 @@ static void _do_with_green_blink(led_device_t* devp, std::string message)
 
     buffer[11] = _get_xor(&buffer[2], 9);
     write(devp->uart.fd, buffer, sizeof(buffer));
-    red_debug_lite("blink:%u", freq);
+    RedDebug::log("green blink:%u", freq);
 }
 
 static void _do_with_green_normal(led_device_t *devp, std::string message)
@@ -413,7 +418,7 @@ static void _do_with_green_normal(led_device_t *devp, std::string message)
         0X01, 0XFF, 0X00, 0X01, level, 0X00 /* 校验和 */, 0XE7};
 
     buffer[11] = _get_xor(&buffer[2], 9);
-    red_debug_lite("normal:%u", level);
+    RedDebug::log("green normal:%u", level);
     write(devp->uart.fd, buffer, sizeof(buffer));
 }
 
@@ -425,7 +430,7 @@ static void _do_with_white_blink(led_device_t* devp, std::string message)
 
     buffer[11] = _get_xor(&buffer[2], 9);
     write(devp->uart.fd, buffer, sizeof(buffer));
-    red_debug_lite("blink:%u", freq);
+    RedDebug::log("blink:%u", freq);
 }
 
 static void _do_with_white_mocode(led_device_t* devp, std::string message)
@@ -448,7 +453,7 @@ static void _do_with_white_mocode(led_device_t* devp, std::string message)
     buffer[10 + len] = _get_xor(&buffer[2], len + 0X08);
     buffer[11 + len] = 0XE7;
     write(devp->uart.fd, buffer, 12 + len);
-    red_debug_lite("mocode:%s", message.c_str());
+    RedDebug::log("mocode:%s", message.c_str());
 }
 
 static void _do_with_white_normal(led_device_t *devp, std::string message)
@@ -458,7 +463,7 @@ static void _do_with_white_normal(led_device_t *devp, std::string message)
         0X01, level, 0XFF, 0X01, 0XFF, 0X00 /* 校验和 */, 0XE7};
 
     buffer[11] = _get_xor(&buffer[2], 9);
-    red_debug_lite("normal:%u", level);
+    RedDebug::log("normal:%u", level);
     write(devp->uart.fd, buffer, sizeof(buffer));
 }
 
@@ -490,7 +495,7 @@ static int _do_analysis_hear_msg(int index, char * buffer, int len)
     gs_led_devices[index].screen->get_dev_angle_label(index)->set_caption(to_string(turntable_horizon) + '/' + to_string(turntable_vertical));
     gs_led_devices[index].screen->get_dev_angular_speed_label(index)->set_caption(to_string(turntable_horizon_speed) + '/' + to_string(turntable_vertical_speed));
 
-    red_debug_lite("valid heart msg:dev_status:%u %u|%u %u|%u", dev_status, turntable_horizon, turntable_vertical, turntable_horizon_speed, turntable_vertical_speed);
+    RedDebug::log("valid heart msg:dev_status:%u %u|%u %u|%u", dev_status, turntable_horizon, turntable_vertical, turntable_horizon_speed, turntable_vertical_speed);
 }
 
 static int get_device_heart_msg(int index)
@@ -502,7 +507,7 @@ static int get_device_heart_msg(int index)
     /* TODO check index valid */
     if (index > 1)
     {
-        red_debug_lite("invalid index:%d", index);
+        RedDebug::log("invalid index:%d", index);
         return -E2BIG;
     }
 
@@ -559,7 +564,7 @@ void *devices_entry(void *arg)
     /* TODO init uart */
     if (init_uart_port(&led_devp->uart) != 0)
     {
-        red_debug_lite("Failed init %s.", led_devp->uart.name);
+        RedDebug::log("Failed init %s.", led_devp->uart.name);
         return NULL;
     }
 
@@ -627,7 +632,7 @@ extern int update_sysinfo2network(void);
                 _do_with_turntable_position_setting(led_devp, msg_payload);
                 break;
             default:
-                red_debug_lite("No support this id:%d", msg_id);
+                RedDebug::log("No support this id:%d", msg_id);
                 break;
         }
     }
@@ -637,7 +642,7 @@ void *devices_thread(void *arg)
 {
     gs_led_devices[0].screen = (Led3000Window *)arg;
     gs_led_devices[1].screen = (Led3000Window *)arg;
-    red_debug_lite("arg=%p", arg);
+    RedDebug::log("arg=%p", arg);
 
     std::thread gsDevice0Thread(devices_entry, &gs_led_devices[0]);
     std::thread gsDevice1Thread(devices_entry, &gs_led_devices[1]);
