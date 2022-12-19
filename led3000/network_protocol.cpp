@@ -198,8 +198,8 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
     target_direction = ntohs(target_value_tmp);
     target_direction = _do_format_dev_value_float2short(target_direction, DIMENSION_90_SHORT);
     memcpy(&target_value_tmp, 10 + net_package.payload(), sizeof(target_value_tmp));
-    target_direction = ntohs(target_value_tmp);
-    target_direction = _do_format_dev_value_float2short(target_direction, DIMENSION_90_SHORT);
+    target_elevation = ntohs(target_value_tmp);
+    target_elevation = _do_format_dev_value_float2short(target_elevation, DIMENSION_90_SHORT);
 
     /* TODO correct target info with attitude */
     gs_turntable_attitude[dev_num].correct_target_info(target_direction, target_elevation);
