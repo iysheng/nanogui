@@ -190,6 +190,38 @@ int NetworkUdp::send2server(char *buffer, uint16_t len, int flags)
     return ret;
 }
 
+int NetworkUdp::send2server(char *buffer, uint16_t len, int flags, struct addrinfo *addr)
+{
+#define MAX_BUFFER_LEN    256
+    static char s_counts;
+    int ret;
+    uint32_t dstip;
+    if ((m_socket <= 0) && (try_to_connect() <= 0))
+    {
+        //RedDebug::log("invalid udp socket and try to connect server failed");
+        return -1;
+    }
+    ret = sendto(m_socket, buffer, len, flags, addr->ai_addr, addr->ai_addrlen);
+    if (-1 == ret)
+    {
+        RedDebug::log("Send msg to server %s failed:%d\n",
+            inet_ntoa(((sockaddr_in *)addr->ai_addr)->sin_addr), errno);
+        RedDebug::hexdump("UDP SEND", (char *)buffer, len);
+    }
+    else
+    {
+        RedDebug::log("Send msg to server %s success\n", inet_ntoa(((sockaddr_in *)addr->ai_addr)->sin_addr));
+        RedDebug::hexdump("UDP SEND", (char *)buffer, len);
+    }
+    if (0 == ++m_sn)
+    {
+      m_sn = 1;
+    }
+
+
+    return ret;
+}
+
 int NetworkUdp::recv_from_server(char *buffer, uint16_t len, int flags)
 {
     int ret;

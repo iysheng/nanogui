@@ -15,6 +15,9 @@
 #include <PolyM/include/polym/Msg.hpp>
 #include <PolyM/include/polym/Queue.hpp>
 #include <stdint.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 using namespace nanogui;
 using namespace std;
@@ -23,6 +26,50 @@ static NetworkUdp gs_network_udp[NETWORK_PROTOCOL_TYPE_COUNTS];
 static Led3000Window *gs_screen = nullptr;
 static TurntableAttitude gs_turntable_attitude[2];
 
+#define DIMENSION_90_SHORT    (90.0 / (2 << 13))
+#define DIMENSION_90_INT      (90.0 / (2 << 13))
+
+static inline short _do_format_dev_value_short(float value, double dimension)
+{
+    if (value < 0)
+    {
+        RedDebug::log("%f = %04hx\n", value, short((value - 0.5 * dimension)/dimension));
+        return short((value - 0.5 * dimension)/dimension);
+    }
+    else
+    {
+        RedDebug::log("%f = %04hx\n", value, short((value + 0.5 * dimension)/dimension));
+        return short((value + 0.5 * dimension)/dimension);
+    }
+}
+
+static inline short _do_format_dev_value_float2short(float value, double dimension)
+{
+    if (value < 0)
+    {
+        RedDebug::log("%f = %hd\n", value, short(value * dimension + 0.5 * dimension));
+        return (short)(value * dimension + 0.5 * dimension);
+    }
+    else
+    {
+        RedDebug::log("%f = %hd\n", value, short(value * dimension - 0.5 * dimension));
+        return (short)(value * dimension - 0.5 * dimension);
+    }
+}
+
+static inline int _do_format_dev_value_float2int(float value, double dimension)
+{
+    if (value < 0)
+    {
+        RedDebug::log("%f = %04hx\n", value, short(value * dimension + 0.5 * dimension));
+        return (int)(value * dimension + 0.5 * dimension);
+    }
+    else
+    {
+        RedDebug::log("%f = %04hx\n", value, short(value * dimension - 0.5 * dimension));
+        return (int)(value * dimension - 0.5 * dimension);
+    }
+}
 /**
   * @brief 处理指控发送的舰艇姿态信息
   * retval .
@@ -43,12 +90,18 @@ static int do_with_network_attitude_info(NetworkPackage &net_package)
     {
         RedDebug::log("invalid attitude info");
     }
-    direction_info = net_package.payload()[2] << 8 | net_package.payload()[3] << 16 |
-        net_package.payload()[4] << 8 | net_package.payload()[5];
-    vertical_info = net_package.payload()[6] << 8 | net_package.payload()[7] << 16 |
-        net_package.payload()[8] << 8 | net_package.payload()[9];
-    horizon_info = net_package.payload()[10] << 8 | net_package.payload()[11] << 16 |
-        net_package.payload()[12] << 8 | net_package.payload()[13];
+
+    memcpy(&direction_info, net_package.payload() + 2, sizeof(direction_info));
+    direction_info = (int)ntohl(direction_info);
+    direction_info = (int)_do_format_dev_value_float2int(direction_info, DIMENSION_90_INT);
+
+    memcpy(&vertical_info, net_package.payload() + 6, sizeof(vertical_info));
+    vertical_info = ntohl(vertical_info);
+    vertical_info = (int)_do_format_dev_value_float2int(vertical_info, DIMENSION_90_INT);
+
+    memcpy(&horizon_info, net_package.payload() + 6, sizeof(horizon_info));
+    horizon_info = ntohl(horizon_info);
+    horizon_info = (int)_do_format_dev_value_float2int(horizon_info, DIMENSION_90_INT);
 
     /* Update ship attitude info */
     gs_turntable_attitude[0].update_attitude_info(direction_info, vertical_info, horizon_info);
@@ -96,6 +149,7 @@ static int do_with_network_recv_probe(NetworkPackage &net_package)
     }
     return 0;
 }
+
 /**
   * @brief 处理指控发送的引导指令
   * @param NetworkPackage &net_package: 
@@ -136,9 +190,17 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
     }
 
     target_batch_number = net_package.payload()[2] << 8 | net_package.payload()[3];
+
     target_distance = net_package.payload()[4] << 24 | net_package.payload()[5] << 16 | net_package.payload()[6] << 8 | net_package.payload()[7];
-    target_direction = net_package.payload()[8] << 8 | net_package.payload()[9];
-    target_elevation = net_package.payload()[10] << 8 | net_package.payload()[11];
+    
+    short target_value_tmp;
+    memcpy(&target_value_tmp, 8 + net_package.payload(), sizeof(target_value_tmp));
+    target_direction = ntohs(target_value_tmp);
+    target_direction = _do_format_dev_value_float2short(target_direction, DIMENSION_90_SHORT);
+    memcpy(&target_value_tmp, 10 + net_package.payload(), sizeof(target_value_tmp));
+    target_direction = ntohs(target_value_tmp);
+    target_direction = _do_format_dev_value_float2short(target_direction, DIMENSION_90_SHORT);
+
     /* TODO correct target info with attitude */
     gs_turntable_attitude[dev_num].correct_target_info(target_direction, target_elevation);
 
@@ -194,6 +256,23 @@ int _do_report_msg2net(NetworkUdp &net_fd, NetworkPackage &network_package)
         return -ENOMEM;
     }
     net_fd.send2server(buffer, network_package.len());
+    return 0;
+}
+
+int _do_report_msg2net(NetworkUdp &net_fd, NetworkPackage &network_package, struct addrinfo *p_addrinfo)
+{
+    char buffer[NETWORK_PACKGE_LEN_MAX] = {0};
+    /* Fix dstip == 0.0.0.0 */
+    if (network_package.dst_ip_n() == 0X00000000)
+    {
+        network_package.set_dst_ip_n(ntohl(((sockaddr_in *)net_fd.addrinfo()->ai_addr)->sin_addr.s_addr));
+    }
+
+    if (network_package.convert_to_buffer(buffer, NETWORK_PACKGE_LEN_MAX))
+    {
+        return -ENOMEM;
+    }
+    net_fd.send2server(buffer, network_package.len(), 0, p_addrinfo);
     return 0;
 }
 
@@ -260,17 +339,6 @@ int do_report_dev_off(NetworkPackage &net_package)
     return _do_report_msg2net(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE], dev_off);
 }
 
-#define DIMENSION_90_SHORT    (90.0 / (2 << 13))
-
-static inline short _do_format_dev_value_short(float value, double dimension)
-{
-    RedDebug::log("%f = %hd\n", value, short((value + 0.5 * dimension)/dimension));
-    if (value < 0)
-        return htonl(short((value - 0.5 * dimension)/dimension));
-    else
-        return htons(short((value + 0.5 * dimension)/dimension));
-}
-
 /**
   * @brief 上报设备数据
   * @param short dev1_direction: 设备一指向角， 指向角，右边为正，左边为负，+-180
@@ -334,7 +402,21 @@ int do_force_respon(NetworkPackage &net_package)
         gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].index(), 0X0, MK_MSG_FULL_LEN(0X0), 0X0, nullptr);
 
     RedDebug::log("force respon 2 network\n");
-    return _do_report_msg2net(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST], force_respon);
+
+    struct addrinfo hints;
+    struct addrinfo *p_addrinfo;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_DGRAM;
+    hints.ai_protocol = IPPROTO_UDP;
+    int r(getaddrinfo("168.6.0.4", "20840", &hints, &p_addrinfo));
+    if(r != 0 || p_addrinfo == NULL)
+    {
+        RedDebug::log("failed convert addrinfo.-------------------------------");
+        return -1;
+    }
+
+    return _do_report_msg2net(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST], force_respon, p_addrinfo);
 }
 
 /**
@@ -468,7 +550,6 @@ int handle_with_network_buffer(char *buffer, int size)
     NetworkPackage net_package;
 
     /* TODO check gs_screen valid */
-
     ret = net_package.convert_from_buffer(buffer, size);
     if (ret < 0)
     {

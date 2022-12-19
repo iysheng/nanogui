@@ -11,6 +11,7 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
@@ -24,6 +25,11 @@ NetworkPackage::NetworkPackage(uint32_t src_ip, uint32_t dst_ip, uint8_t sn, uin
   m_src_ip_n(src_ip), m_dst_ip_n(dst_ip), m_sn(sn), m_ack(ack), m_flag(flag), m_count(count), 
   m_index(index), m_id(id), m_len(len), m_stamp(stamp)
 {
+    struct timeval tv;
+    if (0 == gettimeofday(&tv, NULL))
+    {
+        m_stamp = tv.tv_sec * 1000 + tv.tv_usec;
+    }
     m_src_ip_n = ntohl(inet_addr("168.9.0.1"));
     if (len - CSSMXP_MSG_PREFIX > CSSMXP_PACKAGE_PREFIX)
     {
@@ -40,6 +46,11 @@ NetworkPackage::NetworkPackage(uint32_t src_ip, uint32_t dst_ip, uint8_t sn, uin
 NetworkPackage::NetworkPackage(char index, char id, char len, int stamp, char * payload):m_index(index),
   m_id(id), m_len(len), m_stamp(stamp)
 {
+    struct timeval tv;
+    if (0 == gettimeofday(&tv, NULL))
+    {
+        m_stamp = tv.tv_sec * 1000 + tv.tv_usec;
+    }
     /* net to host */
     m_src_ip_n = ntohl(inet_addr("168.9.0.1"));
     m_dst_ip_n = 0X00; //ntohl(inet_addr("168.9.0.1"));

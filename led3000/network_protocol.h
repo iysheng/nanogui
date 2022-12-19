@@ -44,7 +44,7 @@ typedef enum {
 } network_protocol_led_mode_E;
 
 /*
- *       |    send          |  recv  |
+ *       |    send         |  recv  |
  * probe | guide_controler | group 1|
  * guide | guide_controler | own |
  * force | guide_controler | own |

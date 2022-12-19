@@ -27,6 +27,7 @@ class NetworkUdp {
 
     int try_to_connect(void);
     int send2server(char *buffer, uint16_t len, int flags = 0);
+    int send2server(char *buffer, uint16_t len, int flags, struct addrinfo *addr);
     int recv_from_server(char *buffer, uint16_t len, int flags = 0);
 
     int get_socket(){return m_socket;};
