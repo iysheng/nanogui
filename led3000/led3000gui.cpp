@@ -225,6 +225,7 @@ void do_with_white_light_normal(Widget *widget, int choose)
             led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mode = LED_NORMAL_MODE;
             led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.normal_status = 100;
             led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_WHITE_NORMAL_SETTING, to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.normal_status)));
+            led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
             white_dev_btns->at(0)->set_pushed(true);
             white_dev_btns->at(1)->set_pushed(false);
             white_dev_btns->at(2)->set_pushed(false);
@@ -415,6 +416,7 @@ void do_with_green_light_normal(Widget *widget, int choose)
             led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mode = LED_NORMAL_MODE;
             led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.normal_status = 100;
             led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_GREEN_NORMAL_SETTING, to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.normal_status)));
+            led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
             green_dev_btns->at(0)->set_pushed(true);
             green_dev_btns->at(1)->set_pushed(false);
             green_dev_btns->at(2)->set_pushed(false);
@@ -836,7 +838,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           btn_green_blink->set_button_group(btn_green_led->button_group());
           btn_green_mocode->set_button_group(btn_green_led->button_group());
           set_green_dev_control_btns(&btn_green_led->button_group());
-
+          set_green_dev_control_btns_status(getJsonValue()->devices[0].green_led.mode);
 
           cwindow = new Window(this, "");
           cwindow->set_background_image("/tmp/abc/huiyuan/green1.png");
@@ -867,6 +869,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           btn_white_blink->set_button_group(btn_white_led->button_group());
           btn_white_mocode->set_button_group(btn_white_led->button_group());
           set_white_dev_control_btns(&btn_white_led->button_group());
+          set_white_dev_control_btns_status(getJsonValue()->devices[0].white_led.mode);
         }
 
         /* 系统窗口 */

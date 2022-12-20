@@ -267,6 +267,11 @@ public:
     {
       switch (mode)
       {
+        case LED_NORMAL_MODE_OFF:
+          m_white_dev_control_btns->at(0)->set_pushed(false);
+          m_white_dev_control_btns->at(1)->set_pushed(false);
+          m_white_dev_control_btns->at(2)->set_pushed(false);
+          break;
         case LED_NORMAL_MODE:
           m_white_dev_control_btns->at(0)->set_pushed(true);
           m_white_dev_control_btns->at(1)->set_pushed(false);
