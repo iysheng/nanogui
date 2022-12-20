@@ -217,6 +217,7 @@ void do_with_white_light_normal(Widget *widget, int choose)
         case 0:
             led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mode = LED_NORMAL_MODE_OFF;
             led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.normal_status = 0;
+            led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
             /* 发送消息控制关灯 */
             led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_WHITE_NORMAL_SETTING, to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.normal_status)));
             break;
@@ -410,6 +411,7 @@ void do_with_green_light_normal(Widget *widget, int choose)
             led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.normal_status = 0;
             /* 发送消息控制关灯 */
             led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_GREEN_NORMAL_SETTING, to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.normal_status)));
+            led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
             break;
         case 1:
             /* 发送消息控制开灯 */
