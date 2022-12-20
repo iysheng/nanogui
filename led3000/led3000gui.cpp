@@ -32,7 +32,11 @@ void do_paint_sysconfig(Widget *widget)
       widget->window()->set_background_image(RED_LED3000_ASSETS_DIR"/set_msgdlg3.png");
       Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
 
-      /* 定义了这个窗口的布局 */
+      /* 创建一个 label 显示软件版本号 */
+      auto *ver_label = widget->add<Label>("Ver:" + to_string(LED3000_VERSION), "sans-bold");
+      ver_label->set_position(Vector2i(200, 20));
+      ver_label->set_font_size(20);
+
       auto *label = widget->add<Label>("网卡0IP:", "sans-bold");
       label->set_position(Vector2i(51, 84));
       label->set_font_size(20);

@@ -468,7 +468,7 @@ endif()
 
 set(LED3000_MAJOR_VERSION 0)
 set(LED3000_MINOR_VERSION 9)
-set(LED3000_PATCH_VERSION 0)
+set(LED3000_PATCH_VERSION 5)
 
 execute_process(
     COMMAND git rev-parse --short HEAD
