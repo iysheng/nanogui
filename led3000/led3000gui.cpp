@@ -215,7 +215,7 @@ void do_with_white_light_normal(Widget *widget, int choose)
       switch(choose)
       {
         case 0:
-            led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mode = LED_NORMAL_MODE;
+            led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mode = LED_NORMAL_MODE_OFF;
             led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.normal_status = 0;
             /* 发送消息控制关灯 */
             led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_WHITE_NORMAL_SETTING, to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.normal_status)));
@@ -405,7 +405,7 @@ void do_with_green_light_normal(Widget *widget, int choose)
       {
         case 0:
 
-            led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mode = LED_NORMAL_MODE;
+            led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mode = LED_NORMAL_MODE_OFF;
             led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.normal_status = 0;
             /* 发送消息控制关灯 */
             led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_GREEN_NORMAL_SETTING, to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.normal_status)));
@@ -901,6 +901,10 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
             this->get_white_dev_label()->set_caption("灯光装置终端一 白灯");
             this->get_turntable_label()->set_caption("灯光装置终端一 转台");
             this->setCurrentDevice(0);
+            /* 更新灯光装置终端的状态 */
+            this->set_white_dev_control_btns_status(this->getJsonValue()->devices[0].white_led.mode);
+            this->set_green_dev_control_btns_status(this->getJsonValue()->devices[0].green_led.mode);
+
           });
           /* 根据实际系统功能中按键大小，为了保持大小一致，修改设备选择按键大小保持一致 */
           ///devBtn->set_fixed_size(Vector2i(165, 30));
@@ -914,6 +918,9 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
             this->get_white_dev_label()->set_caption("灯光装置终端二 白灯");
             this->get_turntable_label()->set_caption("灯光装置终端二 转台");
             this->setCurrentDevice(1);
+            /* 更新灯光装置终端的状态 */
+            this->set_white_dev_control_btns_status(this->getJsonValue()->devices[1].white_led.mode);
+            this->set_green_dev_control_btns_status(this->getJsonValue()->devices[1].green_led.mode);
           });
 
           devBtn2->push_button_group(devBtn2);

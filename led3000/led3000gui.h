@@ -56,9 +56,10 @@ typedef enum {
 } turntable_mode_E;
 
 typedef enum {
-    LED_NORMAL_MODE,
-    LED_BLINK_MODE,
-    LED_MOCODE_MODE,
+    LED_NORMAL_MODE, /* 常亮,开灯状态 */
+    LED_BLINK_MODE,  /* 爆闪模式 */
+    LED_MOCODE_MODE, /* 莫码模式 */
+    LED_NORMAL_MODE_OFF, /* 常亮,关灯状态 */
 } led_mode_E;
 
 using namespace rapidjson;
@@ -260,6 +261,54 @@ public:
     const std::vector<Button *> * get_white_dev_control_btns(void)
     {
       return m_white_dev_control_btns;
+    }
+
+    void set_white_dev_control_btns_status(int mode)
+    {
+      switch (mode)
+      {
+        case LED_NORMAL_MODE:
+          m_white_dev_control_btns->at(0)->set_pushed(true);
+          m_white_dev_control_btns->at(1)->set_pushed(false);
+          m_white_dev_control_btns->at(2)->set_pushed(false);
+          break;
+        case LED_BLINK_MODE:
+          m_white_dev_control_btns->at(0)->set_pushed(false);
+          m_white_dev_control_btns->at(1)->set_pushed(true);
+          m_white_dev_control_btns->at(2)->set_pushed(false);
+          break;
+        case LED_MOCODE_MODE:
+          m_white_dev_control_btns->at(0)->set_pushed(false);
+          m_white_dev_control_btns->at(1)->set_pushed(false);
+          m_white_dev_control_btns->at(2)->set_pushed(true);
+          break;
+        default:
+          break;
+      }
+    }
+
+    void set_green_dev_control_btns_status(int mode)
+    {
+      switch (mode)
+      {
+        case LED_NORMAL_MODE:
+          m_green_dev_control_btns->at(0)->set_pushed(true);
+          m_green_dev_control_btns->at(1)->set_pushed(false);
+          m_green_dev_control_btns->at(2)->set_pushed(false);
+          break;
+        case LED_BLINK_MODE:
+          m_green_dev_control_btns->at(0)->set_pushed(false);
+          m_green_dev_control_btns->at(1)->set_pushed(true);
+          m_green_dev_control_btns->at(2)->set_pushed(false);
+          break;
+        case LED_MOCODE_MODE:
+          m_green_dev_control_btns->at(0)->set_pushed(false);
+          m_green_dev_control_btns->at(1)->set_pushed(false);
+          m_green_dev_control_btns->at(2)->set_pushed(true);
+          break;
+        default:
+          break;
+      }
     }
 private:
     /* 设备状态窗口 label 控件 */
