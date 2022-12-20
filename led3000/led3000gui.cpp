@@ -33,8 +33,8 @@ void do_paint_sysconfig(Widget *widget)
       Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
 
       /* 创建一个 label 显示软件版本号 */
-      auto *ver_label = widget->add<Label>("Ver:" + to_string(LED3000_VERSION), "sans-bold");
-      ver_label->set_position(Vector2i(200, 20));
+      auto *ver_label = widget->add<Label>("Ver:LED" + to_string(LED3000_VERSION) + " 七一六研究所", "sans-bold");
+      ver_label->set_position(Vector2i(130, 20));
       ver_label->set_font_size(20);
 
       auto *label = widget->add<Label>("网卡0IP:", "sans-bold");
@@ -911,7 +911,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           sysconfig_btn->set_position({15, 15});
           sysconfig_btn->set_fixed_size({46, 46});
           sysconfig_btn->set_callback([&] {
-              new MessageDialog(this, MessageDialog::Type::Question, "", "准备配置参数", "确认", "取消", "", do_with_sysconfig, do_paint_sysconfig);});
+              new MessageDialog(this, MessageDialog::Type::Question, "", "配置参数", "确认", "取消", "", do_with_sysconfig, do_paint_sysconfig);});
 
           Button *devBtn = swindow->add<Button>("    灯光装置终端一", "/tmp/abc/huiyuan/dev_unchoose.png", "/tmp/abc/huiyuan/dev_choose.png", 0);
           devBtn->set_flags(Button::RadioButton);
