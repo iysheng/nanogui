@@ -287,6 +287,7 @@ void do_with_white_light_blink(Widget *widget, int choose)
     /* 发送消息关灯 */
     led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_WHITE_NORMAL_SETTING, to_string(0X00)));
     /* 同步消息内容到 json 文件 */
+    led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
     white_dev_btns->at(1)->set_pushed(false);
   }
 }
@@ -351,9 +352,9 @@ void do_with_white_light_mocode(Widget *widget, int choose)
 {
   Led3000Window * window = dynamic_cast<Led3000Window *>(widget->screen());
   const std::vector<Button *> * white_dev_btns = window->get_white_dev_control_btns();
+  Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
   if (choose == 1)
   {
-    Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
     led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mode = LED_MOCODE_MODE;
     /* 发送消息控制莫码 */
     led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_WHITE_MOCODE_SETTING, led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mocode));
@@ -365,6 +366,12 @@ void do_with_white_light_mocode(Widget *widget, int choose)
     white_dev_btns->at(0)->set_pushed(false);
     white_dev_btns->at(1)->set_pushed(false);
     white_dev_btns->at(2)->set_pushed(true);
+    return;
+  }
+  else
+  {
+    led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
+    white_dev_btns->at(2)->set_pushed(false);
     return;
   }
 }
@@ -492,6 +499,7 @@ void do_with_green_light_blink(Widget *widget, int choose)
     /* 发送消息关灯 */
     led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_GREEN_NORMAL_SETTING, to_string(0X00)));
     /* 同步消息内容到 json 文件 */
+    led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
     green_dev_btns->at(1)->set_pushed(false);
   }
 }
@@ -557,9 +565,9 @@ void do_with_green_light_mocode(Widget *widget, int choose)
 {
   Led3000Window * window = dynamic_cast<Led3000Window *>(widget->screen());
   const std::vector<Button *> * green_dev_btns = window->get_green_dev_control_btns();
+  Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
   if (choose == 1)
   {
-    Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
     led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mode = LED_MOCODE_MODE;
     /* 发送消息控制莫码 */
     led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_GREEN_MOCODE_SETTING, led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode));
@@ -571,6 +579,12 @@ void do_with_green_light_mocode(Widget *widget, int choose)
     green_dev_btns->at(0)->set_pushed(false);
     green_dev_btns->at(1)->set_pushed(false);
     green_dev_btns->at(2)->set_pushed(true);
+    return;
+  }
+  else
+  {
+    led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
+    green_dev_btns->at(2)->set_pushed(false);
     return;
   }
 }
