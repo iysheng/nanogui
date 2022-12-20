@@ -216,7 +216,7 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
     {
         if (led_mode == NETWORK_PROTOCOL_NORMAL_LED_MODE)
         {
-            //gs_screen->getJsonValue()->devices[gs_screen->getDeviceQueue(dev_num)].white_led.normal_status = 100;
+            gs_screen->getJsonValue()->devices[dev_num].white_led.normal_status = 100;
             gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_WHITE_NORMAL_SETTING, to_string(100)));
         }
         else if (led_mode == NETWORK_PROTOCOL_BINK_LED_MODE)
@@ -229,7 +229,7 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
     {
         if (led_mode == NETWORK_PROTOCOL_NORMAL_LED_MODE)
         {
-            //gs_screen->getJsonValue()->devices[gs_screen->getDeviceQueue(dev_num)].white_led.normal_status = 100;
+            gs_screen->getJsonValue()->devices[dev_num].white_led.normal_status = 100;
             gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_GREEN_NORMAL_SETTING, to_string(100)));
         }
         else if (led_mode == NETWORK_PROTOCOL_BINK_LED_MODE)
