@@ -898,13 +898,17 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           swindow->set_background_image("/tmp/abc/huiyuan/head.png");
 
           /* 创建一个 label 显示软件版本号 */
-          auto *ver_label = swindow->add<Label>("眩目拒止设备控制软件 Ver:" + to_string(LED3000_VERSION >> 16 & 0XFF) +
+          auto *soft_name_label = swindow->add<Label>("眩目拒止设备控制软件", "sans-bold");
+          soft_name_label->set_position(Vector2i(81, 25));
+          soft_name_label->set_font_size(15);
+
+          auto *ver_label = swindow->add<Label>("V" + to_string(LED3000_VERSION >> 16 & 0XFF) +
                 "." +
                 to_string(LED3000_VERSION >> 8 & 0XFF) +
                 "." +
                 to_string(LED3000_VERSION & 0XFF) +
                 + " 中船七一六研究所", "sans-bold");
-          ver_label->set_position(Vector2i(100, 30));
+          ver_label->set_position(Vector2i(81, 40));
           ver_label->set_font_size(15);
 
           sysconfig_btn = swindow->add<Button>("", "/tmp/abc/huiyuan/power.png", 0);
