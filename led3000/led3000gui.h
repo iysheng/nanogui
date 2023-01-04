@@ -242,6 +242,17 @@ public:
     Label *get_turntable_label(){
       return m_turntable_dev;
     }
+    Label *get_guide_mode_icon(){
+      return m_guide_mode_icon;
+    }
+
+    bool check_guide_mode(void)
+    {
+      return m_guide_mode_icon->visible();
+    }
+    void set_guide_mode(bool mode){
+        m_guide_mode_icon->set_visible(mode);
+    }
 
     void set_green_dev_control_btns(const std::vector<Button *> *btns)
     {
@@ -315,6 +326,10 @@ public:
           break;
       }
     }
+
+    void set_guide_mode_icon(Label *label){
+      m_guide_mode_icon = label;
+    }
 private:
     /* 设备状态窗口 label 控件 */
     Label *m_dev_state[LED3000_DEVICES_COUNTS];
@@ -325,6 +340,7 @@ private:
     Label *m_green_dev;
     Label *m_white_dev;
     Label *m_turntable_dev;
+    Label *m_guide_mode_icon;
 
     const std::vector<Button *> *m_green_dev_control_btns;
     const std::vector<Button *> *m_white_dev_control_btns;

@@ -911,6 +911,13 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           ver_label->set_position(Vector2i(81, 40));
           ver_label->set_font_size(15);
 
+          auto *guide_name_label = swindow->add<Label>("", "sans-bold");
+          guide_name_label->set_icon("/tmp/abc/huiyuan/guide.png");
+          guide_name_label->set_position(Vector2i(900, 19));
+          guide_name_label->set_font_size(15);
+          set_guide_mode_icon(guide_name_label);
+          get_guide_mode_icon()->set_visible(false);
+
           sysconfig_btn = swindow->add<Button>("", "/tmp/abc/huiyuan/power.png", 0);
           sysconfig_btn->set_position({1219, 15});
           sysconfig_btn->set_fixed_size({46, 46});

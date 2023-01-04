@@ -185,9 +185,13 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
 
     if (guide_enable)
     {
+        /* 退出引导模式 */
+        gs_screen->set_guide_mode(false);
         RedDebug::log("no guide enable, just return.");
         return 0;
     }
+    /* 进入引导模式 */
+    gs_screen->set_guide_mode(true);
 
     target_batch_number = net_package.payload()[2] << 8 | net_package.payload()[3];
 
