@@ -93,6 +93,11 @@ public:
     /// Sets whether or not this Button is currently pushed.
     void set_pushed(bool pushed) { m_pushed = pushed; }
 
+    /// Whether or not this Button is currently pseudo.
+    bool pseudo() const { return m_pseudo; }
+    /// Sets whether or not this Button is currently pseudo.
+    void set_pseudo(bool pseudo) { m_pseudo = pseudo; }
+
     /// Return the push callback (for any type of button)
     std::function<void()> callback() const { return m_callback; }
     /// Set the push callback (for any type of button).
@@ -146,6 +151,9 @@ protected:
 
     /// Whether or not this Button is currently pushed.
     bool m_pushed;
+
+    /// 是否是虚拟按键,既完全透明的按键
+    bool m_pseudo;
 
     /// The current flags of this button (see \ref nanogui::Button::Flags for options).
     int m_flags;

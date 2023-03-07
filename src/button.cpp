@@ -164,6 +164,9 @@ void Button::draw(NVGcontext *ctx) {
     Widget::draw(ctx);
     int background_image = m_background_image;
 
+    if (m_psuedo)
+        return;
+
     NVGcolor grad_top = m_theme->m_button_gradient_top_unfocused;
     NVGcolor grad_bot = m_theme->m_button_gradient_bot_unfocused;
 
