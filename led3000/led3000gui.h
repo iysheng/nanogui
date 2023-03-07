@@ -110,8 +110,8 @@ typedef struct {
         unsigned char mode;
         unsigned short target_pos_x;
         unsigned short target_pos_y;
-        unsigned short scan_stay_time;
-        unsigned short scan_speed_level;
+        short scan_stay_time;
+        short scan_speed_level;
       } turntable;
     } devices[2];
 } led3000_config_t;
