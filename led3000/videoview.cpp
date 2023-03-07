@@ -260,6 +260,24 @@ int mpp_hardware_init(MpiDecLoopData *data)
     return 0;
 }
 
+#ifdef DEBUG_MPP_DECODER
+void dump_file(char * prefix, char *data, int data_len)
+{
+    static int counts;
+    char file_name[64] = {0};
+    FILE * yuv_file_fd;
+
+    red_debug_lite("yuv raw data_len=%d", data_len);
+    if (counts > 20)
+        return;
+    snprintf(file_name, 64, "/tmp/%s%d.yuv", prefix, counts++);
+
+    yuv_file_fd = fopen(file_name, "w+b");
+    fwrite(data, 1, data_len, yuv_file_fd);
+    fclose(yuv_file_fd);
+}
+#endif
+
 int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_buffer)
 {
     RK_U32 pkt_done = 0;
@@ -367,6 +385,12 @@ int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_b
                     memset(&dst_rect, 0, sizeof(dst_rect));
                     memset(&src, 0, sizeof(src));
                     memset(&dst, 0, sizeof(dst));
+#ifdef DEBUG_MPP_DECODER
+    /*
+     * TODO dump av_paket to file
+     * */
+    dump_file("hik", (char *)base, buf_size);
+#endif
                     /* RGA 模块封装源信息 */
                     src = wrapbuffer_virtualaddr(base, h_stride, v_stride, SRC_FORMAT);
                     /* RGA 模块封装目的信息 */
@@ -432,7 +456,9 @@ int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_b
         }
 
         if (pkt_done)
+        {
             break;
+        }
 
         /*
          * why sleep here:
