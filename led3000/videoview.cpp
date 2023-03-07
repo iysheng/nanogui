@@ -187,9 +187,12 @@ int mpp_hardware_init(MpiDecLoopData *data)
 //    MppPollType timeout = 5;
 
     // paramter for resource malloc
-    RK_U32 width        = 2560;
-    RK_U32 height       = 1440;
-    MppCodingType type  = MPP_VIDEO_CodingAVC;
+    RK_U32 width        = 1920;
+    RK_U32 height       = 1080;
+    /* H.265 使用  MPP_VIDEO_CodingHEVC
+     * H.264 使用  MPP_VIDEO_CodingAVC
+     * */
+    MppCodingType type  = MPP_VIDEO_CodingHEVC;
 
     // resources
     char *buf           = NULL;
@@ -501,7 +504,7 @@ int VideoView::video_draw_handler(void *object)
 re_open:
     if (options_need_set)
     {
-        value = av_dict_set(&options, "rtsp_transport", "udp", 0);
+        value = av_dict_set(&options, "rtsp_transport", "tcp", 0);
         /* 修改超时时间，单位是 ms */
         value = av_dict_set(&options, "timeout", "5000", 0);
         value = av_dict_set(&options, "buffer_size", "10240000", 0);
@@ -604,7 +607,7 @@ re_open:
     }
     else
     {
-        red_debug_lite("malloc memory 4 mpp size=%d\n", 10 * VIDEO_SHOW_FIXED_WIDTH * VIDEO_SHOW_FIXED_HEIGH * mpp_get_bpp_from_format(DST_FORMAT));
+        red_debug_lite("malloc memory 4 mpp size=%.1f\n", 10 * VIDEO_SHOW_FIXED_WIDTH * VIDEO_SHOW_FIXED_HEIGH * mpp_get_bpp_from_format(DST_FORMAT));
     }
     if (!mpp_hardware_init(&mpp_data))
     {

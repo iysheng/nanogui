@@ -110,7 +110,7 @@ NetworkTcp::NetworkTcp(string dstip, uint16_t dst_port):m_index(0)
     if(r != 0)
     {
         close(m_socket);
-        RedDebug::log("could not bind TCP socket with port:%u\n", dst_port);
+        RedDebug::log("could not bind TCP socket with port:%u errno:%d\n", dst_port, errno);
         m_socket = 0;
     }
     else
