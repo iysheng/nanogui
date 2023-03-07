@@ -282,6 +282,18 @@ static void _do_with_turntable_mode_track(led_device_t* devp, std::string messag
     RedDebug::hexdump("TRACK TARGET", (char*)tcp_buffer, sizeof(tcp_buffer));
 }
 
+/*
+ * 模糊跟踪的前提是开启跟踪,所以此处不需要再通过串口给控制板发送开启跟踪的指令
+ * */
+static void _do_with_turntable_mode_fuzzy_track(led_device_t* devp, std::string message)
+{
+    char tcp_buffer[9] = {0XAA, 0XAA, 0X00, 0X00, 0X00, 0X09, 0XFD /* setting track enable */,
+        0X02, 0X5C /* 校验和 */};
+    devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
+    devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
+    RedDebug::hexdump("FUZZY TRACK TARGET", (char*)tcp_buffer, sizeof(tcp_buffer));
+}
+
 static void _do_with_turntable_mode_scan(led_device_t* devp, std::string message)
 {
     uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X32 /* 扫海 */,
@@ -307,6 +319,9 @@ static void _do_with_turntable_mode_setting(led_device_t* devp, std::string mess
     {
         case TURNTABLE_TRACK_MODE:
             _do_with_turntable_mode_track(devp, message);
+            break;
+        case TURNTABLE_FUZZY_TRACK_MODE:
+            _do_with_turntable_mode_fuzzy_track(devp, message);
             break;
         case TURNTABLE_SCAN_MODE:
             _do_with_turntable_mode_scan(devp, message);
@@ -363,20 +378,20 @@ static void _do_with_turntable_position_setting(led_device_t* devp, std::string 
 
 static void _do_with_focal(led_device_t* devp, std::string message)
 {
-    uint8_t buffer[14] = {0X7E, 0X0A /* 帧长 */, 0X82, 0X11, 1 + devp->uart.index, 0X00 /* 坐标无效 */,
-        0XFF, 0XFF, 0XFF, 0XFF, 0X00 /* 不调焦 */, 0X00/* 不调视场 */, 0X00 /* 校验和 */, 0XE7};
-
+    char tcp_buffer[8] = {0XAA, 0XAA, 0X00, 0X00, 0X00, 0X08, 0X00 /* 0XFA:up 0XF0:down */,
+        0X5C /* 校验和 */};
     if ('-' == message.c_str()[0])
     {
-        buffer[10] = 2;
+        tcp_buffer[6] = 0XF0;
     }
     else if ('+' == message.c_str()[0])
     {
-        buffer[10] = 1;
+        tcp_buffer[6] = 0XFA;
     }
-    buffer[12] = _get_xor(&buffer[2], 0X0A);
-    write(devp->uart.fd, buffer, sizeof(buffer));
-
+    tcp_buffer[7] = _get_sum(&tcp_buffer[0], 7);
+    devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
+    devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
+    RedDebug::hexdump("FOCAL CONTROL", (char*)tcp_buffer, sizeof(tcp_buffer));
     RedDebug::log("focal:%s", message.c_str());
 }
 
