@@ -37,7 +37,7 @@ Button::Button(Widget *parent, const std::string &caption, const std::string &Ba
 
 Button::Button(Widget *parent, const std::string &caption, const std::string &BackgroundImage, const std::string &PushedBackgroundImage, int icon)
     : Widget(parent), m_caption(caption), m_icon(icon), m_background_image(0),
-      m_icon_position(IconPosition::LeftCentered), m_pushed(false),
+      m_icon_position(IconPosition::LeftCentered), m_pushed(false), m_pseudo(false),
       m_flags(NormalButton), m_background_color(Color(0, 0)),
       m_text_color(Color(0, 0)) {
     NVGcontext *ctx = screen()->nvg_context();
