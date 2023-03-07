@@ -20,13 +20,13 @@ NAMESPACE_BEGIN(nanogui)
 Button::Button(Widget *parent, const std::string &caption, int icon)
     : Widget(parent), m_caption(caption), m_icon(icon), m_background_image(0),
       m_pushed_background_image(0), m_icon_position(IconPosition::LeftCentered), m_pushed(false),
-      m_flags(NormalButton), m_background_color(Color(0x31, 0x57, 0x97, 255)),
+      m_flags(NormalButton), m_background_color(Color(0x31, 0x57, 0x97, 255)), m_pseudo(false),
       m_text_color(Color(0, 0)) { }
 
 Button::Button(Widget *parent, const std::string &caption, const std::string &BackgroundImage, int icon)
     : Widget(parent), m_caption(caption), m_icon(icon), m_background_image(0),m_pushed_background_image(0),
       m_icon_position(IconPosition::LeftCentered), m_pushed(false),
-      m_flags(NormalButton), m_background_color(Color(0, 0)),
+      m_flags(NormalButton), m_background_color(Color(0, 0)), m_pseudo(false),
       m_text_color(Color(0, 0)) {
     if (!BackgroundImage.empty())
     {
@@ -164,7 +164,7 @@ void Button::draw(NVGcontext *ctx) {
     Widget::draw(ctx);
     int background_image = m_background_image;
 
-    if (m_psuedo)
+    if (m_pseudo)
         return;
 
     NVGcolor grad_top = m_theme->m_button_gradient_top_unfocused;

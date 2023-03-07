@@ -50,9 +50,12 @@
 
 typedef enum {
     TURNTABLE_TRACK_MODE,
+    /* 在漏识别目标情况下,开启的模糊跟踪模式 */
+    TURNTABLE_FUZZY_TRACK_MODE,
     TURNTABLE_MANUAL_MODE,
     TURNTABLE_SCAN_MODE,
     TURNTABLE_RESET_MODE,
+
 } turntable_mode_E;
 
 typedef enum {
