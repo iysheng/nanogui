@@ -55,6 +55,12 @@ typedef enum {
     TURNTABLE_MANUAL_MODE,
     TURNTABLE_SCAN_MODE,
     TURNTABLE_RESET_MODE,
+    
+    /* scan mode param config */
+    TURNTABLE_SCAN_MODE_CONFIG_LEFT_BOUNDARY,
+    TURNTABLE_SCAN_MODE_CONFIG_RIGHT_BOUNDARY,
+    TURNTABLE_SCAN_MODE_CONFIG_STAY_TIME,
+    TURNTABLE_SCAN_MODE_CONFIG_SPEED_LEVEL,
 
 } turntable_mode_E;
 
@@ -104,6 +110,8 @@ typedef struct {
         unsigned char mode;
         unsigned short target_pos_x;
         unsigned short target_pos_y;
+        unsigned short scan_stay_time;
+        unsigned short scan_speed_level;
       } turntable;
     } devices[2];
 } led3000_config_t;

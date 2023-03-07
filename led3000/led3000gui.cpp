@@ -703,6 +703,8 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
                 turntable_config.AddMember("mode", 1, allocator);
                 turntable_config.AddMember("target_pos_x", 0, allocator);
                 turntable_config.AddMember("target_pos_y", 0, allocator);
+                turntable_config.AddMember("scan_stay_time", 10, allocator);
+                turntable_config.AddMember("scan_speed_level", 32, allocator);
 
                 device_config_template.AddMember("white_led", white_led_config, allocator);
                 device_config_template.AddMember("green_led", green_led_config, allocator);
@@ -739,6 +741,8 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
                 mJsonValue.devices[i].turntable.mode = (unsigned char)devices[i]["turntable"]["mode"].GetUint();
                 mJsonValue.devices[i].turntable.target_pos_x = (unsigned short)devices[i]["turntable"]["target_pos_x"].GetUint();
                 mJsonValue.devices[i].turntable.target_pos_y = (unsigned short)devices[i]["turntable"]["target_pos_y"].GetUint();
+                mJsonValue.devices[i].turntable.scan_stay_time = (unsigned short)devices[i]["turntable"]["scan_stay_time"].GetUint();
+                mJsonValue.devices[i].turntable.scan_speed_level = (unsigned short)devices[i]["turntable"]["scan_speed_level"].GetUint();
               }
             }
 

@@ -296,7 +296,7 @@ static void _do_with_turntable_mode_fuzzy_track(led_device_t* devp, std::string 
 
 static void _do_with_turntable_mode_scan(led_device_t* devp, std::string message)
 {
-    uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X32 /* 扫海 */,
+    uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X2 /* 扫海 */,
         0XFF, 0XFF, 0XFF, 0XFF, 0X00 /* 校验和 */, 0XE7};
 
     buffer[10] = _get_xor(&buffer[2], 8);
@@ -309,6 +309,58 @@ static void _do_with_turntable_mode_scan(led_device_t* devp, std::string message
     devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
     devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
     RedDebug::hexdump("TRACK TARGET", (char*)tcp_buffer, sizeof(tcp_buffer));
+}
+
+/* 扫海模式参数配置
+ * 左边界       : 0X12
+ * 右边界       : 0X22
+ * 扫海速度     : 0X42
+ * 扫海停留时间 : 0X52
+ * */
+static void _do_with_turntable_mode_scan_config_left_boundary(led_device_t* devp, std::string message)
+{
+    uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X12 /* 扫海左边界 */,
+        0XFF, 0XFF, 0XFF, 0XFF, 0X00 /* 校验和 */, 0XE7};
+
+    buffer[10] = _get_xor(&buffer[2], 8);
+    write(devp->uart.fd, buffer, sizeof(buffer));
+    RedDebug::log("scan left boundary");
+}
+
+static void _do_with_turntable_mode_scan_config_right_boundary(led_device_t* devp, std::string message)
+{
+    uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X22 /* 扫海右边界 */,
+        0XFF, 0XFF, 0XFF, 0XFF, 0X00 /* 校验和 */, 0XE7};
+
+    buffer[10] = _get_xor(&buffer[2], 8);
+    write(devp->uart.fd, buffer, sizeof(buffer));
+    RedDebug::log("scan right boundary");
+}
+
+static void _do_with_turntable_mode_scan_config_stay_time(led_device_t* devp, std::string message)
+{
+    uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X42 /* 扫海停留时间 */,
+        0XFF, 0XFF, 0XFF, 0XFF, 0X00 /* 校验和 */, 0XE7};
+    int16_t param = (int16_t)stoi(message);
+
+    /* 更新配置停留时间参数 */
+    memcpy(&buffer[6], &param, sizeof(int16_t));
+    buffer[10] = _get_xor(&buffer[2], 8);
+    write(devp->uart.fd, buffer, sizeof(buffer));
+    RedDebug::log("scan config stay time:%s", message.c_str());
+}
+
+static void _do_with_turntable_mode_scan_config_speed_level(led_device_t* devp, std::string message)
+{
+    uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X52 /* 扫海速度 */,
+        0XFF, 0XFF, 0XFF, 0XFF, 0X00 /* 校验和 */, 0XE7};
+    int16_t param = (int16_t)stoi(message);
+
+    /* 更新配置参数线扫速度 */
+    memcpy(&buffer[6], &param, sizeof(int16_t));
+    buffer[10] = _get_xor(&buffer[2], 8);
+    write(devp->uart.fd, buffer, sizeof(buffer));
+    RedDebug::log("scan config speed level:%s", message.c_str());
 }
 
 static void _do_with_turntable_mode_setting(led_device_t* devp, std::string message)
@@ -325,6 +377,18 @@ static void _do_with_turntable_mode_setting(led_device_t* devp, std::string mess
             break;
         case TURNTABLE_SCAN_MODE:
             _do_with_turntable_mode_scan(devp, message);
+            break;
+        case TURNTABLE_SCAN_MODE_CONFIG_LEFT_BOUNDARY:
+            _do_with_turntable_mode_scan_config_left_boundary(devp, message);
+            break;
+        case TURNTABLE_SCAN_MODE_CONFIG_RIGHT_BOUNDARY:
+            _do_with_turntable_mode_scan_config_right_boundary(devp, message);
+            break;
+        case TURNTABLE_SCAN_MODE_CONFIG_STAY_TIME:
+            _do_with_turntable_mode_scan_config_stay_time(devp, message);
+            break;
+        case TURNTABLE_SCAN_MODE_CONFIG_SPEED_LEVEL:
+            _do_with_turntable_mode_scan_config_speed_level(devp, message);
             break;
         case TURNTABLE_MANUAL_MODE:
             /* 切换手动模式时，直接停机 */

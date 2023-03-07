@@ -123,6 +123,8 @@ static void _sync_json(Led3000Window *window)
     Pointer("/devices/0/turntable/mode").Set(*d, window->getJsonValue()->devices[0].turntable.mode);
     Pointer("/devices/0/turntable/target_pos_x").Set(*d, window->getJsonValue()->devices[0].turntable.target_pos_x);
     Pointer("/devices/0/turntable/target_pos_y").Set(*d, window->getJsonValue()->devices[0].turntable.target_pos_y);
+    Pointer("/devices/0/turntable/scan_stay_time").Set(*d, window->getJsonValue()->devices[0].turntable.scan_stay_time);
+    Pointer("/devices/0/turntable/scan_speed_level").Set(*d, window->getJsonValue()->devices[0].turntable.scan_speed_level);
 
     Pointer("/devices/1/camera_url").Set(*d, window->getJsonValue()->devices[1].camera_url);
     Pointer("/devices/1/white_led/mode").Set(*d, window->getJsonValue()->devices[1].white_led.mode);
@@ -144,6 +146,8 @@ static void _sync_json(Led3000Window *window)
     Pointer("/devices/1/turntable/mode").Set(*d, window->getJsonValue()->devices[1].turntable.mode);
     Pointer("/devices/1/turntable/target_pos_x").Set(*d, window->getJsonValue()->devices[1].turntable.target_pos_x);
     Pointer("/devices/1/turntable/target_pos_y").Set(*d, window->getJsonValue()->devices[1].turntable.target_pos_y);
+    Pointer("/devices/1/turntable/scan_stay_time").Set(*d, window->getJsonValue()->devices[1].turntable.scan_stay_time);
+    Pointer("/devices/1/turntable/scan_speed_level").Set(*d, window->getJsonValue()->devices[1].turntable.scan_speed_level);
 
     Writer<OStreamWrapper> writer(osw);
     d->Accept(writer);
