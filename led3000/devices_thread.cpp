@@ -302,13 +302,6 @@ static void _do_with_turntable_mode_scan(led_device_t* devp, std::string message
     buffer[10] = _get_xor(&buffer[2], 8);
     write(devp->uart.fd, buffer, sizeof(buffer));
     RedDebug::log("scan:%s", message.c_str());
-
-    char tcp_buffer[9] = {0XAA, 0XAA, 0X00, 0X00, 0X00, 0X09, 0XFD /* setting track disable */,
-        0X00, 0X5A /* 校验和 */};
-    //tcp_buffer[8] = _get_sum(&tcp_buffer[0], 8);
-    devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
-    devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
-    RedDebug::hexdump("TRACK TARGET", (char*)tcp_buffer, sizeof(tcp_buffer));
 }
 
 /* 扫海模式参数配置
@@ -377,18 +370,6 @@ static void _do_with_turntable_mode_setting(led_device_t* devp, std::string mess
             break;
         case TURNTABLE_SCAN_MODE:
             _do_with_turntable_mode_scan(devp, message);
-            break;
-        case TURNTABLE_SCAN_MODE_CONFIG_LEFT_BOUNDARY:
-            _do_with_turntable_mode_scan_config_left_boundary(devp, message);
-            break;
-        case TURNTABLE_SCAN_MODE_CONFIG_RIGHT_BOUNDARY:
-            _do_with_turntable_mode_scan_config_right_boundary(devp, message);
-            break;
-        case TURNTABLE_SCAN_MODE_CONFIG_STAY_TIME:
-            _do_with_turntable_mode_scan_config_stay_time(devp, message);
-            break;
-        case TURNTABLE_SCAN_MODE_CONFIG_SPEED_LEVEL:
-            _do_with_turntable_mode_scan_config_speed_level(devp, message);
             break;
         case TURNTABLE_MANUAL_MODE:
             /* 切换手动模式时，直接停机 */
@@ -709,6 +690,18 @@ extern int update_sysinfo2network(void);
                 break;
             case POLYM_TURNTABLE_POSITION_SETTING:
                 _do_with_turntable_position_setting(led_devp, msg_payload);
+                break;
+            case POLYM_TURNTABLE_SCAN_MODE_CONFIG_LEFT_BOUNDARY:
+                _do_with_turntable_mode_scan_config_left_boundary(led_devp, msg_payload);
+                break;
+            case POLYM_TURNTABLE_SCAN_MODE_CONFIG_RIGHT_BOUNDARY:
+                _do_with_turntable_mode_scan_config_right_boundary(led_devp, msg_payload);
+                break;
+            case POLYM_TURNTABLE_SCAN_MODE_CONFIG_STAY_TIME:
+                _do_with_turntable_mode_scan_config_stay_time(led_devp, msg_payload);
+                break;
+            case POLYM_TURNTABLE_SCAN_MODE_CONFIG_SPEED_LEVEL:
+                _do_with_turntable_mode_scan_config_speed_level(led_devp, msg_payload);
                 break;
             default:
                 RedDebug::log("No support this id:%d", msg_id);

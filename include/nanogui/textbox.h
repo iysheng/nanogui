@@ -58,11 +58,13 @@ public:
     void syncValue() const {
         if (mSyncChars) {memcpy(mSyncChars, m_value.c_str(), 1 + m_value.length());}
         else if (mSyncUshort && m_value.size() > 0) {*mSyncUshort = (unsigned short)stoi(m_value);}
+        else if (mSyncShort && m_value.size() > 0) {*mSyncShort = (short)stoi(m_value);}
         else if (mSyncUchar && m_value.size() > 0) {*mSyncUchar = (unsigned char)stoi(m_value);}
     }
     void setSyncCharsValue(char *syncChars) { mSyncChars = syncChars;}
     void setSyncUcharValue(unsigned char *syncChar) { mSyncUchar = syncChar;}
     void setSyncUshortValue(unsigned short *syncShort) { mSyncUshort = syncShort;}
+    void setSyncShortValue(short *syncShort) { mSyncShort = syncShort;}
 
     Alignment alignment() const { return m_alignment; }
     void set_alignment(Alignment align) { m_alignment = align; }
@@ -134,6 +136,7 @@ protected:
     char *mSyncChars = nullptr;
     unsigned char *mSyncUchar = nullptr;
     unsigned short *mSyncUshort = nullptr;
+    short *mSyncShort = nullptr;
     std::string m_value;
     std::string m_default_value;
     Alignment m_alignment;

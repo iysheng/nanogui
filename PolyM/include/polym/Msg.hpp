@@ -28,6 +28,12 @@ using MsgUID = unsigned long long;
 
 #define    POLYM_TURNTABLE_POSITION_SETTING     15 /* 角度控制 */
 
+
+#define    POLYM_TURNTABLE_SCAN_MODE_CONFIG_LEFT_BOUNDARY          16
+#define    POLYM_TURNTABLE_SCAN_MODE_CONFIG_RIGHT_BOUNDARY         17
+#define    POLYM_TURNTABLE_SCAN_MODE_CONFIG_STAY_TIME              18
+#define    POLYM_TURNTABLE_SCAN_MODE_CONFIG_SPEED_LEVEL            19
+
 /* JSON 文件配置 ID */
 #define    POLYM_BUTTON_CONFIRM  2
 #define    POLYM_BUTTON_CANCEL   1

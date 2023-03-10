@@ -296,11 +296,6 @@ void do_paint_white_light_mocode(Widget *widget)
     MessageDialog * msg_dlg = dynamic_cast<MessageDialog *>(widget);
     Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
 
-    if (!led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.auth)
-    {
-      return;
-    }
-
     auto * mocode_value_title = widget->add<Label>("莫码参数为：", "sans-bold");
     mocode_value_title->set_font_size(20);
     widget->window()->set_background_image(RED_LED3000_ASSETS_DIR"/set_msgdlg1.png");
@@ -587,6 +582,80 @@ void do_with_green_light_mocode(Widget *widget, int choose)
     return;
   }
 }
+
+void do_paint_scan_setting(Widget *widget)
+{
+    MessageDialog * msg_dlg = dynamic_cast<MessageDialog *>(widget);
+    Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
+
+    auto * mocode_value_title = widget->add<Label>("扫海间隔为(秒)：", "sans-bold");
+    mocode_value_title->set_font_size(20);
+    widget->window()->set_fixed_size(Vector2i(480, 542));
+    widget->window()->set_background_image(RED_LED3000_ASSETS_DIR"/set_msgdlg4.png");
+
+    auto *textBox = widget->add<TextBox>("", KeyboardType::Number);
+    textBox->set_position(Vector2i(194, 179));
+    textBox->set_fixed_size(Vector2i(138, 46));
+    textBox->set_editable(true);
+    textBox->set_value(to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].turntable.scan_stay_time));
+    textBox->setSyncShortValue(&(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].turntable.scan_stay_time));
+    textBox->set_font_size(16);
+    textBox->set_alignment(TextBox::Alignment::Left);
+
+    auto * mocode_counts_title = widget->add<Label>("速度等级：", "sans-bold");
+    mocode_counts_title->set_font_size(20);
+    textBox = widget->add<TextBox>("", KeyboardType::NumberIP);
+    textBox->set_position(Vector2i(194, 235));
+    textBox->set_fixed_size(Vector2i(138, 46));
+    textBox->set_editable(true);
+    textBox->set_value(to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].turntable.scan_speed_level));
+    textBox->setSyncShortValue(&(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].turntable.scan_speed_level));
+    textBox->set_font_size(16);
+    textBox->set_alignment(TextBox::Alignment::Left);
+
+    Button *btn_boundary = widget->add<Button>("左边界");
+    btn_boundary->set_fixed_size({90, 30});
+    btn_boundary->set_position({300, 300});
+    btn_boundary->set_callback([&] {
+        red_debug_lite("Set left boundary"); });
+
+    btn_boundary = widget->add<Button>("右边界");
+    btn_boundary->set_fixed_size({90, 30});
+    btn_boundary->set_position({300, 300});
+    btn_boundary->set_callback([&] {
+        red_debug_lite("Set right boundary"); });
+
+    mocode_value_title->set_position(Vector2i(61, 180));
+    mocode_counts_title->set_position(Vector2i(61, 236));
+
+    msg_dlg->label_icon()->set_position(Vector2i(148, 91));
+    msg_dlg->message_label()->set_position(Vector2i(104, 394));
+    msg_dlg->confirm_button()->set_position(Vector2i(10, 462));
+    msg_dlg->confirm_button()->set_fixed_size(Vector2i(156, 60));
+    msg_dlg->cancel_button()->set_position(Vector2i(176, 462));
+    msg_dlg->cancel_button()->set_fixed_size(Vector2i(156, 60));
+}
+
+void do_with_scan_setting(Widget *widget, int choose)
+{
+  Led3000Window * window = dynamic_cast<Led3000Window *>(widget->screen());
+  Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
+  if (choose == 1)
+  {
+    /* 发送扫海参数配置 */
+    led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_SCAN_MODE_CONFIG_STAY_TIME, to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].turntable.scan_stay_time)));
+    led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_SCAN_MODE_CONFIG_SPEED_LEVEL, to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].turntable.scan_speed_level)));
+    /* 同步消息内容到 json 文件 */
+    led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
+    return;
+  }
+  else
+  {
+    led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CANCEL, "json"));
+    return;
+  }
+}
+
 
 Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false, true),
         mFileName("/opt/led3000.json"), mFp(nullptr)
@@ -982,6 +1051,15 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
 
           m_turntable_dev = turntableWindow->add<Label>("灯光装置终端一 转台");
           m_turntable_dev->set_position({39, 9});
+
+          /* 扫海参数配置按键 */
+          Button *scan_setting_btn = turntableWindow->add<Button>("", "/tmp/abc/huiyuan/setting_scan.png", 0);
+          scan_setting_btn->set_position({270, 9});
+          scan_setting_btn->set_fixed_size({30, 30});
+          scan_setting_btn->set_callback([this]() {
+              new MessageDialog(this, MessageDialog::Type::Question, "", "", "确认", "取消", "", do_with_scan_setting, do_paint_scan_setting);
+          });
+
           auto * btn_ai = turntableWindow->add<Button>("目标检测");
           btn_ai->set_callback([&] {
               this->getJsonValue()->devices[this->getCurrentDevice()].turntable.mode = TURNTABLE_TRACK_MODE;
