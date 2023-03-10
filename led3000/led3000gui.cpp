@@ -593,7 +593,7 @@ void do_paint_scan_setting(Widget *widget)
     widget->window()->set_fixed_size(Vector2i(480, 542));
     widget->window()->set_background_image(RED_LED3000_ASSETS_DIR"/set_msgdlg4.png");
 
-    auto *textBox = widget->add<TextBox>("", KeyboardType::Number);
+    auto *textBox = widget->add<TextBox>("", KeyboardType::NumberIP);
     textBox->set_position(Vector2i(194, 179));
     textBox->set_fixed_size(Vector2i(138, 46));
     textBox->set_editable(true);
@@ -615,7 +615,7 @@ void do_paint_scan_setting(Widget *widget)
 
     Button *btn_boundary = widget->add<Button>("左边界");
     btn_boundary->set_fixed_size({90, 30});
-    btn_boundary->set_position({300, 300});
+    btn_boundary->set_position({90, 300});
     btn_boundary->set_callback([&] {
         red_debug_lite("Set left boundary"); });
 
@@ -629,7 +629,7 @@ void do_paint_scan_setting(Widget *widget)
     mocode_counts_title->set_position(Vector2i(61, 236));
 
     msg_dlg->label_icon()->set_position(Vector2i(148, 91));
-    msg_dlg->message_label()->set_position(Vector2i(104, 394));
+    msg_dlg->message_label()->set_position(Vector2i(188, 404));
     msg_dlg->confirm_button()->set_position(Vector2i(10, 462));
     msg_dlg->confirm_button()->set_fixed_size(Vector2i(156, 60));
     msg_dlg->cancel_button()->set_position(Vector2i(176, 462));
@@ -1057,7 +1057,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           scan_setting_btn->set_position({270, 9});
           scan_setting_btn->set_fixed_size({30, 30});
           scan_setting_btn->set_callback([this]() {
-              new MessageDialog(this, MessageDialog::Type::Question, "", "", "确认", "取消", "", do_with_scan_setting, do_paint_scan_setting);
+              new MessageDialog(this, MessageDialog::Type::Question, "", "设置扫海参数", "确认", "取消", "", do_with_scan_setting, do_paint_scan_setting);
           });
 
           auto * btn_ai = turntableWindow->add<Button>("目标检测");
