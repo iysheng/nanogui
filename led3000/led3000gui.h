@@ -363,6 +363,8 @@ private:
     PolyM::Queue mDeviceQueue[LED3000_DEVICES_COUNTS];
     FILE *mFp;
     std::string mFileName;
+public:
+    std::string m4PolyM[POLYM_TYPE_MAX];
 #endif
 };
 

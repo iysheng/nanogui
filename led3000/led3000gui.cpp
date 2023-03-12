@@ -274,7 +274,8 @@ void do_with_white_light_blink(Widget *widget, int choose)
   {
     /* 发送消息控制频闪 */
     led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mode = LED_BLINK_MODE;
-    led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_WHITE_BLINK_SETTING, to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.blink_freq)));
+    led3000Window->m4PolyM[POLYM_WHITE_BLINK_SETTING].assign(to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.blink_freq));
+    led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_WHITE_BLINK_SETTING, led3000Window->m4PolyM[POLYM_WHITE_BLINK_SETTING]));
     /* 同步消息内容到 json 文件 */
     led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
     white_dev_btns->at(0)->set_pushed(false);
@@ -410,15 +411,17 @@ void do_with_green_light_normal(Widget *widget, int choose)
 
             led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mode = LED_NORMAL_MODE_OFF;
             led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.normal_status = 0;
+            led3000Window->m4PolyM[POLYM_GREEN_NORMAL_SETTING].assign(to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.normal_status));
             /* 发送消息控制关灯 */
-            led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_GREEN_NORMAL_SETTING, to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.normal_status)));
+            led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_GREEN_NORMAL_SETTING, led3000Window->m4PolyM[POLYM_GREEN_NORMAL_SETTING]));
             led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
             break;
         case 1:
             /* 发送消息控制开灯 */
-            led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mode = LED_NORMAL_MODE;
+            led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mode = LED_NORMAL_MODE_OFF;
             led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.normal_status = 100;
-            led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_GREEN_NORMAL_SETTING, to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.normal_status)));
+            led3000Window->m4PolyM[POLYM_GREEN_NORMAL_SETTING].assign(to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.normal_status));
+            led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_GREEN_NORMAL_SETTING, led3000Window->m4PolyM[POLYM_GREEN_NORMAL_SETTING]));
             led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
             green_dev_btns->at(0)->set_pushed(true);
             green_dev_btns->at(1)->set_pushed(false);
@@ -479,8 +482,9 @@ void do_with_green_light_blink(Widget *widget, int choose)
 
   if (choose == 1)
   {
+    led3000Window->m4PolyM[POLYM_GREEN_BLINK_SETTING].assign(to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.blink_freq));
     /* 发送消息控制频闪 */
-    led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_GREEN_BLINK_SETTING, to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.blink_freq)));
+    led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_GREEN_BLINK_SETTING, led3000Window->m4PolyM[POLYM_GREEN_BLINK_SETTING]));
     led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mode = LED_BLINK_MODE;
     /* 同步消息内容到 json 文件 */
     led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
@@ -490,8 +494,9 @@ void do_with_green_light_blink(Widget *widget, int choose)
   }
   else
   {
+    led3000Window->m4PolyM[POLYM_GREEN_NORMAL_SETTING].assign(to_string(0));
     /* 发送消息关灯 */
-    led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_GREEN_NORMAL_SETTING, to_string(0X00)));
+    led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_GREEN_NORMAL_SETTING, led3000Window->m4PolyM[POLYM_GREEN_NORMAL_SETTING]));
     /* 同步消息内容到 json 文件 */
     led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
     green_dev_btns->at(1)->set_pushed(false);
@@ -1063,7 +1068,8 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           auto * btn_ai = turntableWindow->add<Button>("目标检测");
           btn_ai->set_callback([&] {
               this->getJsonValue()->devices[this->getCurrentDevice()].turntable.mode = TURNTABLE_TRACK_MODE;
-              this->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_MODE_SETTING, to_string(TURNTABLE_TRACK_MODE)));
+              this->m4PolyM[POLYM_TURNTABLE_MODE_SETTING].assign(to_string(TURNTABLE_TRACK_MODE));
+              this->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_MODE_SETTING, this->m4PolyM[POLYM_TURNTABLE_MODE_SETTING]));
               /* 同步消息内容到 json 文件 */
               this->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
           });
@@ -1073,7 +1079,8 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           auto *btn_manual = turntableWindow->add<Button>("手动");
           btn_manual->set_callback([&] {
               this->getJsonValue()->devices[this->getCurrentDevice()].turntable.mode = TURNTABLE_MANUAL_MODE;
-              this->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_MODE_SETTING, to_string(TURNTABLE_MANUAL_MODE)));
+              this->m4PolyM[POLYM_TURNTABLE_MODE_SETTING].assign(to_string(TURNTABLE_MANUAL_MODE));
+              this->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_MODE_SETTING, this->m4PolyM[POLYM_TURNTABLE_MODE_SETTING]));
               /* 同步消息内容到 json 文件 */
               this->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
           });
@@ -1083,7 +1090,8 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           auto *btn_scan = turntableWindow->add<Button>("扫海");
           btn_scan->set_callback([&] {
               this->getJsonValue()->devices[this->getCurrentDevice()].turntable.mode = TURNTABLE_SCAN_MODE;
-              this->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_MODE_SETTING, to_string(TURNTABLE_SCAN_MODE)));
+              this->m4PolyM[POLYM_TURNTABLE_MODE_SETTING].assign(to_string(TURNTABLE_SCAN_MODE));
+              this->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_MODE_SETTING, this->m4PolyM[POLYM_TURNTABLE_MODE_SETTING]));
               /* 同步消息内容到 json 文件 */
               this->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
           });
@@ -1117,13 +1125,15 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
                     {
 
                         this->getJsonValue()->devices[this->getCurrentDevice()].turntable.mode = TURNTABLE_FUZZY_TRACK_MODE;
-                        this->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_MODE_SETTING, to_string(TURNTABLE_FUZZY_TRACK_MODE)));
+              this->m4PolyM[POLYM_TURNTABLE_MODE_SETTING].assign(to_string(TURNTABLE_FUZZY_TRACK_MODE));
+              this->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_MODE_SETTING, this->m4PolyM[POLYM_TURNTABLE_MODE_SETTING]));
                         red_debug_lite("switch fuzzy track mode");
                     }
                     else
                     {
                         this->getJsonValue()->devices[this->getCurrentDevice()].turntable.mode = TURNTABLE_TRACK_MODE;
-                        this->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_MODE_SETTING, to_string(TURNTABLE_TRACK_MODE)));
+              this->m4PolyM[POLYM_TURNTABLE_MODE_SETTING].assign(to_string(TURNTABLE_TRACK_MODE));
+              this->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_MODE_SETTING, this->m4PolyM[POLYM_TURNTABLE_MODE_SETTING]));
                         red_debug_lite("switch target track mode");
                     }
                 }
