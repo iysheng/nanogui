@@ -593,10 +593,11 @@ void do_paint_scan_setting(Widget *widget)
     MessageDialog * msg_dlg = dynamic_cast<MessageDialog *>(widget);
     Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
 
-    auto * mocode_value_title = widget->add<Label>("扫海间隔为(秒)：", "sans-bold");
-    mocode_value_title->set_font_size(20);
     widget->window()->set_fixed_size(Vector2i(480, 542));
     widget->window()->set_background_image(RED_LED3000_ASSETS_DIR"/set_msgdlg4.png");
+
+    auto * stay_time_value_title = widget->add<Label>("扫海间隔(秒)：", "sans-bold");
+    stay_time_value_title->set_font_size(20);
 
     auto *textBox = widget->add<TextBox>("", KeyboardType::NumberIP);
     textBox->set_position(Vector2i(194, 179));
@@ -607,8 +608,8 @@ void do_paint_scan_setting(Widget *widget)
     textBox->set_font_size(16);
     textBox->set_alignment(TextBox::Alignment::Left);
 
-    auto * mocode_counts_title = widget->add<Label>("速度等级：", "sans-bold");
-    mocode_counts_title->set_font_size(20);
+    auto * speed_level_title = widget->add<Label>("速度等级：", "sans-bold");
+    speed_level_title->set_font_size(20);
     textBox = widget->add<TextBox>("", KeyboardType::NumberIP);
     textBox->set_position(Vector2i(194, 235));
     textBox->set_fixed_size(Vector2i(138, 46));
@@ -619,30 +620,31 @@ void do_paint_scan_setting(Widget *widget)
     textBox->set_alignment(TextBox::Alignment::Left);
 
     Button *btn_boundary = widget->add<Button>("左边界");
-    btn_boundary->set_fixed_size({90, 30});
-    btn_boundary->set_position({90, 300});
+    btn_boundary->set_fixed_size({200, 46});
+    btn_boundary->set_position({30, 289});
     btn_boundary->set_callback([&] {
         red_debug_lite("Set left boundary");
         led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_SCAN_MODE_CONFIG_LEFT_BOUNDARY, to_string(0X0)));
         });
 
     btn_boundary = widget->add<Button>("右边界");
-    btn_boundary->set_fixed_size({90, 30});
-    btn_boundary->set_position({300, 300});
+    btn_boundary->set_fixed_size({200, 46});
+    btn_boundary->set_position({250, 289});
     btn_boundary->set_callback([&] {
         led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_SCAN_MODE_CONFIG_RIGHT_BOUNDARY, to_string(0X0)));
         red_debug_lite("Set right boundary");
         });
 
-    mocode_value_title->set_position(Vector2i(61, 180));
-    mocode_counts_title->set_position(Vector2i(61, 236));
+    stay_time_value_title->set_position(Vector2i(55, 180));
+    speed_level_title->set_position(Vector2i(55, 236));
 
-    msg_dlg->label_icon()->set_position(Vector2i(148, 91));
+    msg_dlg->label_icon()->set_position(Vector2i(217, 91));
     msg_dlg->message_label()->set_position(Vector2i(188, 404));
-    msg_dlg->confirm_button()->set_position(Vector2i(10, 462));
-    msg_dlg->confirm_button()->set_fixed_size(Vector2i(156, 60));
-    msg_dlg->cancel_button()->set_position(Vector2i(176, 462));
-    msg_dlg->cancel_button()->set_fixed_size(Vector2i(156, 60));
+
+    msg_dlg->confirm_button()->set_position(Vector2i(10, 472));
+    msg_dlg->confirm_button()->set_fixed_size(Vector2i(225, 60));
+    msg_dlg->cancel_button()->set_position(Vector2i(245, 472));
+    msg_dlg->cancel_button()->set_fixed_size(Vector2i(225, 60));
 }
 
 void do_with_scan_setting(Widget *widget, int choose)
