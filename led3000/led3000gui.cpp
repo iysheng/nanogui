@@ -11,7 +11,6 @@
 #include <stdlib.h>
 #include <string>
 #include <version.h>
-#include <arpa/inet.h>
 
 using namespace nanogui;
 using std::cout;
@@ -654,11 +653,11 @@ void do_with_scan_setting(Widget *widget, int choose)
   if (choose == 1)
   {
     /* 发送扫海参数配置 */
-    value_nethost = htons(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].turntable.scan_stay_time);
+    value_nethost = led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].turntable.scan_stay_time;
     led3000Window->m4PolyM[POLYM_TURNTABLE_SCAN_MODE_CONFIG_STAY_TIME] = to_string(value_nethost);
     led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_SCAN_MODE_CONFIG_STAY_TIME, led3000Window->m4PolyM[POLYM_TURNTABLE_SCAN_MODE_CONFIG_STAY_TIME]));
 
-    value_nethost = htons(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].turntable.scan_speed_level);
+    value_nethost = led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].turntable.scan_speed_level;
     led3000Window->m4PolyM[POLYM_TURNTABLE_SCAN_MODE_CONFIG_STAY_TIME] = to_string(value_nethost);
     led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_SCAN_MODE_CONFIG_SPEED_LEVEL, led3000Window->m4PolyM[POLYM_TURNTABLE_SCAN_MODE_CONFIG_SPEED_LEVEL]));
     /* 同步消息内容到 json 文件 */

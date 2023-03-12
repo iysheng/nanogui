@@ -335,6 +335,7 @@ static void _do_with_turntable_mode_scan_config_stay_time(led_device_t* devp, st
     uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X42 /* 扫海停留时间 */,
         0XFF, 0XFF, 0XFF, 0XFF, 0X00 /* 校验和 */, 0XE7};
     int16_t param = (int16_t)stoi(message);
+    param = htons(param);
 
     /* 更新配置停留时间参数 */
     memcpy(&buffer[6], &param, sizeof(int16_t));
@@ -348,6 +349,7 @@ static void _do_with_turntable_mode_scan_config_speed_level(led_device_t* devp, 
     uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X52 /* 扫海速度 */,
         0XFF, 0XFF, 0XFF, 0XFF, 0X00 /* 校验和 */, 0XE7};
     int16_t param = (int16_t)stoi(message);
+    param = htons(param);
 
     /* 更新配置参数线扫速度 */
     memcpy(&buffer[6], &param, sizeof(int16_t));
