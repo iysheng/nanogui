@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string>
 #include <version.h>
+#include <arpa/inet.h>
 
 using namespace nanogui;
 using std::cout;
@@ -622,13 +623,17 @@ void do_paint_scan_setting(Widget *widget)
     btn_boundary->set_fixed_size({90, 30});
     btn_boundary->set_position({90, 300});
     btn_boundary->set_callback([&] {
-        red_debug_lite("Set left boundary"); });
+        red_debug_lite("Set left boundary");
+        led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_SCAN_MODE_CONFIG_LEFT_BOUNDARY, to_string(0X0)));
+        });
 
     btn_boundary = widget->add<Button>("右边界");
     btn_boundary->set_fixed_size({90, 30});
     btn_boundary->set_position({300, 300});
     btn_boundary->set_callback([&] {
-        red_debug_lite("Set right boundary"); });
+        led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_SCAN_MODE_CONFIG_RIGHT_BOUNDARY, to_string(0X0)));
+        red_debug_lite("Set right boundary");
+        });
 
     mocode_value_title->set_position(Vector2i(61, 180));
     mocode_counts_title->set_position(Vector2i(61, 236));
@@ -645,11 +650,17 @@ void do_with_scan_setting(Widget *widget, int choose)
 {
   Led3000Window * window = dynamic_cast<Led3000Window *>(widget->screen());
   Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
+  short value_nethost = 0;
   if (choose == 1)
   {
     /* 发送扫海参数配置 */
-    led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_SCAN_MODE_CONFIG_STAY_TIME, to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].turntable.scan_stay_time)));
-    led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_SCAN_MODE_CONFIG_SPEED_LEVEL, to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].turntable.scan_speed_level)));
+    value_nethost = htons(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].turntable.scan_stay_time);
+    led3000Window->m4PolyM[POLYM_TURNTABLE_SCAN_MODE_CONFIG_STAY_TIME] = to_string(value_nethost);
+    led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_SCAN_MODE_CONFIG_STAY_TIME, led3000Window->m4PolyM[POLYM_TURNTABLE_SCAN_MODE_CONFIG_STAY_TIME]));
+
+    value_nethost = htons(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].turntable.scan_speed_level);
+    led3000Window->m4PolyM[POLYM_TURNTABLE_SCAN_MODE_CONFIG_STAY_TIME] = to_string(value_nethost);
+    led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_SCAN_MODE_CONFIG_SPEED_LEVEL, led3000Window->m4PolyM[POLYM_TURNTABLE_SCAN_MODE_CONFIG_SPEED_LEVEL]));
     /* 同步消息内容到 json 文件 */
     led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
     return;
