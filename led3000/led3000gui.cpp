@@ -302,29 +302,7 @@ void do_paint_white_light_mocode(Widget *widget)
     widget->window()->set_background_image(RED_LED3000_ASSETS_DIR"/set_msgdlg1.png");
     auto *textBox = widget->add<TextBox>("", KeyboardType::Full);
     textBox->set_position(Vector2i(174, 167));
-    textBox->set_fixed_size(Vector2i(138, 46));
-    textBox->set_editable(true);
-    textBox->set_value(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mocode);
-    textBox->setSyncCharsValue(&(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mocode[0]));
-    textBox->set_font_size(16);
-    textBox->set_alignment(TextBox::Alignment::Left);
-
-    auto * mocode_counts_title = widget->add<Label>("莫码发送次数为：", "sans-bold");
-    mocode_counts_title->set_font_size(20);
-    textBox = widget->add<TextBox>("", KeyboardType::NumberIP);
-    textBox->set_position(Vector2i(174, 223));
-    textBox->set_fixed_size(Vector2i(138, 46));
-    textBox->set_editable(true);
-    textBox->set_value(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mocode);
-    textBox->setSyncCharsValue(&(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mocode[0]));
-    textBox->set_font_size(16);
-    textBox->set_alignment(TextBox::Alignment::Left);
-
-    auto * mocode_period_title = widget->add<Label>("莫码发送间隔为：", "sans-bold");
-    mocode_period_title->set_font_size(20);
-    textBox = widget->add<TextBox>("", KeyboardType::NumberIP);
-    textBox->set_fixed_size(Vector2i(138, 46));
-    textBox->set_position(Vector2i(174, 279));
+    textBox->set_fixed_size(Vector2i(276, 46));
     textBox->set_editable(true);
     textBox->set_value(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mocode);
     textBox->setSyncCharsValue(&(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mocode[0]));
@@ -332,15 +310,13 @@ void do_paint_white_light_mocode(Widget *widget)
     textBox->set_alignment(TextBox::Alignment::Left);
 
     mocode_value_title->set_position(Vector2i(61, 180));
-    mocode_counts_title->set_position(Vector2i(46, 236));
-    mocode_period_title->set_position(Vector2i(46, 292));
 
-    msg_dlg->label_icon()->set_position(Vector2i(148, 91));
-    msg_dlg->message_label()->set_position(Vector2i(104, 394));
-    msg_dlg->confirm_button()->set_position(Vector2i(10, 462));
-    msg_dlg->confirm_button()->set_fixed_size(Vector2i(156, 60));
-    msg_dlg->cancel_button()->set_position(Vector2i(176, 462));
-    msg_dlg->cancel_button()->set_fixed_size(Vector2i(156, 60));
+    msg_dlg->label_icon()->set_position(Vector2i(217, 91));
+    msg_dlg->message_label()->set_position(Vector2i(150, 282));
+    msg_dlg->confirm_button()->set_position(Vector2i(10, 350));
+    msg_dlg->confirm_button()->set_fixed_size(Vector2i(225, 60));
+    msg_dlg->cancel_button()->set_position(Vector2i(245, 350));
+    msg_dlg->cancel_button()->set_fixed_size(Vector2i(225, 60));
 }
 
 void do_with_white_light_mocode(Widget *widget, int choose)
@@ -518,29 +494,7 @@ void do_paint_green_light_mocode(Widget *widget)
         widget->window()->set_background_image(RED_LED3000_ASSETS_DIR"/set_msgdlg1.png");
         auto *textBox = widget->add<TextBox>("", KeyboardType::Full);
         textBox->set_position(Vector2i(174, 167));
-        textBox->set_fixed_size(Vector2i(138, 46));
-        textBox->set_editable(true);
-        textBox->set_value(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode);
-        textBox->setSyncCharsValue(&(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode[0]));
-        textBox->set_font_size(16);
-        textBox->set_alignment(TextBox::Alignment::Left);
-    
-        auto * mocode_counts_title = widget->add<Label>("莫码发送次数为：", "sans-bold");
-        mocode_counts_title->set_font_size(20);
-        textBox = widget->add<TextBox>("", KeyboardType::NumberIP);
-        textBox->set_position(Vector2i(174, 223));
-        textBox->set_fixed_size(Vector2i(138, 46));
-        textBox->set_editable(true);
-        textBox->set_value(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode);
-        textBox->setSyncCharsValue(&(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode[0]));
-        textBox->set_font_size(16);
-        textBox->set_alignment(TextBox::Alignment::Left);
-    
-        auto * mocode_period_title = widget->add<Label>("莫码发送间隔为：", "sans-bold");
-        mocode_period_title->set_font_size(20);
-        textBox = widget->add<TextBox>("", KeyboardType::NumberIP);
-        textBox->set_fixed_size(Vector2i(138, 46));
-        textBox->set_position(Vector2i(174, 279));
+        textBox->set_fixed_size(Vector2i(276, 46));
         textBox->set_editable(true);
         textBox->set_value(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode);
         textBox->setSyncCharsValue(&(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode[0]));
@@ -548,15 +502,13 @@ void do_paint_green_light_mocode(Widget *widget)
         textBox->set_alignment(TextBox::Alignment::Left);
     
         mocode_value_title->set_position(Vector2i(61, 180));
-        mocode_counts_title->set_position(Vector2i(46, 236));
-        mocode_period_title->set_position(Vector2i(46, 292));
     
-        msg_dlg->label_icon()->set_position(Vector2i(148, 91));
-        msg_dlg->message_label()->set_position(Vector2i(104, 394));
-        msg_dlg->confirm_button()->set_position(Vector2i(10, 462));
-        msg_dlg->confirm_button()->set_fixed_size(Vector2i(156, 60));
-        msg_dlg->cancel_button()->set_position(Vector2i(176, 462));
-        msg_dlg->cancel_button()->set_fixed_size(Vector2i(156, 60));
+        msg_dlg->label_icon()->set_position(Vector2i(217, 91));
+        msg_dlg->message_label()->set_position(Vector2i(150, 282));
+        msg_dlg->confirm_button()->set_position(Vector2i(10, 350));
+        msg_dlg->confirm_button()->set_fixed_size(Vector2i(225, 60));
+        msg_dlg->cancel_button()->set_position(Vector2i(245, 350));
+        msg_dlg->cancel_button()->set_fixed_size(Vector2i(225, 60));
     }
 }
 
@@ -600,8 +552,8 @@ void do_paint_scan_setting(Widget *widget)
     stay_time_value_title->set_font_size(20);
 
     auto *textBox = widget->add<TextBox>("", KeyboardType::NumberIP);
-    textBox->set_position(Vector2i(194, 179));
-    textBox->set_fixed_size(Vector2i(138, 46));
+    textBox->set_position(Vector2i(174, 167));
+    textBox->set_fixed_size(Vector2i(276, 46));
     textBox->set_editable(true);
     textBox->set_value(to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].turntable.scan_stay_time));
     textBox->setSyncShortValue(&(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].turntable.scan_stay_time));
@@ -611,8 +563,8 @@ void do_paint_scan_setting(Widget *widget)
     auto * speed_level_title = widget->add<Label>("速度等级：", "sans-bold");
     speed_level_title->set_font_size(20);
     textBox = widget->add<TextBox>("", KeyboardType::NumberIP);
-    textBox->set_position(Vector2i(194, 235));
-    textBox->set_fixed_size(Vector2i(138, 46));
+    textBox->set_position(Vector2i(174, 223));
+    textBox->set_fixed_size(Vector2i(276, 46));
     textBox->set_editable(true);
     textBox->set_value(to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].turntable.scan_speed_level));
     textBox->setSyncShortValue(&(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].turntable.scan_speed_level));
@@ -1072,8 +1024,8 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
 
           /* 扫海参数配置按键 */
           Button *scan_setting_btn = turntableWindow->add<Button>("", "/tmp/abc/huiyuan/setting_scan.png", 0);
-          scan_setting_btn->set_position({270, 9});
-          scan_setting_btn->set_fixed_size({30, 30});
+          scan_setting_btn->set_position({305, 4});
+          scan_setting_btn->set_fixed_size({32, 32});
           scan_setting_btn->set_callback([this]() {
               new MessageDialog(this, MessageDialog::Type::Question, "", "设置扫海参数", "确认", "取消", "", do_with_scan_setting, do_paint_scan_setting);
           });
