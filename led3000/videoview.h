@@ -35,6 +35,7 @@ enum VideoViewStatus
     R_VIDEO_INITLED,
 };
 
+#define LED3000_MPP_H265
 #define SRCURL_MAX    128
 /**
  * \class VideoView imageview.h sdl_gui/imageview.h
@@ -62,7 +63,10 @@ protected:
     char mSrcUrl[SRCURL_MAX];
     std::thread *m_thread;
     VideoViewStatus mStatus;
-    uint8_t* m_pixels;
+    uint8_t * m_pixels;
+#ifdef LED3000_MPP_H265
+    uint8_t * m_crop4h265;
+#endif
     Texture *m_texture;
     int m_no_frame_counts;
 };

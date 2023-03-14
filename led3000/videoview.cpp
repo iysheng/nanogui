@@ -213,7 +213,7 @@ int mpp_hardware_init(MpiDecLoopData *data)
     }
 
     // NOTE: decoder split mode need to be set before init
-    mpi_cmd = MPP_DEC_SET_PARSER_SPLIT_MODE;
+    mpi_cmd = MPP_DEC_SET_PARSER_FAST_MODE; //MPP_DEC_SET_PARSER_SPLIT_MODE;
     param = &need_split;
     ret = mpi->control(ctx, mpi_cmd, param);
     if (MPP_OK != ret) {
@@ -259,6 +259,7 @@ int mpp_hardware_init(MpiDecLoopData *data)
 
     return 0;
 }
+//#define DEBUG_MPP_DECODER
 
 #ifdef DEBUG_MPP_DECODER
 void dump_file(char * prefix, char *data, int data_len)
@@ -278,7 +279,7 @@ void dump_file(char * prefix, char *data, int data_len)
 }
 #endif
 
-int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_buffer)
+int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_buffer, char *crop_buffer = nullptr)
 {
     RK_U32 pkt_done = 0;
     RK_U32 pkt_eos  = 0;
@@ -292,6 +293,8 @@ int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_b
     size_t packet_size = data->packet_size;
     RK_U32 h_stride = 0;
     RK_U32 v_stride = 0;
+    RK_U32 width = 0;
+    RK_U32 height = 0;
     RK_U32 buf_size;
 
     MppBuffer buffer    = NULL;
@@ -300,6 +303,10 @@ int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_b
     rga_buffer_t dst;
     im_rect src_rect;
     im_rect dst_rect;
+#ifdef LED3000_MPP_H265
+    rga_buffer_t crop;
+    im_rect crop_rect;
+#endif
 
     ret = mpp_packet_init(&packet, av_packet->data, av_packet->size);
     mpp_packet_set_pts(packet, av_packet->pts);
@@ -343,8 +350,8 @@ int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_b
             if (frame) {
                 /* 信息变换帧,这个一般不会 */
                 if (mpp_frame_get_info_change(frame)) {
-                    RK_U32 width = mpp_frame_get_width(frame);
-                    RK_U32 height = mpp_frame_get_height(frame);
+                    width = mpp_frame_get_width(frame);
+                    height = mpp_frame_get_height(frame);
                     RK_U32 hor_stride = mpp_frame_get_hor_stride(frame);
                     RK_U32 ver_stride = mpp_frame_get_ver_stride(frame);
                     RK_U32 buf_size = mpp_frame_get_buf_size(frame);
@@ -376,6 +383,8 @@ int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_b
                     buf_size = mpp_frame_get_buf_size(frame);
                     h_stride = mpp_frame_get_hor_stride(frame);
                     v_stride = mpp_frame_get_ver_stride(frame);
+                    width = mpp_frame_get_width(frame);
+                    height = mpp_frame_get_height(frame);
                     RK_U8 * base = NULL;
                     /* 获取内存首地址 */
                     base = (RK_U8 *)mpp_buffer_get_ptr(buffer);
@@ -400,18 +409,54 @@ int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_b
                         return ERROR;
                     }
 
-                    /* 处理源和目的 rect 信息 */
-            ret = (MPP_RET)imcheck(src, dst, src_rect, dst_rect);
+            /* 缩放之前标记编码格式 */
+            src.format = RK_FORMAT_YCbCr_420_SP;
+            dst.format = DST_FORMAT;
+
+#ifdef LED3000_MPP_H265
+            memset(&crop, 0, sizeof(crop));
+            memset(&crop_rect, 0, sizeof(crop_rect));
+            crop_rect.x = 0;
+            crop_rect.y = 0;
+            crop_rect.width = width;
+            crop_rect.height = height;
+            crop = wrapbuffer_virtualaddr(crop_buffer, width, height, SRC_FORMAT);
+            crop.format = src.format;
+
+            ret = (MPP_RET)imcheck(src, crop, crop_rect, src_rect, IM_CROP);
             if (IM_STATUS_NOERROR != ret) {
-                printf("%d, check error! %s", __LINE__, imStrError((IM_STATUS)ret));
+                red_debug_lite("%d, check error! %s", __LINE__, imStrError((IM_STATUS)ret));
                 return -1;
             }
 
-            /* 缩放之前标记编码格式 */
-            src.format = RK_FORMAT_YCbCr_420_SP;
-            dst.format = RK_FORMAT_RGBA_8888;
+            ret = (MPP_RET)imcrop(src,
+                 crop,
+                 crop_rect);
+            if (ret != IM_STATUS_SUCCESS)
+            {
+                red_debug_lite("imcrop error! %d %s", __LINE__, imStrError((IM_STATUS)ret));
+            }
+
+            crop_rect.x = 0;
+            crop_rect.y = 0;
+            crop_rect.width = width;
+            crop_rect.height = height;
+            ret = (MPP_RET)imcheck(crop, dst, crop_rect, dst_rect);
+            if (IM_STATUS_NOERROR != ret) {
+                red_debug_lite("%d, check error! %s", __LINE__, imStrError((IM_STATUS)ret));
+                return -1;
+            }
+            ret = (MPP_RET)imresize(crop, dst);
+            //dump_file("imcrop", display_buffer, 4 * VIDEO_SHOW_FIXED_HEIGH * VIDEO_SHOW_FIXED_WIDTH);
+#else
+            ret = (MPP_RET)imcheck(src, crop, crop_rect, src);
+            if (IM_STATUS_NOERROR != ret) {
+                red_debug_lite("%d, check error! %s", __LINE__, imStrError((IM_STATUS)ret));
+                return -1;
+            }
             ret = (MPP_RET)imresize(src, dst);
-            //printf("resizing .... %s %p\n", imStrError(ret), display_buffer);
+#endif
+            //printf("resizing .... [%s %p]\n", imStrError(ret), display_buffer);
                    }
                 }
                 frm_eos = mpp_frame_get_eos(frame);
@@ -625,7 +670,8 @@ re_open:
     Vector2i top_left = Vector2i(p_video_obj->pixel_to_pos(Vector2f(0.f, 0.f))),
              size     = Vector2i(p_video_obj->pixel_to_pos(Vector2f(p_video_obj->size())) - Vector2f(top_left));
     if (!p_video_obj->m_pixels)
-        p_video_obj->m_pixels = (uint8_t *)malloc(10 * VIDEO_SHOW_FIXED_WIDTH * VIDEO_SHOW_FIXED_HEIGH * mpp_get_bpp_from_format(DST_FORMAT));
+        p_video_obj->m_pixels = (uint8_t *)malloc(5 * VIDEO_SHOW_FIXED_WIDTH * VIDEO_SHOW_FIXED_HEIGH * mpp_get_bpp_from_format(DST_FORMAT));
+
     if (!p_video_obj->m_pixels)
     {
         red_debug_lite("Failed malloc memory for mpp\n");
@@ -633,8 +679,23 @@ re_open:
     }
     else
     {
-        red_debug_lite("malloc memory 4 mpp size=%.1f\n", 10 * VIDEO_SHOW_FIXED_WIDTH * VIDEO_SHOW_FIXED_HEIGH * mpp_get_bpp_from_format(DST_FORMAT));
+        red_debug_lite("malloc memory 4 mpp size=%.1f\n", 5 * VIDEO_SHOW_FIXED_WIDTH * VIDEO_SHOW_FIXED_HEIGH * mpp_get_bpp_from_format(DST_FORMAT));
     }
+#ifdef LED3000_MPP_H265
+    if (!p_video_obj->m_crop4h265)
+        p_video_obj->m_crop4h265 = (uint8_t *)malloc(VIDEO_TRACK_FIXED_WIDTH* VIDEO_TRACK_FIXED_WIDTH* mpp_get_bpp_from_format(SRC_FORMAT));
+
+    if (!p_video_obj->m_crop4h265)
+    {
+        red_debug_lite("Failed malloc memory for crop\n");
+        return -12;
+    }
+    else
+    {
+        red_debug_lite("malloc memory 4 crop size=%.1f\n", VIDEO_TRACK_FIXED_WIDTH * VIDEO_TRACK_FIXED_HEIGH * mpp_get_bpp_from_format(SRC_FORMAT));
+    }
+#endif
+
     if (!mpp_hardware_init(&mpp_data))
     {
         red_debug_lite("success mpp_hardware_init\n");
@@ -644,6 +705,12 @@ just_draw:
     while (1)
     {
         ret = av_read_frame(p_avformat_context, &packet);
+#ifdef DEBUG_MPP_DECODER
+        /*
+         * TODO dump av_paket to file
+         * */
+        dump_file("hikraw", (char *)packet.data, packet.size);
+#endif
         if (ret < 0)
         {
             red_debug_lite("Failed get frame 00000000000 %d\n", p_video_obj->m_no_frame_counts++);
@@ -672,7 +739,11 @@ just_draw:
         else
         {
             p_video_obj->m_no_frame_counts = 0;
+#ifdef LED3000_MPP_H265
+            mpp_decode_simple(&mpp_data, &packet, (char *)p_video_obj->m_pixels, (char *)p_video_obj->m_crop4h265);
+#else
             mpp_decode_simple(&mpp_data, &packet, (char *)p_video_obj->m_pixels);
+#endif
             if (p_video_obj->mStatus != R_VIDEO_RUNNING)
                 p_video_obj->mStatus = R_VIDEO_INITLED;
         }
@@ -688,6 +759,9 @@ exit:
 
     /* 释放内存 */
     free(p_video_obj->m_pixels);
+#ifdef LED3000_MPP_H265
+    free(p_video_obj->m_crop4h265);
+#endif
 
     value = avcodec_close(p_avcodec_context);
     if (value)
@@ -702,7 +776,7 @@ exit:
     return 0;
 }
 
-VideoView::VideoView(Widget* parent):ImageView(parent), m_texture(nullptr), m_pixels(nullptr),
+VideoView::VideoView(Widget* parent):ImageView(parent), m_texture(nullptr), m_pixels(nullptr), m_crop4h265(nullptr),
     m_thread(nullptr), mSrcUrl("rtsp://admin:jariled123@192.168.100.64"), m_no_frame_counts(0)
 {
     Window * wnd = parent->window();
