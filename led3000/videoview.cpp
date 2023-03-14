@@ -53,71 +53,72 @@ NAMESPACE_BEGIN(nanogui)
 
 #define ERROR -1
 
-float mpp_get_bpp_from_format(int format) {
+float mpp_get_bpp_from_format(int format)
+{
     float bpp = 0;
 
     switch (format) {
-        case RK_FORMAT_Y4:
-            bpp = 0.5;
-            break;
-        case RK_FORMAT_BPP1:
-        case RK_FORMAT_BPP2:
-        case RK_FORMAT_BPP4:
-        case RK_FORMAT_BPP8:
-        case RK_FORMAT_YCbCr_400:
-            bpp = 1;
-            break;
-        case RK_FORMAT_YCbCr_420_SP:
-        case RK_FORMAT_YCbCr_420_P:
-        case RK_FORMAT_YCrCb_420_P:
-        case RK_FORMAT_YCrCb_420_SP:
-        /* yuyv */
-        case RK_FORMAT_YVYU_420:
-        case RK_FORMAT_VYUY_420:
-        case RK_FORMAT_YUYV_420:
-        case RK_FORMAT_UYVY_420:
-            bpp = 1.5;
-            break;
-        case RK_FORMAT_RGB_565:
-        case RK_FORMAT_RGBA_5551:
-        case RK_FORMAT_RGBA_4444:
-        case RK_FORMAT_BGR_565:
-        case RK_FORMAT_BGRA_5551:
-        case RK_FORMAT_BGRA_4444:
-        case RK_FORMAT_YCbCr_422_SP:
-        case RK_FORMAT_YCbCr_422_P:
-        case RK_FORMAT_YCrCb_422_SP:
-        case RK_FORMAT_YCrCb_422_P:
-        /* yuyv */
-        case RK_FORMAT_YVYU_422:
-        case RK_FORMAT_VYUY_422:
-        case RK_FORMAT_YUYV_422:
-        case RK_FORMAT_UYVY_422:
-            bpp = 2;
-            break;
-        /*RK encoder requires alignment of odd multiples of 256.*/
-        /*Here bpp=2 guarantee to read complete data.*/
-        case RK_FORMAT_YCbCr_420_SP_10B:
-        case RK_FORMAT_YCrCb_420_SP_10B:
-            bpp = 2;
-            break;
-        case RK_FORMAT_YCbCr_422_10b_SP:
-        case RK_FORMAT_YCrCb_422_10b_SP:
-            bpp = 2.5;
-            break;
-        case RK_FORMAT_BGR_888:
-        case RK_FORMAT_RGB_888:
-            bpp = 3;
-            break;
-        case RK_FORMAT_RGBA_8888:
-        case RK_FORMAT_RGBX_8888:
-        case RK_FORMAT_BGRA_8888:
-        case RK_FORMAT_BGRX_8888:
-            bpp = 4;
-            break;
-        default:
-            printf("Is unsupport format now, please fix \n");
-            return 0;
+    case RK_FORMAT_Y4:
+        bpp = 0.5;
+        break;
+    case RK_FORMAT_BPP1:
+    case RK_FORMAT_BPP2:
+    case RK_FORMAT_BPP4:
+    case RK_FORMAT_BPP8:
+    case RK_FORMAT_YCbCr_400:
+        bpp = 1;
+        break;
+    case RK_FORMAT_YCbCr_420_SP:
+    case RK_FORMAT_YCbCr_420_P:
+    case RK_FORMAT_YCrCb_420_P:
+    case RK_FORMAT_YCrCb_420_SP:
+    /* yuyv */
+    case RK_FORMAT_YVYU_420:
+    case RK_FORMAT_VYUY_420:
+    case RK_FORMAT_YUYV_420:
+    case RK_FORMAT_UYVY_420:
+        bpp = 1.5;
+        break;
+    case RK_FORMAT_RGB_565:
+    case RK_FORMAT_RGBA_5551:
+    case RK_FORMAT_RGBA_4444:
+    case RK_FORMAT_BGR_565:
+    case RK_FORMAT_BGRA_5551:
+    case RK_FORMAT_BGRA_4444:
+    case RK_FORMAT_YCbCr_422_SP:
+    case RK_FORMAT_YCbCr_422_P:
+    case RK_FORMAT_YCrCb_422_SP:
+    case RK_FORMAT_YCrCb_422_P:
+    /* yuyv */
+    case RK_FORMAT_YVYU_422:
+    case RK_FORMAT_VYUY_422:
+    case RK_FORMAT_YUYV_422:
+    case RK_FORMAT_UYVY_422:
+        bpp = 2;
+        break;
+    /*RK encoder requires alignment of odd multiples of 256.*/
+    /*Here bpp=2 guarantee to read complete data.*/
+    case RK_FORMAT_YCbCr_420_SP_10B:
+    case RK_FORMAT_YCrCb_420_SP_10B:
+        bpp = 2;
+        break;
+    case RK_FORMAT_YCbCr_422_10b_SP:
+    case RK_FORMAT_YCrCb_422_10b_SP:
+        bpp = 2.5;
+        break;
+    case RK_FORMAT_BGR_888:
+    case RK_FORMAT_RGB_888:
+        bpp = 3;
+        break;
+    case RK_FORMAT_RGBA_8888:
+    case RK_FORMAT_RGBX_8888:
+    case RK_FORMAT_BGRA_8888:
+    case RK_FORMAT_BGRX_8888:
+        bpp = 4;
+        break;
+    default:
+        printf("Is unsupport format now, please fix \n");
+        return 0;
     }
 
     return bpp;
@@ -196,7 +197,7 @@ int mpp_hardware_init(MpiDecLoopData *data)
 
     // resources
     char *buf           = NULL;
-    size_t packet_size  = 8*1024;
+    size_t packet_size  = 8 * 1024;
     MppBuffer pkt_buf   = NULL;
     MppBuffer frm_buf   = NULL;
 
@@ -236,16 +237,14 @@ int mpp_hardware_init(MpiDecLoopData *data)
     }
 
 #if 0
-   mpi_cmd = MPP_DEC_SET_OUTPUT_FORMAT;
-   MppFrameFormat rgba_format = MPP_FMT_ARGB8888;//MPP_FMT_YUV420SP;// MPP_FMT_YUV420SP;//MPP_FMT_RGBA8888;
+    mpi_cmd = MPP_DEC_SET_OUTPUT_FORMAT;
+    MppFrameFormat rgba_format = MPP_FMT_ARGB8888;//MPP_FMT_YUV420SP;// MPP_FMT_YUV420SP;//MPP_FMT_RGBA8888;
     param = &rgba_format;
     ret = mpi->control(ctx, mpi_cmd, param);
     if (MPP_OK != ret) {
         printf("mpi->control failed aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n");
         deInit(&packet, &frame, ctx, buf, data);
-    }
-    else
-    {
+    } else {
         printf("mpi->control success bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\n");
     }
 #endif
@@ -322,15 +321,15 @@ int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_b
                 printf("送入码流出错:%d\n", ret);
         }
 
-        int abc=0, def_index= 0;
-        char file_name[32]={0};
+        int abc = 0, def_index = 0;
+        char file_name[32] = {0};
         FILE *yuv_file_fd;
         // then get all available frame and release
         do {
             RK_S32 get_frm = 0;
             RK_U32 frm_eos = 0;
 
-            try_again:
+        try_again:
             /* 循环等待解码流 */
             ret = mpi->decode_get_frame(ctx, &frame);
             if (MPP_ERR_TIMEOUT == ret) {
@@ -358,7 +357,7 @@ int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_b
 
                     printf("decode_get_frame get info changed found 不应该出现信息变换帧\n");
                     printf("decoder require buffer w:h [%d:%d] stride [%d:%d] buf_size %d",
-                            width, height, hor_stride, ver_stride, buf_size);
+                           width, height, hor_stride, ver_stride, buf_size);
 
                     ret = mpp_buffer_group_get_internal(&data->frm_grp, MPP_BUFFER_TYPE_ION);
                     if (ret) {
@@ -372,92 +371,91 @@ int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_b
                     err_info = mpp_frame_get_errinfo(frame) | mpp_frame_get_discard(frame);
                     if (err_info) {
                         printf("解码的帧出错了 decoder_get_frame get err info:%d discard:%d.\n",
-                                mpp_frame_get_errinfo(frame), mpp_frame_get_discard(frame));
+                               mpp_frame_get_errinfo(frame), mpp_frame_get_discard(frame));
                     }
                     data->frame_count++;
                     /* 如果成功解码了一帧 */
                     /*  准备显示这个 frame */
-                   if (!err_info){
-                    /* 获取这个帧的 buffer 信息 */
-                    buffer = mpp_frame_get_buffer(frame);
-                    buf_size = mpp_frame_get_buf_size(frame);
-                    h_stride = mpp_frame_get_hor_stride(frame);
-                    v_stride = mpp_frame_get_ver_stride(frame);
-                    width = mpp_frame_get_width(frame);
-                    height = mpp_frame_get_height(frame);
-                    RK_U8 * base = NULL;
-                    /* 获取内存首地址 */
-                    base = (RK_U8 *)mpp_buffer_get_ptr(buffer);
-                    //printf("base=%p fmt=%d hstride=%d vstride=%d size=%d\n", base, mpp_frame_get_fmt(frame), h_stride, v_stride, buf_size);
-                    ///////////////////////////////
-                    memset(&src_rect, 0, sizeof(src_rect));
-                    memset(&dst_rect, 0, sizeof(dst_rect));
-                    memset(&src, 0, sizeof(src));
-                    memset(&dst, 0, sizeof(dst));
+                    if (!err_info) {
+                        /* 获取这个帧的 buffer 信息 */
+                        buffer = mpp_frame_get_buffer(frame);
+                        buf_size = mpp_frame_get_buf_size(frame);
+                        h_stride = mpp_frame_get_hor_stride(frame);
+                        v_stride = mpp_frame_get_ver_stride(frame);
+                        width = mpp_frame_get_width(frame);
+                        height = mpp_frame_get_height(frame);
+                        RK_U8 * base = NULL;
+                        /* 获取内存首地址 */
+                        base = (RK_U8 *)mpp_buffer_get_ptr(buffer);
+                        //printf("base=%p fmt=%d hstride=%d vstride=%d size=%d\n", base, mpp_frame_get_fmt(frame), h_stride, v_stride, buf_size);
+                        ///////////////////////////////
+                        memset(&src_rect, 0, sizeof(src_rect));
+                        memset(&dst_rect, 0, sizeof(dst_rect));
+                        memset(&src, 0, sizeof(src));
+                        memset(&dst, 0, sizeof(dst));
 #ifdef DEBUG_MPP_DECODER
-    /*
-     * TODO dump av_paket to file
-     * */
-    dump_file("hik", (char *)base, buf_size);
+                        /*
+                         * TODO dump av_paket to file
+                         * */
+                        dump_file("hik", (char *)base, buf_size);
 #endif
-                    /* RGA 模块封装源信息 */
-                    src = wrapbuffer_virtualaddr(base, h_stride, v_stride, SRC_FORMAT);
-                    /* RGA 模块封装目的信息 */
-                    dst = wrapbuffer_virtualaddr(display_buffer, VIDEO_SHOW_FIXED_WIDTH, VIDEO_SHOW_FIXED_HEIGH, DST_FORMAT);
-                    if(dst.width == 0) {
-                        printf("%s, %s\n", __FUNCTION__, imStrError());
-                        return ERROR;
-                    }
+                        /* RGA 模块封装源信息 */
+                        src = wrapbuffer_virtualaddr(base, h_stride, v_stride, SRC_FORMAT);
+                        /* RGA 模块封装目的信息 */
+                        dst = wrapbuffer_virtualaddr(display_buffer, VIDEO_SHOW_FIXED_WIDTH, VIDEO_SHOW_FIXED_HEIGH, DST_FORMAT);
+                        if (dst.width == 0) {
+                            printf("%s, %s\n", __FUNCTION__, imStrError());
+                            return ERROR;
+                        }
 
-            /* 缩放之前标记编码格式 */
-            src.format = RK_FORMAT_YCbCr_420_SP;
-            dst.format = DST_FORMAT;
+                        /* 缩放之前标记编码格式 */
+                        src.format = RK_FORMAT_YCbCr_420_SP;
+                        dst.format = DST_FORMAT;
 
 #ifdef LED3000_MPP_H265
-            memset(&crop, 0, sizeof(crop));
-            memset(&crop_rect, 0, sizeof(crop_rect));
-            crop_rect.x = 0;
-            crop_rect.y = 0;
-            crop_rect.width = width;
-            crop_rect.height = height;
-            crop = wrapbuffer_virtualaddr(crop_buffer, width, height, SRC_FORMAT);
-            crop.format = src.format;
+                        memset(&crop, 0, sizeof(crop));
+                        memset(&crop_rect, 0, sizeof(crop_rect));
+                        crop_rect.x = 0;
+                        crop_rect.y = 0;
+                        crop_rect.width = width;
+                        crop_rect.height = height;
+                        crop = wrapbuffer_virtualaddr(crop_buffer, width, height, SRC_FORMAT);
+                        crop.format = src.format;
 
-            ret = (MPP_RET)imcheck(src, crop, crop_rect, src_rect, IM_CROP);
-            if (IM_STATUS_NOERROR != ret) {
-                red_debug_lite("%d, check error! %s", __LINE__, imStrError((IM_STATUS)ret));
-                return -1;
-            }
+                        ret = (MPP_RET)imcheck(src, crop, crop_rect, src_rect, IM_CROP);
+                        if (IM_STATUS_NOERROR != ret) {
+                            red_debug_lite("%d, check error! %s", __LINE__, imStrError((IM_STATUS)ret));
+                            return -1;
+                        }
 
-            ret = (MPP_RET)imcrop(src,
-                 crop,
-                 crop_rect);
-            if (ret != IM_STATUS_SUCCESS)
-            {
-                red_debug_lite("imcrop error! %d %s", __LINE__, imStrError((IM_STATUS)ret));
-            }
+                        ret = (MPP_RET)imcrop(src,
+                                              crop,
+                                              crop_rect);
+                        if (ret != IM_STATUS_SUCCESS) {
+                            red_debug_lite("imcrop error! %d %s", __LINE__, imStrError((IM_STATUS)ret));
+                        }
 
-            crop_rect.x = 0;
-            crop_rect.y = 0;
-            crop_rect.width = width;
-            crop_rect.height = height;
-            ret = (MPP_RET)imcheck(crop, dst, crop_rect, dst_rect);
-            if (IM_STATUS_NOERROR != ret) {
-                red_debug_lite("%d, check error! %s", __LINE__, imStrError((IM_STATUS)ret));
-                return -1;
-            }
-            ret = (MPP_RET)imresize(crop, dst);
-            //dump_file("imcrop", display_buffer, 4 * VIDEO_SHOW_FIXED_HEIGH * VIDEO_SHOW_FIXED_WIDTH);
+                        crop_rect.x = 0;
+                        crop_rect.y = 0;
+                        crop_rect.width = width;
+                        crop_rect.height = height;
+                        ret = (MPP_RET)imcheck(crop, dst, crop_rect, dst_rect);
+                        if (IM_STATUS_NOERROR != ret) {
+                            red_debug_lite("%d, check error! %s", __LINE__, imStrError((IM_STATUS)ret));
+                            return -1;
+                        }
+                        ret = (MPP_RET)imresize(crop, dst);
+                        //dump_file("imcrop", display_buffer, 4 * VIDEO_SHOW_FIXED_HEIGH * VIDEO_SHOW_FIXED_WIDTH);
 #else
-            ret = (MPP_RET)imcheck(src, crop, crop_rect, src);
-            if (IM_STATUS_NOERROR != ret) {
-                red_debug_lite("%d, check error! %s", __LINE__, imStrError((IM_STATUS)ret));
-                return -1;
-            }
-            ret = (MPP_RET)imresize(src, dst);
+                        ret = (MPP_RET)imcheck(src, crop, crop_rect, src);
+                        if (IM_STATUS_NOERROR != ret) {
+                            red_debug_lite("%d, check error! %s", __LINE__, imStrError((IM_STATUS)ret));
+                            return -1;
+                        }
+                        ret = (MPP_RET)imresize(src, dst);
 #endif
-            //printf("resizing .... [%s %p]\n", imStrError(ret), display_buffer);
-                   }
+                        //printf("resizing .... [%s %p]\n", imStrError(ret), display_buffer);
+                    }
                 }
                 frm_eos = mpp_frame_get_eos(frame);
                 /* 清零 frame 信息 */
@@ -500,8 +498,7 @@ int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_b
             break;
         }
 
-        if (pkt_done)
-        {
+        if (pkt_done) {
             break;
         }
 
@@ -524,14 +521,12 @@ void _do_reopen_prepare(AVFrame* p_frame, AVFormatContext *p_avformat_context, A
     int value;
     char errbuf[128];
     red_debug_lite("reopen prepare 555555555555555555\n");
-    if (p_frame)
-    {
+    if (p_frame) {
         av_frame_free(&p_frame);
     }
 
     value = avcodec_close(p_avcodec_context);
-    if (value)
-    {
+    if (value) {
         av_strerror(value, errbuf, sizeof(errbuf));
         red_debug_lite("Failed close av input:%d  %s\n", value, errbuf);
     }
@@ -565,22 +560,19 @@ int VideoView::video_draw_handler(void *object)
 
     ///p_video_obj->mStatus = R_VIDEO_RUNNING;
 
-    if (!strlen(p_video_obj->mSrcUrl))
-    {
+    if (!strlen(p_video_obj->mSrcUrl)) {
         return -1;
     }
 
     char errbuf[128];
     red_debug_lite("src_file=%s\n", p_video_obj->mSrcUrl);
 re_open:
-    if (options_need_set)
-    {
+    if (options_need_set) {
         value = av_dict_set(&options, "rtsp_transport", "tcp", 0);
         /* 修改超时时间，单位是 ms */
         value = av_dict_set(&options, "timeout", "5000", 0);
         value = av_dict_set(&options, "buffer_size", "10240000", 0);
-        if (value < 0)
-        {
+        if (value < 0) {
             red_debug_lite("Failed av_dict_set %d\n", value);
             return -2;
         }
@@ -589,66 +581,55 @@ re_open:
 
     if (!p_avformat_context)
         p_avformat_context = avformat_alloc_context();
-    if (!p_avformat_context)
-    {
+    if (!p_avformat_context) {
         red_debug_lite("Failed avformat_alloc_context\n");
         return -1;
     }
 
     value = avformat_open_input(&p_avformat_context, p_video_obj->mSrcUrl, NULL, &options);
 
-    if (value)
-    {
+    if (value) {
         av_strerror(value, errbuf, sizeof(errbuf));
         red_debug_lite("Failed open av input:%d  %s src=%s\n", value, errbuf, p_video_obj->mSrcUrl);
         sleep(1);
         goto re_open;
         //return -3;
-    }
-    else
-    {
+    } else {
         red_debug_lite("Open input success\n");
     }
 
     value = avformat_find_stream_info(p_avformat_context, NULL);
-    if (value)
-    {
+    if (value) {
         red_debug_lite("Failed find stream info\n");
         return -4;
     }
 
-    for (int i = 0; i < p_avformat_context->nb_streams; i++) // find video stream posistion/index.
-    {
-        if (p_avformat_context->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
-        {
+    for (int i = 0; i < p_avformat_context->nb_streams; i++) { // find video stream posistion/index.
+        if (p_avformat_context->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
             video_stream_index = i;
             break;
         }
     }
 
-    if (video_stream_index == -1)
-    {
+    if (video_stream_index == -1) {
         red_debug_lite("Failed get video stream\n");
         return -5;
     }
 
     p_avcodec_parameter = p_avformat_context->streams[video_stream_index]->codecpar;
     p_avcodec = avcodec_find_decoder(p_avcodec_parameter->codec_id);
-    if (!p_avcodec)
-    {
+    if (!p_avcodec) {
         red_debug_lite("Failed get avcodec format\n");
         return -6;
     }
 
     p_avcodec_context = avcodec_alloc_context3(p_avcodec);
-    if (!p_avcodec_context)
-    {
+    if (!p_avcodec_context) {
         red_debug_lite("Failed create avcodec context\n");
         return -7;
     }
     value = avcodec_parameters_to_context(p_avcodec_context, p_avcodec_parameter);
-    if (value < 0)
-    {
+    if (value < 0) {
         red_debug_lite("Failed init avcodec context\n");
         return -8;
     }
@@ -661,8 +642,7 @@ re_open:
 
     p_frame = av_frame_alloc();
 
-    if (!p_frame)
-    {
+    if (!p_frame) {
         red_debug_lite("Failed alloc AVFrame\n");
         return -7;
     }
@@ -672,38 +652,30 @@ re_open:
     if (!p_video_obj->m_pixels)
         p_video_obj->m_pixels = (uint8_t *)malloc(5 * VIDEO_SHOW_FIXED_WIDTH * VIDEO_SHOW_FIXED_HEIGH * mpp_get_bpp_from_format(DST_FORMAT));
 
-    if (!p_video_obj->m_pixels)
-    {
+    if (!p_video_obj->m_pixels) {
         red_debug_lite("Failed malloc memory for mpp\n");
         return -12;
-    }
-    else
-    {
+    } else {
         red_debug_lite("malloc memory 4 mpp size=%.1f\n", 5 * VIDEO_SHOW_FIXED_WIDTH * VIDEO_SHOW_FIXED_HEIGH * mpp_get_bpp_from_format(DST_FORMAT));
     }
 #ifdef LED3000_MPP_H265
     if (!p_video_obj->m_crop4h265)
-        p_video_obj->m_crop4h265 = (uint8_t *)malloc(VIDEO_TRACK_FIXED_WIDTH* VIDEO_TRACK_FIXED_WIDTH* mpp_get_bpp_from_format(SRC_FORMAT));
+        p_video_obj->m_crop4h265 = (uint8_t *)malloc(VIDEO_TRACK_FIXED_WIDTH * VIDEO_TRACK_FIXED_WIDTH * mpp_get_bpp_from_format(SRC_FORMAT));
 
-    if (!p_video_obj->m_crop4h265)
-    {
+    if (!p_video_obj->m_crop4h265) {
         red_debug_lite("Failed malloc memory for crop\n");
         return -12;
-    }
-    else
-    {
+    } else {
         red_debug_lite("malloc memory 4 crop size=%.1f\n", VIDEO_TRACK_FIXED_WIDTH * VIDEO_TRACK_FIXED_HEIGH * mpp_get_bpp_from_format(SRC_FORMAT));
     }
 #endif
 
-    if (!mpp_hardware_init(&mpp_data))
-    {
+    if (!mpp_hardware_init(&mpp_data)) {
         red_debug_lite("success mpp_hardware_init\n");
     }
 
 just_draw:
-    while (1)
-    {
+    while (1) {
         ret = av_read_frame(p_avformat_context, &packet);
 #ifdef DEBUG_MPP_DECODER
         /*
@@ -711,14 +683,12 @@ just_draw:
          * */
         dump_file("hikraw", (char *)packet.data, packet.size);
 #endif
-        if (ret < 0)
-        {
+        if (ret < 0) {
             red_debug_lite("Failed get frame 00000000000 %d\n", p_video_obj->m_no_frame_counts++);
             avcodec_send_packet(p_avcodec_context, NULL);
             if (p_video_obj->m_no_frame_counts < 100)
                 continue;
-            else
-            {
+            else {
                 p_video_obj->m_no_frame_counts = 0;
                 p_video_obj->mStatus = R_VIDEO_UNINITLED;
                 _do_reopen_prepare(p_frame, p_avformat_context, p_avcodec_context);
@@ -731,13 +701,9 @@ just_draw:
                 options_need_set = 1;
                 goto re_open;
             }
-        }
-        else if (packet.stream_index != video_stream_index)
-        {
+        } else if (packet.stream_index != video_stream_index) {
             red_debug_lite("No video frame 11111111111\n");
-        }
-        else
-        {
+        } else {
             p_video_obj->m_no_frame_counts = 0;
 #ifdef LED3000_MPP_H265
             mpp_decode_simple(&mpp_data, &packet, (char *)p_video_obj->m_pixels, (char *)p_video_obj->m_crop4h265);
@@ -752,8 +718,7 @@ just_draw:
 exit:
     /* 标记状态为未初始化 */
     p_video_obj->mStatus = R_VIDEO_UNINITLED;
-    if (p_frame)
-    {
+    if (p_frame) {
         av_frame_free(&p_frame);
     }
 
@@ -764,8 +729,7 @@ exit:
 #endif
 
     value = avcodec_close(p_avcodec_context);
-    if (value)
-    {
+    if (value) {
         av_strerror(value, errbuf, sizeof(errbuf));
         red_debug_lite("Failed open av input:%d  %s\n", value, errbuf);
     }
@@ -776,22 +740,21 @@ exit:
     return 0;
 }
 
-VideoView::VideoView(Widget* parent):ImageView(parent), m_texture(nullptr), m_pixels(nullptr), m_crop4h265(nullptr),
+VideoView::VideoView(Widget* parent): ImageView(parent), m_texture(nullptr), m_pixels(nullptr), m_crop4h265(nullptr),
     m_thread(nullptr), mSrcUrl("rtsp://admin:jariled123@192.168.100.64"), m_no_frame_counts(0)
 {
     Window * wnd = parent->window();
     int hh = wnd->theme()->m_window_header_height;
     Screen* screen = dynamic_cast<Screen*>(wnd->parent());
     assert(screen);
-    if (!m_texture)
-    {
+    if (!m_texture) {
         /* 默认创建一个 window size - 20 大小的窗口 */
         m_texture = new Texture(
-           Texture::PixelFormat::RGBA,
-           Texture::ComponentFormat::UInt8,
-           m_size,
-           Texture::InterpolationMode::Trilinear,
-           Texture::InterpolationMode::Nearest);
+            Texture::PixelFormat::RGBA,
+            Texture::ComponentFormat::UInt8,
+            m_size,
+            Texture::InterpolationMode::Trilinear,
+            Texture::InterpolationMode::Nearest);
     }
 
     m_thread = new std::thread(VideoView::video_draw_handler, this);
@@ -803,28 +766,24 @@ VideoView::~VideoView() {}
 /* 图像绘制函数 */
 void VideoView::draw(NVGcontext *ctx)
 {
-    if (mStatus == R_VIDEO_INITLED)
-    {
-        if (m_texture)
-        {
-            if (m_fixed_size != Vector2i(0))
-            {
+    if (mStatus == R_VIDEO_INITLED) {
+        if (m_texture) {
+            if (m_fixed_size != Vector2i(0)) {
                 m_texture->resize(m_fixed_size);
             }
             m_texture->upload(m_pixels);
             red_debug_lite("show %p -------------------------------------------", m_pixels);
             ImageView::set_image(m_texture);
-            mStatus = R_VIDEO_RUNNING; 
+            mStatus = R_VIDEO_RUNNING;
         }
-    }
-    else if (mStatus == R_VIDEO_RUNNING)
-    {
+    } else if (mStatus == R_VIDEO_RUNNING) {
         m_texture->upload(m_pixels);
     }
     ImageView::draw(ctx);
 }
 
-bool VideoView::mouse_button_event(const Vector2i &p, int button, bool down, int modifiers) {
+bool VideoView::mouse_button_event(const Vector2i &p, int button, bool down, int modifiers)
+{
     char track_buffer[32] = {0};
     Vector2i track_p;
 
