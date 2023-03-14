@@ -604,7 +604,7 @@ target_compile_definitions(nanogui
   PRIVATE
     -DNANOGUI_BUILD
     -DNVG_STB_IMAGE_IMPLEMENTATION
-    -DRED_LED3000_ASSETS_DIR="/tmp/abc/huiyuan"
+    -DRED_LED3000_ASSETS_DIR="/lib/led3000_assets"
 )
 
 target_include_directories(nanogui
