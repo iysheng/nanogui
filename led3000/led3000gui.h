@@ -134,7 +134,7 @@ public:
               g_cwindow = new Window(this, "TEST KEYBOARD");
             if (action == GLFW_PRESS)
             {
-            g_cwindow->set_background_image("/tmp/abc/huiyuan/green1.png");
+            g_cwindow->set_background_image(RED_LED3000_ASSETS_DIR"/green1.png");
             /* 确定了 g_cwindow 的位置 */
             g_cwindow->set_fixed_size({400, 150});
             g_cwindow->center();

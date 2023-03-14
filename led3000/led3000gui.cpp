@@ -797,7 +797,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
         {
           auto* swindow = new Window(this, "");
           swindow->set_fixed_size({1240, 166});
-          swindow->set_background_image("/tmp/abc/huiyuan/status.png");
+          swindow->set_background_image(RED_LED3000_ASSETS_DIR"/status.png");
           /* 确定了 swindow 的位置 */
           swindow->set_position({20, 444});
 
@@ -857,7 +857,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
         /* 设备控制窗口 */
         {
           auto* cwindow = new Window(this, "");
-          cwindow->set_background_image("/tmp/abc/huiyuan/green1.png");
+          cwindow->set_background_image(RED_LED3000_ASSETS_DIR"/green1.png");
 
           /* 确定了 cwindow 的位置 */
           cwindow->set_position({20, 630});
@@ -899,7 +899,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           set_green_dev_control_btns_status(getJsonValue()->devices[0].green_led.mode);
 
           cwindow = new Window(this, "");
-          cwindow->set_background_image("/tmp/abc/huiyuan/green1.png");
+          cwindow->set_background_image(RED_LED3000_ASSETS_DIR"/green1.png");
           cwindow->set_position({440, 630});
           cwindow->set_fixed_size({400, 150});
           m_white_dev = new Label(cwindow, "灯光装置终端一 白灯");
@@ -938,7 +938,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           /* 确定了 swindow 的位置 */
           swindow->set_position({0, 0});
           swindow->set_fixed_size({1280, 78});
-          swindow->set_background_image("/tmp/abc/huiyuan/head.png");
+          swindow->set_background_image(RED_LED3000_ASSETS_DIR"/head.png");
 
           /* 创建一个 label 显示软件版本号 */
           auto *soft_name_label = swindow->add<Label>("眩目拒止设备控制软件", "sans-bold");
@@ -955,24 +955,24 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           ver_label->set_font_size(15);
 
           auto *guide_name_label = swindow->add<Label>("", "sans-bold");
-          guide_name_label->set_icon("/tmp/abc/huiyuan/guide.png");
+          guide_name_label->set_icon(RED_LED3000_ASSETS_DIR"/guide.png");
           guide_name_label->set_position(Vector2i(900, 19));
           guide_name_label->set_font_size(15);
           set_guide_mode_icon(guide_name_label);
           get_guide_mode_icon()->set_visible(false);
 
-          sysconfig_btn = swindow->add<Button>("", "/tmp/abc/huiyuan/power.png", 0);
+          sysconfig_btn = swindow->add<Button>("", RED_LED3000_ASSETS_DIR"/power.png", 0);
           sysconfig_btn->set_position({1219, 15});
           sysconfig_btn->set_fixed_size({46, 46});
           sysconfig_btn->set_callback([&] {
               new MessageDialog(this, MessageDialog::Type::Question, "", "确认要关机么?", "确认", "取消", "", do_with_power_off); });
-          sysconfig_btn = swindow->add<Button>("", "/tmp/abc/huiyuan/sys.png", 0);
+          sysconfig_btn = swindow->add<Button>("", RED_LED3000_ASSETS_DIR"/sys.png", 0);
           sysconfig_btn->set_position({15, 15});
           sysconfig_btn->set_fixed_size({46, 46});
           sysconfig_btn->set_callback([&] {
               new MessageDialog(this, MessageDialog::Type::Question, "", "配置参数", "确认", "取消", "", do_with_sysconfig, do_paint_sysconfig);});
 
-          Button *devBtn = swindow->add<Button>("    灯光装置终端一", "/tmp/abc/huiyuan/dev_unchoose.png", "/tmp/abc/huiyuan/dev_choose.png", 0);
+          Button *devBtn = swindow->add<Button>("    灯光装置终端一", RED_LED3000_ASSETS_DIR"/dev_unchoose.png", RED_LED3000_ASSETS_DIR"/dev_choose.png", 0);
           devBtn->set_flags(Button::RadioButton);
           devBtn->set_position({415, 13});
           devBtn->set_fixed_size({220, 50});
@@ -990,7 +990,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           });
           /* 根据实际系统功能中按键大小，为了保持大小一致，修改设备选择按键大小保持一致 */
           ///devBtn->set_fixed_size(Vector2i(165, 30));
-          Button *devBtn2 = swindow->add<Button>("    灯光装置终端二", "/tmp/abc/huiyuan/dev_unchoose.png", "/tmp/abc/huiyuan/dev_choose.png", 0);
+          Button *devBtn2 = swindow->add<Button>("    灯光装置终端二", RED_LED3000_ASSETS_DIR"/dev_unchoose.png", RED_LED3000_ASSETS_DIR"/dev_choose.png", 0);
           devBtn2->set_flags(Button::RadioButton);
           devBtn2->set_position({645, 13});
           devBtn2->set_fixed_size({220, 50});
@@ -1014,7 +1014,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
         /* 转台功能 */
         {
           auto* turntableWindow = new Window(this, "");
-          turntableWindow->set_background_image("/tmp/abc/huiyuan/green1.png");
+          turntableWindow->set_background_image(RED_LED3000_ASSETS_DIR"/green1.png");
 
           /* 确定了 turntableWindow 的位置 */
           turntableWindow->set_position({860, 630});
@@ -1023,7 +1023,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
           m_turntable_dev->set_position({39, 9});
 
           /* 扫海参数配置按键 */
-          Button *scan_setting_btn = turntableWindow->add<Button>("", "/tmp/abc/huiyuan/setting_scan.png", 0);
+          Button *scan_setting_btn = turntableWindow->add<Button>("", RED_LED3000_ASSETS_DIR"/setting_scan.png", 0);
           scan_setting_btn->set_position({305, 4});
           scan_setting_btn->set_fixed_size({32, 32});
           scan_setting_btn->set_callback([this]() {
@@ -1077,7 +1077,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
             auto* img_window = new Window(this, "");
             img_window->set_fixed_size({610, 326});
             img_window->set_position(Vector2i(20, 98));
-            img_window->set_background_image("/tmp/abc/huiyuan/video.png");
+            img_window->set_background_image(RED_LED3000_ASSETS_DIR"/video.png");
 
             auto * track_video_btn = img_window->add<Button>("");
             track_video_btn->set_pseudo(true);
@@ -1113,14 +1113,14 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
             auto *label = img_window->add<Label>("1");
             label->set_font("sans-bold");
             label->set_position(Vector2i(570, 64));
-            auto *btn = img_window->add<Button>("", "/tmp/abc/huiyuan/dec_focal.png");
+            auto *btn = img_window->add<Button>("", RED_LED3000_ASSETS_DIR"/dec_focal.png");
             btn->set_callback([this]() {
                   cout << "decrease camera 1 focal len" << endl;
                   this->getDeviceQueue(0).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "-"));
             });
             btn->set_fixed_size({30, 30});
             btn->set_position({560, 240});
-            btn = img_window->add<Button>("", "/tmp/abc/huiyuan/inc_focal.png");
+            btn = img_window->add<Button>("", RED_LED3000_ASSETS_DIR"/inc_focal.png");
             btn->set_fixed_size({30, 30});
             btn->set_position({560, 276});
             btn->set_callback([this]() {
@@ -1130,7 +1130,7 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
             auto* img2_window = new Window(this, "");
             img2_window->set_fixed_size({610, 326});
             img2_window->set_position(Vector2i(650, 98));
-            img2_window->set_background_image("/tmp/abc/huiyuan/video.png");
+            img2_window->set_background_image(RED_LED3000_ASSETS_DIR"/video.png");
 
             auto * track_video_btn2 = img2_window->add<Button>("");
             track_video_btn2->set_pseudo(true);
@@ -1160,14 +1160,14 @@ Led3000Window::Led3000Window():Screen(Vector2i(1280, 800), "NanoGUI Test", false
             label->set_font("sans-bold");
             label->set_position(Vector2i(570, 64));
 
-            btn = img2_window->add<Button>("", "/tmp/abc/huiyuan/dec_focal.png", 0);
+            btn = img2_window->add<Button>("", RED_LED3000_ASSETS_DIR"/dec_focal.png", 0);
             btn->set_fixed_size({30, 30});
             btn->set_position({560, 240});
             btn->set_callback([this]() {
                   this->getDeviceQueue(1).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "-"));
                   cout << "decrease camera 2 focal len" << endl;
               });
-            btn = img2_window->add<Button>("", "/tmp/abc/huiyuan/inc_focal.png", 0);
+            btn = img2_window->add<Button>("", RED_LED3000_ASSETS_DIR"/inc_focal.png", 0);
             btn->set_fixed_size({30, 30});
             btn->set_position({560, 276});
             btn->set_callback([this]() {
