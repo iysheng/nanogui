@@ -301,22 +301,22 @@ void do_paint_white_light_mocode(Widget *widget)
     mocode_value_title->set_font_size(20);
     widget->window()->set_background_image(RED_LED3000_ASSETS_DIR"/set_msgdlg1.png");
     auto *textBox = widget->add<TextBox>("", KeyboardType::Full);
-    textBox->set_position(Vector2i(174, 167));
-    textBox->set_fixed_size(Vector2i(276, 46));
+    textBox->set_position(Vector2i(134, 167));
+    textBox->set_fixed_size(Vector2i(178, 46));
     textBox->set_editable(true);
     textBox->set_value(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mocode);
     textBox->setSyncCharsValue(&(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mocode[0]));
     textBox->set_font_size(16);
     textBox->set_alignment(TextBox::Alignment::Left);
 
-    mocode_value_title->set_position(Vector2i(61, 180));
+    mocode_value_title->set_position(Vector2i(41, 180));
 
-    msg_dlg->label_icon()->set_position(Vector2i(217, 91));
-    msg_dlg->message_label()->set_position(Vector2i(150, 282));
-    msg_dlg->confirm_button()->set_position(Vector2i(10, 350));
-    msg_dlg->confirm_button()->set_fixed_size(Vector2i(225, 60));
-    msg_dlg->cancel_button()->set_position(Vector2i(245, 350));
-    msg_dlg->cancel_button()->set_fixed_size(Vector2i(225, 60));
+    msg_dlg->label_icon()->set_position(Vector2i(148, 91));
+    msg_dlg->message_label()->set_position(Vector2i(104, 282));
+    msg_dlg->confirm_button()->set_position(Vector2i(10, 354));
+    msg_dlg->confirm_button()->set_fixed_size(Vector2i(156, 60));
+    msg_dlg->cancel_button()->set_position(Vector2i(176, 354));
+    msg_dlg->cancel_button()->set_fixed_size(Vector2i(156, 60));
 }
 
 void do_with_white_light_mocode(Widget *widget, int choose)
@@ -368,6 +368,7 @@ void do_paint_green_light_normal(Widget *widget)
         msg_dlg->cancel_button()->set_fixed_size(Vector2i(225, 60));
     }
 }
+
 void do_with_green_light_normal(Widget *widget, int choose)
 {
   std::cout << "green light normal:" << choose << std::endl;
@@ -493,22 +494,22 @@ void do_paint_green_light_mocode(Widget *widget)
         mocode_value_title->set_font_size(20);
         widget->window()->set_background_image(RED_LED3000_ASSETS_DIR"/set_msgdlg1.png");
         auto *textBox = widget->add<TextBox>("", KeyboardType::Full);
-        textBox->set_position(Vector2i(174, 167));
-        textBox->set_fixed_size(Vector2i(276, 46));
+        textBox->set_position(Vector2i(134, 167));
+        textBox->set_fixed_size(Vector2i(178, 46));
         textBox->set_editable(true);
         textBox->set_value(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode);
         textBox->setSyncCharsValue(&(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mocode[0]));
         textBox->set_font_size(16);
         textBox->set_alignment(TextBox::Alignment::Left);
     
-        mocode_value_title->set_position(Vector2i(61, 180));
+        mocode_value_title->set_position(Vector2i(41, 180));
     
-        msg_dlg->label_icon()->set_position(Vector2i(217, 91));
-        msg_dlg->message_label()->set_position(Vector2i(150, 282));
-        msg_dlg->confirm_button()->set_position(Vector2i(10, 350));
-        msg_dlg->confirm_button()->set_fixed_size(Vector2i(225, 60));
-        msg_dlg->cancel_button()->set_position(Vector2i(245, 350));
-        msg_dlg->cancel_button()->set_fixed_size(Vector2i(225, 60));
+        msg_dlg->label_icon()->set_position(Vector2i(148, 91));
+        msg_dlg->message_label()->set_position(Vector2i(104, 282));
+        msg_dlg->confirm_button()->set_position(Vector2i(10, 354));
+        msg_dlg->confirm_button()->set_fixed_size(Vector2i(156, 60));
+        msg_dlg->cancel_button()->set_position(Vector2i(176, 354));
+        msg_dlg->cancel_button()->set_fixed_size(Vector2i(156, 60));
     }
 }
 
