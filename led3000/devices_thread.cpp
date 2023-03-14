@@ -287,11 +287,19 @@ static void _do_with_turntable_mode_track(led_device_t* devp, std::string messag
  * */
 static void _do_with_turntable_mode_fuzzy_track(led_device_t* devp, std::string message)
 {
+    int ret = 0;
     char tcp_buffer[9] = {0XAA, 0XAA, 0X00, 0X00, 0X00, 0X09, 0XFD /* setting track enable */,
         0X02, 0X5C /* 校验和 */};
     devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
+    if (ret != -1)
+    {
+        red_debug_lite("set fuzzy track mode failed")
+    }
+    else
+    {
+        RedDebug::hexdump("FUZZY TRACK TARGET", (char*)tcp_buffer, sizeof(tcp_buffer));
+    }
     devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
-    RedDebug::hexdump("FUZZY TRACK TARGET", (char*)tcp_buffer, sizeof(tcp_buffer));
 }
 
 static void _do_with_turntable_mode_scan(led_device_t* devp, std::string message)
@@ -385,30 +393,28 @@ static void _do_with_turntable_mode_setting(led_device_t* devp, std::string mess
 
 static void _do_with_turntable_track_setting(led_device_t* devp, std::string message)
 {
-    int x_pos, y_pos;
-    uint16_t level = (uint16_t)stoi(message);
+    int x_pos, y_pos, ret;
     sscanf(message.c_str(), "%d,%d", &x_pos, &y_pos);
-    uint8_t buffer[14] = {0X7E, 0X0A /* 帧长 */, 0X82, 0X11, 1 + devp->uart.index, 0X01 /* 停止手动,目标有效 */,
-        x_pos >> 8, x_pos, y_pos >> 8, y_pos, 0X00 /* 不调焦 */, 0X00/* 不调视场 */, 0X00 /* 校验和 */, 0XE7};
-
     char tcp_buffer[16] = {0XAA, 0XAA, 0X00, 0X00, 0X00, 0X10, 0XFE /* zuobiaogenzong */,
         x_pos >> 24, x_pos >> 16, x_pos >> 8, x_pos, y_pos >> 24, y_pos >> 16, y_pos >> 8, y_pos, 0X00 /* 校验和 */};
 
-    buffer[12] = _get_xor(&buffer[2], 0X0A);
     tcp_buffer[15] = _get_sum(&tcp_buffer[0], 0X0F);
 
-    devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
+    ret = devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
+    if (ret == -1)
+    {
+        red_debug_lite("Failed send 2 server with track setting.");
+    }
+    else
+    {
+        RedDebug::hexdump("TRACK TARGET", (char*)tcp_buffer, sizeof(tcp_buffer));
+    }
     devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
-    RedDebug::hexdump("TRACK TARGET", (char*)tcp_buffer, sizeof(tcp_buffer));
-    write(devp->uart.fd, buffer, sizeof(buffer));
-
-    RedDebug::log("track_setting:%s", message.c_str());
 }
 
 static void _do_with_turntable_position_setting(led_device_t* devp, std::string message)
 {
     int16_t direction, elevation;
-    uint16_t level = (uint16_t)stoi(message);
     sscanf(message.c_str(), "%hd,%hd", &direction, &elevation);
     direction *= 100;
     elevation *= 100;
