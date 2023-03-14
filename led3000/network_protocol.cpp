@@ -329,7 +329,7 @@ int do_report_dev_off(NetworkPackage &net_package)
         return -EINVAL;
     }
     char dev_off_buffer[NETWORK_PACKGE_LEN_MAX] = {0};
-    
+
     NetworkPackage dev_off(net_package.src_ip_n(),
         ntohl(((sockaddr_in *)gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].addrinfo()->ai_addr)->sin_addr.s_addr),
         gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].sn(),

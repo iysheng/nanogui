@@ -74,7 +74,7 @@ int NetworkTcp::try_to_connect(void)
 
 NetworkTcp::NetworkTcp(string dstip, uint16_t dst_port):m_index(0)
 {
-    char decimal_port[16];
+    char decimal_port[16] = {0};
     snprintf(decimal_port, sizeof(decimal_port), "%u", dst_port);
     decimal_port[sizeof(decimal_port) / sizeof(decimal_port[0]) - 1] = '\0';
     struct addrinfo hints;
@@ -121,7 +121,7 @@ NetworkTcp::NetworkTcp(string dstip, uint16_t dst_port):m_index(0)
 
 NetworkTcp::NetworkTcp(string dstip, uint16_t source_port, uint16_t dst_port):m_index(0)
 {
-    char decimal_port[16];
+    char decimal_port[16] = {0};
     snprintf(decimal_port, sizeof(decimal_port), "%u", source_port);
     decimal_port[sizeof(decimal_port) / sizeof(decimal_port[0]) - 1] = '\0';
     struct addrinfo hints;
@@ -162,7 +162,7 @@ NetworkTcp::NetworkTcp(string dstip, uint16_t source_port, uint16_t dst_port):m_
     {
         freeaddrinfo(m_addrinfo);
         close(m_socket);
-        RedDebug::log("could not bind UDP socket with port:%u\n", source_port);
+        RedDebug::log("could not connect TCP socket with port:%u\n", source_port);
     }
     RedDebug::log("Create socket success.\n");
 }

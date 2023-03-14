@@ -642,6 +642,7 @@ void *devices_entry(void *arg)
             msg_id = dm.getMsgId();
             msg_payload = dm.getPayload();
             RedDebug::log("Device%d thread :%u@%s", led_devp->uart.index, msg_id, msg_payload.c_str());
+            /* 更新状态信息到一体化网络 */
 extern int update_sysinfo2network(void);
             update_sysinfo2network();
         }

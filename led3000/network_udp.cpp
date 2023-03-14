@@ -174,7 +174,6 @@ int NetworkUdp::send2server(char *buffer, uint16_t len, int flags)
     {
         RedDebug::log("Send msg to server %s failed:%d\n",
             inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr), errno);
-        RedDebug::hexdump("UDP SEND", (char *)buffer, len);
     }
     else
     {
