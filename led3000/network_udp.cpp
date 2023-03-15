@@ -93,7 +93,7 @@ NetworkUdp::NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port, in
     }
     else
     {
-        RedDebug::log("udp socket create to:%p %ssuccess. -------------------------------", m_addrinfo, inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr));
+        RedDebug::log("udp socket will connect to:%s", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr));
     }
 
     if (m_socket > 0)

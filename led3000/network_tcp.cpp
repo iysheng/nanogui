@@ -90,7 +90,7 @@ NetworkTcp::NetworkTcp(string dstip, uint16_t dst_port):m_index(0)
     }
     else
     {
-        RedDebug::log("tcp socket create to:%s success. -------------------------------", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr));
+        RedDebug::log("tcp socket will conect to:%s", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr));
     }
     m_socket = socket(m_addrinfo->ai_family, SOCK_STREAM | SOCK_CLOEXEC, IPPROTO_TCP);
     if(m_socket == -1)
