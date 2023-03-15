@@ -28,8 +28,7 @@ NAMESPACE_BEGIN(nanogui)
 
 using namespace std;
 
-enum VideoViewStatus
-{
+enum VideoViewStatus {
     R_VIDEO_UNINITLED,
     R_VIDEO_RUNNING,
     R_VIDEO_INITLED,
@@ -42,10 +41,11 @@ enum VideoViewStatus
  *
  * \brief Widget used to display images.
  */
-class NANOGUI_EXPORT VideoView : public ImageView {
+class NANOGUI_EXPORT VideoView : public ImageView
+{
 public:
     VideoView(Widget* parent);
-    VideoView(Widget* parent, const char *srcurl):VideoView(parent)
+    VideoView(Widget* parent, const char *srcurl): VideoView(parent)
     {
         memcpy(mSrcUrl, srcurl, strlen(srcurl) + 1);
     };
@@ -56,8 +56,8 @@ public:
     virtual bool mouse_button_event(const Vector2i &p, int button, bool down, int modifiers) override;
     static int video_draw_handler(void *object);
 
-    int setSrcUrl(const char *srcurl) {memcpy(mSrcUrl, srcurl, strlen(srcurl) + 1);return 0;}
-    Texture * get_texture(){return m_texture;};
+    int setSrcUrl(const char *srcurl) {memcpy(mSrcUrl, srcurl, strlen(srcurl) + 1); return 0;}
+    Texture * get_texture() {return m_texture;};
 
 protected:
     char mSrcUrl[SRCURL_MAX];

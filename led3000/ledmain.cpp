@@ -57,8 +57,7 @@ static void signal_func4trace(int sig, siginfo_t *info, void *secret)
        would produce similar output to the following: */
 
     strings = backtrace_symbols(buffer, nptrs);
-    if (strings == NULL)
-    {
+    if (strings == NULL) {
         perror("backtrace_symbols");
         exit(EXIT_FAILURE);
     }
@@ -120,35 +119,35 @@ static int init_backtrace(signal_func4trace_t func4trace)
     LED3000_INSTALL_SIGNAL(SIGPWR);
     LED3000_INSTALL_SIGNAL(SIGSYS);
     LED3000_INSTALL_SIGNAL(SIGRTMIN);
-    LED3000_INSTALL_SIGNAL(SIGRTMIN+1);
-    LED3000_INSTALL_SIGNAL(SIGRTMIN+2);
-    LED3000_INSTALL_SIGNAL(SIGRTMIN+3);
-    LED3000_INSTALL_SIGNAL(SIGRTMIN+4);
-    LED3000_INSTALL_SIGNAL(SIGRTMIN+5);
-    LED3000_INSTALL_SIGNAL(SIGRTMIN+6);
-    LED3000_INSTALL_SIGNAL(SIGRTMIN+7);
-    LED3000_INSTALL_SIGNAL(SIGRTMIN+8);
-    LED3000_INSTALL_SIGNAL(SIGRTMIN+9);
-    LED3000_INSTALL_SIGNAL(SIGRTMIN+10);
-    LED3000_INSTALL_SIGNAL(SIGRTMIN+11);
-    LED3000_INSTALL_SIGNAL(SIGRTMIN+12);
-    LED3000_INSTALL_SIGNAL(SIGRTMIN+13);
-    LED3000_INSTALL_SIGNAL(SIGRTMIN+14);
-    LED3000_INSTALL_SIGNAL(SIGRTMIN+15);
-    LED3000_INSTALL_SIGNAL(SIGRTMAX-14);
-    LED3000_INSTALL_SIGNAL(SIGRTMAX-13);
-    LED3000_INSTALL_SIGNAL(SIGRTMAX-12);
-    LED3000_INSTALL_SIGNAL(SIGRTMAX-11);
-    LED3000_INSTALL_SIGNAL(SIGRTMAX-10);
-    LED3000_INSTALL_SIGNAL(SIGRTMAX-9);
-    LED3000_INSTALL_SIGNAL(SIGRTMAX-8);
-    LED3000_INSTALL_SIGNAL(SIGRTMAX-7);
-    LED3000_INSTALL_SIGNAL(SIGRTMAX-6);
-    LED3000_INSTALL_SIGNAL(SIGRTMAX-5);
-    LED3000_INSTALL_SIGNAL(SIGRTMAX-4);
-    LED3000_INSTALL_SIGNAL(SIGRTMAX-3);
-    LED3000_INSTALL_SIGNAL(SIGRTMAX-2);
-    LED3000_INSTALL_SIGNAL(SIGRTMAX-1);
+    LED3000_INSTALL_SIGNAL(SIGRTMIN + 1);
+    LED3000_INSTALL_SIGNAL(SIGRTMIN + 2);
+    LED3000_INSTALL_SIGNAL(SIGRTMIN + 3);
+    LED3000_INSTALL_SIGNAL(SIGRTMIN + 4);
+    LED3000_INSTALL_SIGNAL(SIGRTMIN + 5);
+    LED3000_INSTALL_SIGNAL(SIGRTMIN + 6);
+    LED3000_INSTALL_SIGNAL(SIGRTMIN + 7);
+    LED3000_INSTALL_SIGNAL(SIGRTMIN + 8);
+    LED3000_INSTALL_SIGNAL(SIGRTMIN + 9);
+    LED3000_INSTALL_SIGNAL(SIGRTMIN + 10);
+    LED3000_INSTALL_SIGNAL(SIGRTMIN + 11);
+    LED3000_INSTALL_SIGNAL(SIGRTMIN + 12);
+    LED3000_INSTALL_SIGNAL(SIGRTMIN + 13);
+    LED3000_INSTALL_SIGNAL(SIGRTMIN + 14);
+    LED3000_INSTALL_SIGNAL(SIGRTMIN + 15);
+    LED3000_INSTALL_SIGNAL(SIGRTMAX - 14);
+    LED3000_INSTALL_SIGNAL(SIGRTMAX - 13);
+    LED3000_INSTALL_SIGNAL(SIGRTMAX - 12);
+    LED3000_INSTALL_SIGNAL(SIGRTMAX - 11);
+    LED3000_INSTALL_SIGNAL(SIGRTMAX - 10);
+    LED3000_INSTALL_SIGNAL(SIGRTMAX - 9);
+    LED3000_INSTALL_SIGNAL(SIGRTMAX - 8);
+    LED3000_INSTALL_SIGNAL(SIGRTMAX - 7);
+    LED3000_INSTALL_SIGNAL(SIGRTMAX - 6);
+    LED3000_INSTALL_SIGNAL(SIGRTMAX - 5);
+    LED3000_INSTALL_SIGNAL(SIGRTMAX - 4);
+    LED3000_INSTALL_SIGNAL(SIGRTMAX - 3);
+    LED3000_INSTALL_SIGNAL(SIGRTMAX - 2);
+    LED3000_INSTALL_SIGNAL(SIGRTMAX - 1);
     LED3000_INSTALL_SIGNAL(SIGRTMAX);
 
     return 0;
@@ -166,8 +165,7 @@ int main(int /* argc */, char ** /* argv */)
     RedDebug::init("/tmp/ledmain_log.txt");
     RedDebug::print_soft_info();
     /* 创建了测试窗口类 */
-    try
-    {
+    try {
         nanogui::init();
 
         /* scoped variables */ {
@@ -197,15 +195,13 @@ int main(int /* argc */, char ** /* argv */)
 
         nanogui::shutdown();
         red_debug_lite("test demo");
-    }
-    catch (const std::runtime_error &e)
-    {
+    } catch (const std::runtime_error &e) {
         std::string error_msg = std::string("Caught a fatal error: ") + std::string(e.what());
-        #if defined(_WIN32)
-            MessageBoxA(nullptr, error_msg.c_str(), NULL, MB_ICONERROR | MB_OK);
-        #else
-            std::cerr << error_msg << endl;
-        #endif
+#if defined(_WIN32)
+        MessageBoxA(nullptr, error_msg.c_str(), NULL, MB_ICONERROR | MB_OK);
+#else
+        std::cerr << error_msg << endl;
+#endif
         return -1;
     }
     return 0;

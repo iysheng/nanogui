@@ -36,15 +36,13 @@ int NetworkUdp::stamp()
 
 int NetworkUdp::try_to_connect(void)
 {
-    if (!m_addrinfo)
-    {
+    if (!m_addrinfo) {
         printf("invalid m_addrinfo for retry connect");
         return -1;
     }
 
     m_socket = socket(m_addrinfo->ai_family, SOCK_DGRAM | SOCK_CLOEXEC, IPPROTO_UDP);
-    if(m_socket == -1)
-    {
+    if (m_socket == -1) {
         //RedDebug::log("could not retry create udp socket\n");
         return -1;
     }
@@ -58,21 +56,18 @@ int NetworkUdp::try_to_connect(void)
 
     int r;
     r = bind(m_socket, (struct sockaddr *) &m_source_sin, sizeof m_source_sin);
-    if(r != 0)
-    {
+    if (r != 0) {
         close(m_socket);
         m_socket = -1;
         printf("could not try to bind UDP socket with port\n");
-    }
-    else
-    {
+    } else {
         printf("Try to create socket success.\n");
     }
 
     return m_socket;
 }
 
-NetworkUdp::NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port, int socket_fd):m_sn(1), m_socket(socket_fd)
+NetworkUdp::NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port, int socket_fd): m_sn(1), m_socket(socket_fd)
 {
     char decimal_port[16];
     snprintf(decimal_port, sizeof(decimal_port), "%u", source_port);
@@ -86,25 +81,18 @@ NetworkUdp::NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port, in
      * m_addrinfo : 保存目标 ip 和端口信息
      * */
     int r(getaddrinfo(dstip.c_str(), decimal_port, &hints, &m_addrinfo));
-    if(r != 0 || m_addrinfo == NULL)
-    {
+    if (r != 0 || m_addrinfo == NULL) {
         printf("invalid address or port: %s:%u\n", dstip.c_str(), source_port);
         return;
-    }
-    else
-    {
+    } else {
         RedDebug::log("udp socket will connect to:%s", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr));
     }
 
-    if (m_socket > 0)
-    {
+    if (m_socket > 0) {
         RedDebug::log("use origin socket fd:%d", m_socket);
-    }
-    else
-    {
+    } else {
         m_socket = socket(m_addrinfo->ai_family, SOCK_DGRAM | SOCK_CLOEXEC, IPPROTO_UDP);
-        if(m_socket == -1)
-        {
+        if (m_socket == -1) {
             freeaddrinfo(m_addrinfo);
             printf("could not create socket address or port: %s:%u\n", dstip.c_str(), dst_port);
             return;
@@ -120,40 +108,31 @@ NetworkUdp::NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port, in
         m_source_sin.sin_family = AF_INET;
         m_source_sin.sin_port = htons(source_port);
         r = bind(m_socket, (struct sockaddr *) &m_source_sin, sizeof m_source_sin);
-        if(r != 0)
-        {
+        if (r != 0) {
             freeaddrinfo(m_addrinfo);
             close(m_socket);
             m_socket = -1;
             printf("could not bind UDP socket with port:%u\n", source_port);
-        }
-        else
-        {
+        } else {
             printf("Create socket success.\n");
         }
         /* 根据对方要求修改 TTL */
         char ttl = 8;
-        if (setsockopt(m_socket, IPPROTO_IP, IP_MULTICAST_TTL, (char *)&ttl, sizeof(ttl)) != 0)
-        {
+        if (setsockopt(m_socket, IPPROTO_IP, IP_MULTICAST_TTL, (char *)&ttl, sizeof(ttl)) != 0) {
             RedDebug::log("Failed set ttl to %d", ttl);
-        }
-        else
-        {
+        } else {
             RedDebug::log("Success set ttl to %d", ttl);
         }
     }
 
     int ret;
     struct ip_mreq req = {0};//结构体对象
-	req.imr_multiaddr.s_addr = inet_addr(dstip.c_str());//设置组播地址
-	req.imr_interface.s_addr = INADDR_ANY;//本地地址
-	ret  = setsockopt(m_socket, IPPROTO_IP, IP_ADD_MEMBERSHIP, &(req), sizeof(req));//IPPROTO_IP通过IP组播，IP_ADD_MEMBERSHIP -> 加入组播组
-	if(ret < 0)
-    {
+    req.imr_multiaddr.s_addr = inet_addr(dstip.c_str());//设置组播地址
+    req.imr_interface.s_addr = INADDR_ANY;//本地地址
+    ret  = setsockopt(m_socket, IPPROTO_IP, IP_ADD_MEMBERSHIP, &(req), sizeof(req));//IPPROTO_IP通过IP组播，IP_ADD_MEMBERSHIP -> 加入组播组
+    if (ret < 0) {
         RedDebug::log("add multi error -------------------------\n");
-	}
-    else
-    {
+    } else {
         RedDebug::log("add multi to %s success ------------------------\n", dstip.c_str());
     }
 }
@@ -164,25 +143,20 @@ int NetworkUdp::send2server(char *buffer, uint16_t len, int flags)
     static char s_counts;
     int ret;
     uint32_t dstip;
-    if ((m_socket <= 0) && (try_to_connect() <= 0))
-    {
+    if ((m_socket <= 0) && (try_to_connect() <= 0)) {
         //RedDebug::log("invalid udp socket and try to connect server failed");
         return -1;
     }
     ret = sendto(m_socket, buffer, len, flags, m_addrinfo->ai_addr, m_addrinfo->ai_addrlen);
-    if (-1 == ret)
-    {
+    if (-1 == ret) {
         RedDebug::log("Send msg to server %s failed:%d\n",
-            inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr), errno);
-    }
-    else
-    {
+                      inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr), errno);
+    } else {
         RedDebug::log("Send msg to server %s success\n", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr));
         RedDebug::hexdump("UDP SEND", (char *)buffer, len);
     }
-    if (0 == ++m_sn)
-    {
-      m_sn = 1;
+    if (0 == ++m_sn) {
+        m_sn = 1;
     }
 
 
@@ -195,26 +169,21 @@ int NetworkUdp::send2server(char *buffer, uint16_t len, int flags, struct addrin
     static char s_counts;
     int ret;
     uint32_t dstip;
-    if ((m_socket <= 0) && (try_to_connect() <= 0))
-    {
+    if ((m_socket <= 0) && (try_to_connect() <= 0)) {
         //RedDebug::log("invalid udp socket and try to connect server failed");
         return -1;
     }
     ret = sendto(m_socket, buffer, len, flags, addr->ai_addr, addr->ai_addrlen);
-    if (-1 == ret)
-    {
+    if (-1 == ret) {
         RedDebug::log("Send msg to server %s failed:%d\n",
-            inet_ntoa(((sockaddr_in *)addr->ai_addr)->sin_addr), errno);
+                      inet_ntoa(((sockaddr_in *)addr->ai_addr)->sin_addr), errno);
         RedDebug::hexdump("UDP SEND", (char *)buffer, len);
-    }
-    else
-    {
+    } else {
         RedDebug::log("Send msg to server %s success\n", inet_ntoa(((sockaddr_in *)addr->ai_addr)->sin_addr));
         RedDebug::hexdump("UDP SEND", (char *)buffer, len);
     }
-    if (0 == ++m_sn)
-    {
-      m_sn = 1;
+    if (0 == ++m_sn) {
+        m_sn = 1;
     }
 
 
@@ -224,21 +193,17 @@ int NetworkUdp::send2server(char *buffer, uint16_t len, int flags, struct addrin
 int NetworkUdp::recv_from_server(char *buffer, uint16_t len, int flags)
 {
     int ret;
-    if ((m_socket <= 0) && (try_to_connect() <= 0))
-    {
+    if ((m_socket <= 0) && (try_to_connect() <= 0)) {
         //RedDebug::log("invalid udp socket and try to connect server failed");
         return -1;
     }
     RedDebug::log("before udp socket recv:%s %p", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr), m_addrinfo);
     //ret = recvfrom(m_socket, buffer, len, flags, m_addrinfo->ai_addr, &(m_addrinfo->ai_addrlen));
     ret = recvfrom(m_socket, buffer, len, flags, NULL, NULL);
-    if (-1 == ret)
-    {
+    if (-1 == ret) {
         /* 为了测试暂时屏蔽该错误打印 */
         RedDebug::log("Failed recvfrom server :%d %s %p", errno, inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr), m_addrinfo);
-    }
-    else if(ret > 0)
-    {
+    } else if (ret > 0) {
         RedDebug::log("%s %p", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr), m_addrinfo);
         RedDebug::hexdump("RECV_FROM_SEREVR", buffer, ret);
     }

@@ -1,8 +1,8 @@
 /******************************************************************************
 * File:             network_package.h
 *
-* Author:           yangyongsheng@jari.cn  
-* Created:          10/27/22 
+* Author:           yangyongsheng@jari.cn
+* Created:          10/27/22
 * Description:      网络数据包类头文件
 *****************************************************************************/
 
@@ -40,31 +40,32 @@ using namespace std;
 #define NETWORK_PACKAGE_PAYLOAD_LEN    128
 #define NETWORK_PACKGE_LEN_MAX         MK_PACKAGE_LEN(NETWORK_PACKAGE_PAYLOAD_LEN)
 
-class NetworkPackage {
+class NetworkPackage
+{
 public:
-    NetworkPackage():m_payload_len(0){memset(m_payload, 0, sizeof(m_payload));};
-    NetworkPackage(int payload_len):m_payload_len(payload_len){memset(m_payload, 0, sizeof(m_payload));};
+    NetworkPackage(): m_payload_len(0) {memset(m_payload, 0, sizeof(m_payload));};
+    NetworkPackage(int payload_len): m_payload_len(payload_len) {memset(m_payload, 0, sizeof(m_payload));};
     NetworkPackage(char index, char id, char len, int stamp, char * payload);
     NetworkPackage(uint32_t src_ip, uint32_t dst_ip, uint8_t sn, uint8_t ack,
-      uint8_t flag, uint8_t count,
-      char index, char id, char len, int stamp, char * payload);
+                   uint8_t flag, uint8_t count,
+                   char index, char id, char len, int stamp, char * payload);
     ~NetworkPackage();
 
     int convert_from_buffer(char *buffer, short int len);
     int convert_to_buffer(char *buffer, short int len);
 
-    char id(){return m_id;};
-    char* payload(){return m_payload;};
-    short payload_len(){return m_payload_len;};
-    short len(){return m_len;};
+    char id() {return m_id;};
+    char* payload() {return m_payload;};
+    short payload_len() {return m_payload_len;};
+    short len() {return m_len;};
 
-    uint32_t src_ip_n(){return m_src_ip_n;};
-    uint32_t dst_ip_n(){return m_dst_ip_n;};
-    void set_dst_ip_n(uint32_t dstip_n){m_dst_ip_n = dstip_n;};
-    uint8_t sn(){return m_sn;};
-    uint8_t ack(){return m_ack;};
-    uint8_t flag(){return m_flag;};
-    uint8_t count(){return m_count;};
+    uint32_t src_ip_n() {return m_src_ip_n;};
+    uint32_t dst_ip_n() {return m_dst_ip_n;};
+    void set_dst_ip_n(uint32_t dstip_n) {m_dst_ip_n = dstip_n;};
+    uint8_t sn() {return m_sn;};
+    uint8_t ack() {return m_ack;};
+    uint8_t flag() {return m_flag;};
+    uint8_t count() {return m_count;};
 
 private:
     uint32_t m_src_ip_n;

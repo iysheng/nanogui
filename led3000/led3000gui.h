@@ -69,43 +69,43 @@ NAMESPACE_BEGIN(nanogui)
 
 typedef struct {
     struct {
-      unsigned int version;
-      unsigned int id;
+        unsigned int version;
+        unsigned int id;
     } sys_config;
     struct {
-      char name[64]; /* 0: 摄像头 1: 引导信息 */
-      char ip[16];
-      char netmask[16];
-      char gateway[16];
+        char name[64]; /* 0: 摄像头 1: 引导信息 */
+        char ip[16];
+        char netmask[16];
+        char gateway[16];
     } eths[2];
 
     struct {
-      char ip[16];
-      unsigned short port;
+        char ip[16];
+        unsigned short port;
     } server;
 
     struct {
-      char camera_url[128];
-      struct {
-        unsigned char mode;
-        unsigned char normal_status;
-        unsigned char blink_freq;
-        char mocode[255];
-      } white_led;
-      struct {
-        unsigned char auth; /* 上电默认是授权状态 */
-        unsigned char mode;
-        unsigned char normal_status;
-        unsigned char blink_freq;
-        char mocode[255];
-      } green_led;
-      struct {
-        unsigned char mode;
-        unsigned short target_pos_x;
-        unsigned short target_pos_y;
-        short scan_stay_time;
-        short scan_speed_level;
-      } turntable;
+        char camera_url[128];
+        struct {
+            unsigned char mode;
+            unsigned char normal_status;
+            unsigned char blink_freq;
+            char mocode[255];
+        } white_led;
+        struct {
+            unsigned char auth; /* 上电默认是授权状态 */
+            unsigned char mode;
+            unsigned char normal_status;
+            unsigned char blink_freq;
+            char mocode[255];
+        } green_led;
+        struct {
+            unsigned char mode;
+            unsigned short target_pos_x;
+            unsigned short target_pos_y;
+            short scan_stay_time;
+            short scan_speed_level;
+        } turntable;
     } devices[2];
 } led3000_config_t;
 
@@ -119,63 +119,55 @@ class NANOGUI_EXPORT Led3000Window : public Screen
 public:
     Led3000Window();
 
-    ~Led3000Window() {
+    ~Led3000Window()
+    {
     }
     void init_json_file(void);
 #if 1
-    virtual bool keyboard_event(int key, int scancode, int action, int modifiers) {
+    virtual bool keyboard_event(int key, int scancode, int action, int modifiers)
+    {
         RedDebug::log("key=%d action=%d", key, action);
-        switch (key)
-        {
-          case GLFW_KEY_F1:
-          {
+        switch (key) {
+        case GLFW_KEY_F1: {
 #if 0
             if (!g_cwindow)
-              g_cwindow = new Window(this, "TEST KEYBOARD");
-            if (action == GLFW_PRESS)
-            {
-            g_cwindow->set_background_image(RED_LED3000_ASSETS_DIR"/green1.png");
-            /* 确定了 g_cwindow 的位置 */
-            g_cwindow->set_fixed_size({400, 150});
-            g_cwindow->center();
-            g_cwindow->request_focus();
-            g_cwindow->set_visible(true);
+                g_cwindow = new Window(this, "TEST KEYBOARD");
+            if (action == GLFW_PRESS) {
+                g_cwindow->set_background_image(RED_LED3000_ASSETS_DIR"/green1.png");
+                /* 确定了 g_cwindow 的位置 */
+                g_cwindow->set_fixed_size({400, 150});
+                g_cwindow->center();
+                g_cwindow->request_focus();
+                g_cwindow->set_visible(true);
             }
 #else
             /* 取消设备二激光授权,支持自锁按键 */
-            if (action == GLFW_PRESS)
-            {
+            if (action == GLFW_PRESS) {
                 mJsonValue.devices[1].green_led.auth = 0;
                 m_dev_auth[1]->set_caption("禁止射击");
                 RedDebug::log("F1 catched");
-            }
-            else if (GLFW_RELEASE == action && mJsonValue.devices[1].green_led.auth == 0)
-            {
+            } else if (GLFW_RELEASE == action && mJsonValue.devices[1].green_led.auth == 0) {
                 mJsonValue.devices[1].green_led.auth = 1;
                 m_dev_auth[1]->set_caption("允许射击");
                 RedDebug::log("F1 release");
             }
 #endif
-          }
-          break;
-          case GLFW_KEY_F2:
-          {
+        }
+        break;
+        case GLFW_KEY_F2: {
             /* 取消设备一激光授权,支持自锁按键 */
-            if (action == GLFW_PRESS)
-            {
+            if (action == GLFW_PRESS) {
                 mJsonValue.devices[0].green_led.auth = 0;
                 m_dev_auth[0]->set_caption("禁止射击");
                 RedDebug::log("F2 catched");
-            }
-            else if ((GLFW_RELEASE == action) && (mJsonValue.devices[0].green_led.auth == 0))
-            {
+            } else if ((GLFW_RELEASE == action) && (mJsonValue.devices[0].green_led.auth == 0)) {
                 mJsonValue.devices[0].green_led.auth = 1;
                 m_dev_auth[0]->set_caption("允许射击");
                 RedDebug::log("F2 release");
             }
-          }
-          break;
-          default:
+        }
+        break;
+        default:
             break;
         }
 
@@ -188,7 +180,8 @@ public:
         return false;
     }
 
-    virtual void draw(NVGcontext *ctx) {
+    virtual void draw(NVGcontext *ctx)
+    {
         /* Animate the scrollbar */
         //m_progress->set_value(std::fmod((float) glfwGetTime() / 10, 1.0f));
 
@@ -198,141 +191,151 @@ public:
     }
 
     /* 函数重载,绘制内容,初始化 m_shader 和 m_render_pass 相关的内容 */
-    virtual void draw_contents() {
+    virtual void draw_contents()
+    {
         glClearColor(m_background[0], m_background[1], m_background[2], m_background[3]);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     }
 
-    FILE*& getMfp(void){return mFp;};
-    Document* getDocument(void){return &mDocument;};
-    std::string& getFileName(void){return mFileName;};
-    led3000_config_t* getJsonValue(void){return &mJsonValue;};
-    PolyM::Queue& getJsonQueue(void){return mJsonQueue;};
-    PolyM::Queue& getDeviceQueue(int device){
-      if (device < LED3000_DEVICES_COUNTS)
-      {
-        return mDeviceQueue[device];
-      }
-      else
-        return mDeviceQueue[0]; /* 默认控制第一台设备 */
+    FILE*& getMfp(void) {return mFp;};
+    Document* getDocument(void) {return &mDocument;};
+    std::string& getFileName(void) {return mFileName;};
+    led3000_config_t* getJsonValue(void) {return &mJsonValue;};
+    PolyM::Queue& getJsonQueue(void) {return mJsonQueue;};
+    PolyM::Queue& getDeviceQueue(int device)
+    {
+        if (device < LED3000_DEVICES_COUNTS) {
+            return mDeviceQueue[device];
+        } else
+            return mDeviceQueue[0]; /* 默认控制第一台设备 */
     };
-    PolyM::Queue& getCurrentDeviceQueue(void) {
+    PolyM::Queue& getCurrentDeviceQueue(void)
+    {
         return getDeviceQueue(mCurrentDevice);
     }
-    void setCurrentDevice(int index){mCurrentDevice = index;};
-    int getCurrentDevice(void){return mCurrentDevice;};
+    void setCurrentDevice(int index) {mCurrentDevice = index;};
+    int getCurrentDevice(void) {return mCurrentDevice;};
 
-    Label *get_dev_state_label(int index) {
+    Label *get_dev_state_label(int index)
+    {
         return GET_LABEL_WITH_INDEX(m_dev_state, index);
     }
-    Label *get_dev_angle_label(int index) {
+    Label *get_dev_angle_label(int index)
+    {
         return GET_LABEL_WITH_INDEX(m_dev_angle, index);
     }
-    Label *get_dev_angular_speed_label(int index) {
+    Label *get_dev_angular_speed_label(int index)
+    {
         return GET_LABEL_WITH_INDEX(m_dev_angular_speed, index);
     }
-    Label *get_dev_morse_code_label(int index) {
+    Label *get_dev_morse_code_label(int index)
+    {
         return GET_LABEL_WITH_INDEX(m_dev_morse_code, index);
     }
-    Label *get_dev_auth_label(int index) {
+    Label *get_dev_auth_label(int index)
+    {
         return GET_LABEL_WITH_INDEX(m_dev_auth, index);
     }
-    Label *get_green_dev_label(){
-      return m_green_dev;
+    Label *get_green_dev_label()
+    {
+        return m_green_dev;
     }
-    Label *get_white_dev_label(){
-      return m_white_dev;
+    Label *get_white_dev_label()
+    {
+        return m_white_dev;
     }
-    Label *get_turntable_label(){
-      return m_turntable_dev;
+    Label *get_turntable_label()
+    {
+        return m_turntable_dev;
     }
-    Label *get_guide_mode_icon(){
-      return m_guide_mode_icon;
+    Label *get_guide_mode_icon()
+    {
+        return m_guide_mode_icon;
     }
 
     bool check_guide_mode(void)
     {
-      return m_guide_mode_icon->visible();
+        return m_guide_mode_icon->visible();
     }
-    void set_guide_mode(bool mode){
+    void set_guide_mode(bool mode)
+    {
         m_guide_mode_icon->set_visible(mode);
     }
 
     void set_green_dev_control_btns(const std::vector<Button *> *btns)
     {
-      m_green_dev_control_btns = btns;
+        m_green_dev_control_btns = btns;
     }
 
     const std::vector<Button *> * get_green_dev_control_btns(void)
     {
-      return m_green_dev_control_btns;
+        return m_green_dev_control_btns;
     }
 
     void set_white_dev_control_btns(const std::vector<Button *> *btns)
     {
-      m_white_dev_control_btns = btns;
+        m_white_dev_control_btns = btns;
     }
 
     const std::vector<Button *> * get_white_dev_control_btns(void)
     {
-      return m_white_dev_control_btns;
+        return m_white_dev_control_btns;
     }
 
     void set_white_dev_control_btns_status(int mode)
     {
-      switch (mode)
-      {
+        switch (mode) {
         case LED_NORMAL_MODE_OFF:
-          m_white_dev_control_btns->at(0)->set_pushed(false);
-          m_white_dev_control_btns->at(1)->set_pushed(false);
-          m_white_dev_control_btns->at(2)->set_pushed(false);
-          break;
+            m_white_dev_control_btns->at(0)->set_pushed(false);
+            m_white_dev_control_btns->at(1)->set_pushed(false);
+            m_white_dev_control_btns->at(2)->set_pushed(false);
+            break;
         case LED_NORMAL_MODE:
-          m_white_dev_control_btns->at(0)->set_pushed(true);
-          m_white_dev_control_btns->at(1)->set_pushed(false);
-          m_white_dev_control_btns->at(2)->set_pushed(false);
-          break;
+            m_white_dev_control_btns->at(0)->set_pushed(true);
+            m_white_dev_control_btns->at(1)->set_pushed(false);
+            m_white_dev_control_btns->at(2)->set_pushed(false);
+            break;
         case LED_BLINK_MODE:
-          m_white_dev_control_btns->at(0)->set_pushed(false);
-          m_white_dev_control_btns->at(1)->set_pushed(true);
-          m_white_dev_control_btns->at(2)->set_pushed(false);
-          break;
+            m_white_dev_control_btns->at(0)->set_pushed(false);
+            m_white_dev_control_btns->at(1)->set_pushed(true);
+            m_white_dev_control_btns->at(2)->set_pushed(false);
+            break;
         case LED_MOCODE_MODE:
-          m_white_dev_control_btns->at(0)->set_pushed(false);
-          m_white_dev_control_btns->at(1)->set_pushed(false);
-          m_white_dev_control_btns->at(2)->set_pushed(true);
-          break;
+            m_white_dev_control_btns->at(0)->set_pushed(false);
+            m_white_dev_control_btns->at(1)->set_pushed(false);
+            m_white_dev_control_btns->at(2)->set_pushed(true);
+            break;
         default:
-          break;
-      }
+            break;
+        }
     }
 
     void set_green_dev_control_btns_status(int mode)
     {
-      switch (mode)
-      {
+        switch (mode) {
         case LED_NORMAL_MODE:
-          m_green_dev_control_btns->at(0)->set_pushed(true);
-          m_green_dev_control_btns->at(1)->set_pushed(false);
-          m_green_dev_control_btns->at(2)->set_pushed(false);
-          break;
+            m_green_dev_control_btns->at(0)->set_pushed(true);
+            m_green_dev_control_btns->at(1)->set_pushed(false);
+            m_green_dev_control_btns->at(2)->set_pushed(false);
+            break;
         case LED_BLINK_MODE:
-          m_green_dev_control_btns->at(0)->set_pushed(false);
-          m_green_dev_control_btns->at(1)->set_pushed(true);
-          m_green_dev_control_btns->at(2)->set_pushed(false);
-          break;
+            m_green_dev_control_btns->at(0)->set_pushed(false);
+            m_green_dev_control_btns->at(1)->set_pushed(true);
+            m_green_dev_control_btns->at(2)->set_pushed(false);
+            break;
         case LED_MOCODE_MODE:
-          m_green_dev_control_btns->at(0)->set_pushed(false);
-          m_green_dev_control_btns->at(1)->set_pushed(false);
-          m_green_dev_control_btns->at(2)->set_pushed(true);
-          break;
+            m_green_dev_control_btns->at(0)->set_pushed(false);
+            m_green_dev_control_btns->at(1)->set_pushed(false);
+            m_green_dev_control_btns->at(2)->set_pushed(true);
+            break;
         default:
-          break;
-      }
+            break;
+        }
     }
 
-    void set_guide_mode_icon(Label *label){
-      m_guide_mode_icon = label;
+    void set_guide_mode_icon(Label *label)
+    {
+        m_guide_mode_icon = label;
     }
 private:
     /* 设备状态窗口 label 控件 */

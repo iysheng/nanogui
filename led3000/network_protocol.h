@@ -1,8 +1,8 @@
 /******************************************************************************
 * File:             network_protocol.h
 *
-* Author:           yangyongsheng@jari.cn  
-* Created:          10/27/22 
+* Author:           yangyongsheng@jari.cn
+* Created:          10/27/22
 *                   网络协议处理头文件
 *****************************************************************************/
 
@@ -60,23 +60,21 @@ typedef enum {
     NETWORK_PROTOCOL_TYPE_COUNTS,
 } network_protocol_type_E;
 
-class TurntableAttitude {
+class TurntableAttitude
+{
 #define VERCTICAL_INFO_ANGLE_MAX    30
 public:
-    TurntableAttitude():m_direction_info(0), m_vertical_info(0), m_horizon_info(0), m_delta_info(0){};
-    TurntableAttitude(int delta_info):m_direction_info(0), m_vertical_info(0), m_horizon_info(0), m_delta_info(delta_info){};
-    void set_delta_info(int delta_info){m_delta_info = delta_info;};
+    TurntableAttitude(): m_direction_info(0), m_vertical_info(0), m_horizon_info(0), m_delta_info(0) {};
+    TurntableAttitude(int delta_info): m_direction_info(0), m_vertical_info(0), m_horizon_info(0), m_delta_info(delta_info) {};
+    void set_delta_info(int delta_info) {m_delta_info = delta_info;};
     void update_attitude_info(int direction_info, int vertical_info, int horizon_info)
     {
 #if 1
         m_direction_info = direction_info;
 #else
-        if (direction_info <= 180)
-        {
+        if (direction_info <= 180) {
             m_direction_info = direction_info;
-        }
-        else if (direction_info <= 360)
-        {
+        } else if (direction_info <= 360) {
             m_direction_info = direction_info - 360;
         }
 #endif
@@ -87,20 +85,16 @@ public:
     {
         /* TODO use shipinfo correct target info */
         direction_info -= m_direction_info;
-        if (direction_info > 180)
-        {
+        if (direction_info > 180) {
             /* correct direction info with -180 ~ 0 */
             direction_info -= 360;
         }
 
         vertical_info -= m_vertical_info;
         /* correct with cirtical value */
-        if (vertical_info > VERCTICAL_INFO_ANGLE_MAX)
-        {
+        if (vertical_info > VERCTICAL_INFO_ANGLE_MAX) {
             vertical_info = VERCTICAL_INFO_ANGLE_MAX;
-        }
-        else if (vertical_info < -VERCTICAL_INFO_ANGLE_MAX)
-        {
+        } else if (vertical_info < -VERCTICAL_INFO_ANGLE_MAX) {
             vertical_info = -VERCTICAL_INFO_ANGLE_MAX;
         }
     }
@@ -118,15 +112,15 @@ private:
 
 /**
   * @brief 注册指定类型的 NetworkUdp 句柄
-  * @param char fd_type: 
-  * @param NetworkUdp &net_fd: 
+  * @param char fd_type:
+  * @param NetworkUdp &net_fd:
   * retval Linux/errno.
   */
 extern int network_protocol_registe(char fd_type, NetworkUdp &net_fd);
 
 /**
   * @brief 注册 Led3000Window 对象指针
-  * @param void *window: 
+  * @param void *window:
   * retval Linux/errno.
   */
 extern int screen_window_register(void *window);

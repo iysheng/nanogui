@@ -1,8 +1,8 @@
 /******************************************************************************
 * File:             devices_thread.cpp
 *
-* Author:           yangyongsheng@jari.cn  
-* Created:          08/16/22 
+* Author:           yangyongsheng@jari.cn
+* Created:          08/16/22
 * Description:      灯光装置控制线程
 *****************************************************************************/
 
@@ -44,7 +44,7 @@ static Led3000Window *gs_screen = nullptr;
 
 /**
   * @brief 左转运动
-  * @param int bias: 
+  * @param int bias:
   * retval Linux/errno.
   */
 static int do_x_left_bias(short int bias)
@@ -57,7 +57,7 @@ static int do_x_left_bias(short int bias)
 
 /**
   * @brief 右转运动
-  * @param short int bias: 
+  * @param short int bias:
   * retval Linux/errno.
   */
 static int do_x_right_bias(short int bias)
@@ -69,7 +69,7 @@ static int do_x_right_bias(short int bias)
 
 /**
   * @brief 向下运动
-  * @param short int bias: 
+  * @param short int bias:
   * retval Linux/errno.
   */
 static int do_y_down_bias(short int bias)
@@ -81,7 +81,7 @@ static int do_y_down_bias(short int bias)
 
 /**
   * @brief 向上运动
-  * @param short int bias: 
+  * @param short int bias:
   * retval Linux/errno.
   */
 static int do_y_up_bias(short int bias)
@@ -93,7 +93,7 @@ static int do_y_up_bias(short int bias)
 
 /**
   * @brief 向上运动
-  * @param int bias: 
+  * @param int bias:
   * retval Linux/errno.
   */
 static int do_xy_stop(void)
@@ -105,31 +105,25 @@ static int do_xy_stop(void)
 
 /**
   * @brief 向上运动
-  * @param int bias: 
+  * @param int bias:
   * retval Linux/errno.
   */
 static int do_with_xy_bias(int x_bias, int y_bias)
 {
-    if (x_bias < 0)
-    {
+    if (x_bias < 0) {
         x_bias *= -1;
         if (MK_X_LEFT_SPEED(x_bias))
             do_x_left_bias(MK_X_LEFT_SPEED(x_bias));
-    }
-    else if (x_bias > 0)
-    {
+    } else if (x_bias > 0) {
         if (MK_X_RIGHT_SPEED(x_bias))
             do_x_right_bias(MK_X_RIGHT_SPEED(x_bias));
     }
 
-    if (y_bias < 0)
-    {
+    if (y_bias < 0) {
         y_bias *= -1;
         if (MK_Y_DOWN_SPEED(y_bias))
             do_y_down_bias(MK_Y_DOWN_SPEED(y_bias));
-    }
-    else if (y_bias > 0)
-    {
+    } else if (y_bias > 0) {
         if (MK_Y_UP_SPEED(y_bias))
             do_y_up_bias(MK_Y_UP_SPEED(y_bias));
     }
@@ -148,43 +142,30 @@ static int do_with_handle_axis(float x_axis, float y_axis)
 {
     int x_turn_bais = 0, y_turn_bais = 0;
 
-    if (x_axis < X_LEFT_POINT)
-    {
+    if (x_axis < X_LEFT_POINT) {
         /* TODO 左转 */
         x_turn_bais = x_axis - X_LEFT_POINT;
-    }
-    else if (x_axis > X_RIGHT_POINT)
-    {
+    } else if (x_axis > X_RIGHT_POINT) {
         /* TODO 右转 */
         x_turn_bais = x_axis - X_RIGHT_POINT;
-    }
-    else
-    {
+    } else {
         x_turn_bais = 0;
     }
 
-    if (y_axis < Y_DOWN_POINT)
-    {
+    if (y_axis < Y_DOWN_POINT) {
         /* TODO 向下 */
         y_turn_bais = y_axis - Y_DOWN_POINT;
-    }
-    else if (y_axis > Y_UP_POINT)
-    {
+    } else if (y_axis > Y_UP_POINT) {
         /* TODO 向上 */
         y_turn_bais = y_axis - Y_UP_POINT;
-    }
-    else
-    {
+    } else {
         y_turn_bais = 0;
     }
 
-    if (!x_turn_bais && !y_turn_bais)
-    {
+    if (!x_turn_bais && !y_turn_bais) {
         /* TODO 停止转台 */
         do_xy_stop();
-    }
-    else
-    {
+    } else {
         do_with_xy_bias(x_turn_bais, y_turn_bais);
     }
 
@@ -206,15 +187,12 @@ void *joystick_thread(void *arg)
     prctl(PR_SET_NAME, thread_name);
 
     red_debug_lite("Hello joystick: screen: %p", gs_screen);
-    for (present = GLFW_JOYSTICK_1; present < GLFW_JOYSTICK_LAST; present++)
-    {
-        if (glfwJoystickPresent(present))
-        {
+    for (present = GLFW_JOYSTICK_1; present < GLFW_JOYSTICK_LAST; present++) {
+        if (glfwJoystickPresent(present)) {
             string joyname(glfwGetJoystickName(present));
             std::cout << joyname << std::endl;
             /* FIXME 根据名称确定是否是真实的操纵杆 */
-            if (string::npos != joyname.find("joystick"))
-            {
+            if (string::npos != joyname.find("joystick")) {
                 red_debug_lite("<<<<<<<<<<<<<<<< Find the joystick name:%s", glfwGetJoystickName(present) ? : "ohno");
                 break;
             }
@@ -223,8 +201,7 @@ void *joystick_thread(void *arg)
     red_debug_lite("Oh no Hello joystick");
 
     int i;
-    while(1)
-    {
+    while (1) {
         axes = glfwGetJoystickAxes(present, &axis_count);
         if (!axes)
             continue;
@@ -237,8 +214,7 @@ void *joystick_thread(void *arg)
          * X 轴向中心数据是 479 ~ 521
          * Y 轴向中心数据是 479 ~ 521
          * */
-        for (i = 0; i < axis_count; i++)
-        {
+        for (i = 0; i < axis_count; i++) {
             red_debug_lite("%f@%d", axes[i], i);
         }
 #endif

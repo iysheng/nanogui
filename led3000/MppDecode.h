@@ -28,8 +28,7 @@
 #define MPI_DEC_LOOP_COUNT          4
 #define MAX_FILE_NAME_LENGTH        256
 
-typedef struct
-{
+typedef struct {
     MppCtx          ctx;
     MppApi          *mpi;
     RK_U32          eos;
@@ -48,8 +47,7 @@ typedef struct
     size_t          max_usage;
 } MpiDecLoopData;
 
-typedef struct
-{
+typedef struct {
     char            file_input[MAX_FILE_NAME_LENGTH];
     char            file_output[MAX_FILE_NAME_LENGTH];
     MppCodingType   type;

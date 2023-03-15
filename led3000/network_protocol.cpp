@@ -1,8 +1,8 @@
 /******************************************************************************
 * File:             network_protocol.c
 *
-* Author:           yangyongsheng@jari.cn  
-* Created:          10/27/22 
+* Author:           yangyongsheng@jari.cn
+* Created:          10/27/22
 *                   网络协议处理源文件
 *****************************************************************************/
 
@@ -31,27 +31,21 @@ static TurntableAttitude gs_turntable_attitude[2];
 
 static inline short _do_format_dev_value_short(float value, double dimension)
 {
-    if (value < 0)
-    {
-        RedDebug::log("%f = %04hx\n", value, short((value - 0.5 * dimension)/dimension));
-        return short((value - 0.5 * dimension)/dimension);
-    }
-    else
-    {
-        RedDebug::log("%f = %04hx\n", value, short((value + 0.5 * dimension)/dimension));
-        return short((value + 0.5 * dimension)/dimension);
+    if (value < 0) {
+        RedDebug::log("%f = %04hx\n", value, short((value - 0.5 * dimension) / dimension));
+        return short((value - 0.5 * dimension) / dimension);
+    } else {
+        RedDebug::log("%f = %04hx\n", value, short((value + 0.5 * dimension) / dimension));
+        return short((value + 0.5 * dimension) / dimension);
     }
 }
 
 static inline short _do_format_dev_value_float2short(float value, double dimension)
 {
-    if (value < 0)
-    {
+    if (value < 0) {
         RedDebug::log("%f = %hd\n", value, short(value * dimension + 0.5 * dimension));
         return (short)(value * dimension + 0.5 * dimension);
-    }
-    else
-    {
+    } else {
         RedDebug::log("%f = %hd\n", value, short(value * dimension - 0.5 * dimension));
         return (short)(value * dimension - 0.5 * dimension);
     }
@@ -59,13 +53,10 @@ static inline short _do_format_dev_value_float2short(float value, double dimensi
 
 static inline int _do_format_dev_value_float2int(float value, double dimension)
 {
-    if (value < 0)
-    {
+    if (value < 0) {
         RedDebug::log("%f = %04hx\n", value, short(value * dimension + 0.5 * dimension));
         return (int)(value * dimension + 0.5 * dimension);
-    }
-    else
-    {
+    } else {
         RedDebug::log("%f = %04hx\n", value, short(value * dimension - 0.5 * dimension));
         return (int)(value * dimension - 0.5 * dimension);
     }
@@ -79,15 +70,13 @@ static int do_with_network_attitude_info(NetworkPackage &net_package)
     short info_valid_flags /* 状态及数据有效标志 */;
     int direction_info /* 航向角 */, vertical_info /* 纵摇角 */, horizon_info /* 横摇角 */;
 
-    if (net_package.len() != 0X16)
-    {
+    if (net_package.len() != 0X16) {
         RedDebug::log("Invalid payload_len4recv_attitude_info");
         return -1;
     }
 
     info_valid_flags = net_package.payload()[0] << 8 | net_package.payload()[1];
-    if (info_valid_flags & 0x01)
-    {
+    if (info_valid_flags & 0x01) {
         RedDebug::log("invalid attitude info");
     }
 
@@ -108,7 +97,7 @@ static int do_with_network_attitude_info(NetworkPackage &net_package)
     gs_turntable_attitude[1].update_attitude_info(direction_info, vertical_info, horizon_info);
 
     RedDebug::log("flag:%hx direction:%d vertical:%d horizon:%d", info_valid_flags,
-        direction_info, vertical_info, horizon_info);
+                  direction_info, vertical_info, horizon_info);
     return 0;
 }
 
@@ -121,8 +110,7 @@ static int do_with_network_recv_force(NetworkPackage &net_package)
     short command_word /* 命令字 */;
     uint8_t dev_num, force_control;
 
-    if (net_package.payload_len() != 4)
-    {
+    if (net_package.payload_len() != 4) {
         RedDebug::log("Invalid payload_len4recv_guide");
         return -1;
     }
@@ -142,8 +130,7 @@ static int do_with_network_recv_force(NetworkPackage &net_package)
   */
 static int do_with_network_recv_probe(NetworkPackage &net_package)
 {
-    if (net_package.payload_len() != 0)
-    {
+    if (net_package.payload_len() != 0) {
         RedDebug::log("Invalid payload_len4recv_probe");
         return -1;
     }
@@ -152,7 +139,7 @@ static int do_with_network_recv_probe(NetworkPackage &net_package)
 
 /**
   * @brief 处理指控发送的引导指令
-  * @param NetworkPackage &net_package: 
+  * @param NetworkPackage &net_package:
   * retval Linux/errno.
   */
 static int do_with_network_recv_guide(NetworkPackage &net_package)
@@ -165,8 +152,7 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
     uint8_t dev_num, led_type, led_mode, guide_enable;
     uint8_t distance_valid, direction_valid, elevation_valid, batch_valid;
 
-    if (net_package.payload_len() != 12)
-    {
+    if (net_package.payload_len() != 12) {
         RedDebug::log("Invalid payload_len4recv_guide");
         return -1;
     }
@@ -183,8 +169,7 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
     elevation_valid = control_word >> 1 & 0x01;
     batch_valid = control_word & 0x01;
 
-    if (guide_enable)
-    {
+    if (guide_enable) {
         /* 退出引导模式 */
         gs_screen->set_guide_mode(false);
         RedDebug::log("no guide enable, just return.");
@@ -196,7 +181,7 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
     target_batch_number = net_package.payload()[2] << 8 | net_package.payload()[3];
 
     target_distance = net_package.payload()[4] << 24 | net_package.payload()[5] << 16 | net_package.payload()[6] << 8 | net_package.payload()[7];
-    
+
     short target_value_tmp;
     memcpy(&target_value_tmp, 8 + net_package.payload(), sizeof(target_value_tmp));
     target_direction = ntohs(target_value_tmp);
@@ -212,32 +197,23 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
     snprintf(target_position_buffer, sizeof(target_position_buffer), "%hd,%hd", target_direction, target_elevation);
 
     RedDebug::log("control_word:%hx batch_number:%hx distance:%x direction:%hx elevation:%hx", control_word, target_batch_number,
-            target_distance, target_direction, target_elevation);
+                  target_distance, target_direction, target_elevation);
     /* TODO 发送消息到对应的设备控制线程 */
     /* 发送消息控制转台转动到指定角度 */
     gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_POSITION_SETTING, string(target_position_buffer)));
-    if (led_type == NETWORK_PROTOCOL_WHITE_LED_TYPE)
-    {
-        if (led_mode == NETWORK_PROTOCOL_NORMAL_LED_MODE)
-        {
+    if (led_type == NETWORK_PROTOCOL_WHITE_LED_TYPE) {
+        if (led_mode == NETWORK_PROTOCOL_NORMAL_LED_MODE) {
             gs_screen->getJsonValue()->devices[dev_num].white_led.normal_status = 100;
             gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_WHITE_NORMAL_SETTING, to_string(100)));
-        }
-        else if (led_mode == NETWORK_PROTOCOL_BINK_LED_MODE)
-        {
+        } else if (led_mode == NETWORK_PROTOCOL_BINK_LED_MODE) {
             /* 默认 5HZ 爆闪 */
             gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_WHITE_BLINK_SETTING, to_string(5)));
         }
-    }
-    else if (led_type == NETWORK_PROTOCOL_GREEN_LED_TYPE)
-    {
-        if (led_mode == NETWORK_PROTOCOL_NORMAL_LED_MODE)
-        {
+    } else if (led_type == NETWORK_PROTOCOL_GREEN_LED_TYPE) {
+        if (led_mode == NETWORK_PROTOCOL_NORMAL_LED_MODE) {
             gs_screen->getJsonValue()->devices[dev_num].white_led.normal_status = 100;
             gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_GREEN_NORMAL_SETTING, to_string(100)));
-        }
-        else if (led_mode == NETWORK_PROTOCOL_BINK_LED_MODE)
-        {
+        } else if (led_mode == NETWORK_PROTOCOL_BINK_LED_MODE) {
             /* 默认 5HZ 爆闪 */
             gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_GREEN_BLINK_SETTING, to_string(5)));
         }
@@ -250,13 +226,11 @@ int _do_report_msg2net(NetworkUdp &net_fd, NetworkPackage &network_package)
 {
     char buffer[NETWORK_PACKGE_LEN_MAX] = {0};
     /* Fix dstip == 0.0.0.0 */
-    if (network_package.dst_ip_n() == 0X00000000)
-    {
+    if (network_package.dst_ip_n() == 0X00000000) {
         network_package.set_dst_ip_n(ntohl(((sockaddr_in *)net_fd.addrinfo()->ai_addr)->sin_addr.s_addr));
     }
 
-    if (network_package.convert_to_buffer(buffer, NETWORK_PACKGE_LEN_MAX))
-    {
+    if (network_package.convert_to_buffer(buffer, NETWORK_PACKGE_LEN_MAX)) {
         return -ENOMEM;
     }
     net_fd.send2server(buffer, network_package.len());
@@ -267,13 +241,11 @@ int _do_report_msg2net(NetworkUdp &net_fd, NetworkPackage &network_package, stru
 {
     char buffer[NETWORK_PACKGE_LEN_MAX] = {0};
     /* Fix dstip == 0.0.0.0 */
-    if (network_package.dst_ip_n() == 0X00000000)
-    {
+    if (network_package.dst_ip_n() == 0X00000000) {
         network_package.set_dst_ip_n(ntohl(((sockaddr_in *)net_fd.addrinfo()->ai_addr)->sin_addr.s_addr));
     }
 
-    if (network_package.convert_to_buffer(buffer, NETWORK_PACKGE_LEN_MAX))
-    {
+    if (network_package.convert_to_buffer(buffer, NETWORK_PACKGE_LEN_MAX)) {
         return -ENOMEM;
     }
     net_fd.send2server(buffer, network_package.len(), 0, p_addrinfo);
@@ -285,14 +257,13 @@ int _do_report_msg2net(NetworkUdp &net_fd, NetworkPackage &network_package, stru
   * retval Linux/errno.
   */
 int do_report_dev_status(NetworkPackage &net_package, char dev1_status, char dev1_green_status, char dev1_white_status, char dev1_auth,
-    char dev2_status, char dev2_green_status, char dev2_white_status, char dev2_auth)
+                         char dev2_status, char dev2_green_status, char dev2_white_status, char dev2_auth)
 {
     short raw_status = (short)dev1_status << 14 | (short)dev1_green_status << 12 | (short)dev1_white_status << 10 |
-        (short)dev1_auth << 9 | (short)dev2_status << 7 | (short)dev2_green_status << 5 |
-        (short)dev2_white_status << 3 | (short)dev2_auth << 2;
+                       (short)dev1_auth << 9 | (short)dev2_status << 7 | (short)dev2_green_status << 5 |
+                       (short)dev2_white_status << 3 | (short)dev2_auth << 2;
 
-    if (gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].get_socket() <= 0)
-    {
+    if (gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].get_socket() <= 0) {
         RedDebug::log("Novalid socket for network udp");
         return -EINVAL;
     }
@@ -305,14 +276,14 @@ int do_report_dev_status(NetworkPackage &net_package, char dev1_status, char dev
     dev_status_buffer[3] = 0x00;
 
     NetworkPackage dev_status(net_package.src_ip_n(),
-        net_package.dst_ip_n(),
-        gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].sn(),
-        0X00,
-        0X01,
-        0X01,
-        0X01, NETWORK_SEND_STATUS, MK_MSG_FULL_LEN(0X0C),
-        gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].stamp(),
-        dev_status_buffer);
+                              net_package.dst_ip_n(),
+                              gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].sn(),
+                              0X00,
+                              0X01,
+                              0X01,
+                              0X01, NETWORK_SEND_STATUS, MK_MSG_FULL_LEN(0X0C),
+                              gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].stamp(),
+                              dev_status_buffer);
 
     return _do_report_msg2net(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST], dev_status);
 }
@@ -323,22 +294,21 @@ int do_report_dev_status(NetworkPackage &net_package, char dev1_status, char dev
   */
 int do_report_dev_off(NetworkPackage &net_package)
 {
-    if (gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].get_socket() <= 0)
-    {
+    if (gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].get_socket() <= 0) {
         RedDebug::log("Novalid socket for network udp");
         return -EINVAL;
     }
     char dev_off_buffer[NETWORK_PACKGE_LEN_MAX] = {0};
 
     NetworkPackage dev_off(net_package.src_ip_n(),
-        ntohl(((sockaddr_in *)gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].addrinfo()->ai_addr)->sin_addr.s_addr),
-        gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].sn(),
-        0X00,
-        0X01,
-        0X01,
-        0X01,
-        NETWORK_SEND_OFF, MK_MSG_FULL_LEN(0X8),
-        gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].stamp(), dev_off_buffer);
+                           ntohl(((sockaddr_in *)gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].addrinfo()->ai_addr)->sin_addr.s_addr),
+                           gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].sn(),
+                           0X00,
+                           0X01,
+                           0X01,
+                           0X01,
+                           NETWORK_SEND_OFF, MK_MSG_FULL_LEN(0X8),
+                           gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].stamp(), dev_off_buffer);
 
     return _do_report_msg2net(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE], dev_off);
 }
@@ -353,8 +323,7 @@ int do_report_dev_off(NetworkPackage &net_package)
   */
 int do_report_dev_info(NetworkPackage &net_package, short dev1_direction, short dev1_elevation, short dev2_direction, short dev2_elevation)
 {
-    if (gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].get_socket() <= 0)
-    {
+    if (gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].get_socket() <= 0) {
         RedDebug::log("Novalid socket for network udp");
         return -EINVAL;
     }
@@ -375,35 +344,34 @@ int do_report_dev_info(NetworkPackage &net_package, short dev1_direction, short 
     dev_info_buffer[17] = dev2_elevation & 0xff;
 
     NetworkPackage dev_info(net_package.src_ip_n(), net_package.dst_ip_n(),
-        gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].sn(),
-        0X00,
-        0X01,
-        0X01,
-        0X01,
-        NETWORK_SEND_INFO, MK_MSG_FULL_LEN(0X1A), gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].stamp(), dev_info_buffer);
+                            gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].sn(),
+                            0X00,
+                            0X01,
+                            0X01,
+                            0X01,
+                            NETWORK_SEND_INFO, MK_MSG_FULL_LEN(0X1A), gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].stamp(), dev_info_buffer);
 
     return _do_report_msg2net(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST], dev_info);
 }
 
 /**
-  * @brief respon 
+  * @brief respon
   * retval Linux/errno.
   */
 int do_force_respon(NetworkPackage &net_package)
 {
-    if (gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].get_socket() <= 0)
-    {
+    if (gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].get_socket() <= 0) {
         RedDebug::log("Novalid socket for network udp");
         return -EINVAL;
     }
     char force_respon_buffer[NETWORK_PACKGE_LEN_MAX] = {0};
-    NetworkPackage force_respon(net_package.src_ip_n(), 
-        net_package.dst_ip_n(),
-        gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].sn(),
-        net_package.ack(),
-        0X03,
-        0X00,
-        gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].index(), 0X0, MK_MSG_FULL_LEN(0X0), 0X0, nullptr);
+    NetworkPackage force_respon(net_package.src_ip_n(),
+                                net_package.dst_ip_n(),
+                                gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].sn(),
+                                net_package.ack(),
+                                0X03,
+                                0X00,
+                                gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].index(), 0X0, MK_MSG_FULL_LEN(0X0), 0X0, nullptr);
 
     RedDebug::log("force respon 2 network\n");
 
@@ -414,8 +382,7 @@ int do_force_respon(NetworkPackage &net_package)
     hints.ai_socktype = SOCK_DGRAM;
     hints.ai_protocol = IPPROTO_UDP;
     int r(getaddrinfo("168.6.0.4", "20840", &hints, &p_addrinfo));
-    if(r != 0 || p_addrinfo == NULL)
-    {
+    if (r != 0 || p_addrinfo == NULL) {
         RedDebug::log("failed convert addrinfo.-------------------------------");
         return -1;
     }
@@ -438,86 +405,72 @@ int do_probe_respon(NetworkPackage &network_package)
     const led3000_config_t *json_value_ptr = gs_screen->getJsonValue();
     int index = 0;
 
-    for (; index < 2; index++)
-    {
+    for (; index < 2; index++) {
         if (gs_screen->get_dev_state_label(index)->caption() == std::string("故障"))
             dev_status[index] = 1;
         else if (gs_screen->get_dev_state_label(index)->caption() == std::string("离线"))
             dev_status[index] = 2;
         RedDebug::log("%s\n", gs_screen->get_dev_state_label(index)->caption().c_str());
 
-        if (json_value_ptr->devices[index].white_led.mode == LED_NORMAL_MODE && 
-            json_value_ptr->devices[index].white_led.normal_status == 0)
-        {
+        if (json_value_ptr->devices[index].white_led.mode == LED_NORMAL_MODE &&
+            json_value_ptr->devices[index].white_led.normal_status == 0) {
             dev_white_status[index] = 3;
-        }
-        else if(json_value_ptr->devices[index].white_led.mode == LED_MOCODE_MODE)
-        {
+        } else if (json_value_ptr->devices[index].white_led.mode == LED_MOCODE_MODE) {
             dev_white_status[index] = 2;
-        }
-        else if(json_value_ptr->devices[index].white_led.mode == LED_BLINK_MODE)
-        {
+        } else if (json_value_ptr->devices[index].white_led.mode == LED_BLINK_MODE) {
             dev_white_status[index] = 1;
         }
 
-        if (json_value_ptr->devices[index].green_led.mode == LED_NORMAL_MODE && 
-            json_value_ptr->devices[index].green_led.normal_status == 0)
-        {
+        if (json_value_ptr->devices[index].green_led.mode == LED_NORMAL_MODE &&
+            json_value_ptr->devices[index].green_led.normal_status == 0) {
             dev_green_status[index] = 3;
-        }
-        else if(json_value_ptr->devices[index].green_led.mode == LED_MOCODE_MODE)
-        {
+        } else if (json_value_ptr->devices[index].green_led.mode == LED_MOCODE_MODE) {
             dev_green_status[index] = 2;
-        }
-        else if(json_value_ptr->devices[index].green_led.mode == LED_BLINK_MODE)
-        {
+        } else if (json_value_ptr->devices[index].green_led.mode == LED_BLINK_MODE) {
             dev_green_status[index] = 1;
         }
 
-        if (gs_screen->get_dev_auth_label(index)->caption() == std::string("禁止射击"))
-        {
+        if (gs_screen->get_dev_auth_label(index)->caption() == std::string("禁止射击")) {
             dev_auth_status[index] = 1;
         }
         RedDebug::log("%d: status:%d green_status:%d white_status=%d auth:%d\n",
-            index,
-            dev_status[index],
-            dev_green_status[index],
-            dev_white_status[index],
-            dev_auth_status[index]);
+                      index,
+                      dev_status[index],
+                      dev_green_status[index],
+                      dev_white_status[index],
+                      dev_auth_status[index]);
 
         dev_info_str = gs_screen->get_dev_angle_label(index)->caption();
         split_index = dev_info_str.find("/");
         direction_str = dev_info_str.substr(0, split_index);
         elevation_str = dev_info_str.substr(1 + split_index);
         RedDebug::log("gre:%s dire:%s elevation:%s whole:%s\n", gs_screen->get_dev_auth_label(index)->caption().c_str(),
-            direction_str.c_str(), elevation_str.c_str(), dev_info_str.c_str());
+                      direction_str.c_str(), elevation_str.c_str(), dev_info_str.c_str());
         direction[index] = std::atoi(direction_str.c_str());
         elevation[index] = std::atoi(elevation_str.c_str());
     }
     do_report_dev_status(network_package, dev_status[0], dev_green_status[0], dev_white_status[0], dev_auth_status[0],
-        dev_status[1], dev_green_status[1], dev_white_status[1], dev_auth_status[1]);
+                         dev_status[1], dev_green_status[1], dev_white_status[1], dev_auth_status[1]);
     do_report_dev_info(network_package, direction[0], elevation[0], direction[1], elevation[1]);
     RedDebug::log("respon 2 network\n");
 }
 
 /**
   * @brief 注册指定类型的 NetworkUdp 句柄
-  * @param char fd_type: 
-  * @param NetworkUdp &net_fd: 
+  * @param char fd_type:
+  * @param NetworkUdp &net_fd:
   * retval Linux/errno.
   */
 int network_protocol_registe(char fd_type, NetworkUdp &net_fd)
 {
     int ret = 0;
 
-    if (fd_type < 0 || fd_type >= NETWORK_PROTOCOL_TYPE_COUNTS)
-    {
+    if (fd_type < 0 || fd_type >= NETWORK_PROTOCOL_TYPE_COUNTS) {
         RedDebug::log("invalid fd type:%hd", fd_type);
         return -EINVAL;
     }
 
-    if (gs_network_udp[fd_type].get_socket() > 0)
-    {
+    if (gs_network_udp[fd_type].get_socket() > 0) {
         RedDebug::log("the fd type:%hd has registered before", fd_type);
         ret = 1;
     }
@@ -529,15 +482,14 @@ int network_protocol_registe(char fd_type, NetworkUdp &net_fd)
 
 /**
   * @brief 注册 Led3000Window 对象指针
-  * @param Led3000Window *window: 
+  * @param Led3000Window *window:
   * retval Linux/errno.
   */
 int screen_window_register(void *window)
 {
     int ret = 0;
 
-    if (window && !gs_screen)
-    {
+    if (window && !gs_screen) {
         gs_screen = (Led3000Window *)window;
     }
 
@@ -545,7 +497,7 @@ int screen_window_register(void *window)
 }
 
 /**
-  * @brief 
+  * @brief
   * retval .
   */
 int handle_with_network_buffer(char *buffer, int size)
@@ -555,43 +507,41 @@ int handle_with_network_buffer(char *buffer, int size)
 
     /* TODO check gs_screen valid */
     ret = net_package.convert_from_buffer(buffer, size);
-    if (ret < 0)
-    {
+    if (ret < 0) {
         RedDebug::log("Failed convert buffer to NetworkPackage err=%d.", ret);
         return ret;
     }
     /* TODO debug buffer msg */
 
-    switch (net_package.id())
-    {
-        case NETWORK_RECV_FORCE:
-            do_with_network_recv_force(net_package);
-            do_force_respon(net_package);
-            RedDebug::log("TODO with FORCE");
-            break;
-        case NETWORK_RECV_ATTITUDE_INFO:
-            RedDebug::log("TODO with ATTITUDE_INFO");
-            do_with_network_attitude_info(net_package);
-            break;
-        case NETWORK_RECV_GUIDE:
-            RedDebug::log("TODO with GUIDE");
-            do_with_network_recv_guide(net_package);
-            break;
-        case NETWORK_RECV_PROBE:
-            RedDebug::log("TODO with PROBE");
-            do_with_network_recv_probe(net_package);
-            do_probe_respon(net_package);
-            break;
-        case NETWORK_RECV_OFF:
-            RedDebug::log("TODO with OFF");
-            break;
-        case NETWORK_PINPONG_TEST:
-            RedDebug::log("TODO with pingpong test");
-            /* 返回 99 表示测试 pingong */
-            ret = 99;
-            break;
-        default:
-            break;
+    switch (net_package.id()) {
+    case NETWORK_RECV_FORCE:
+        do_with_network_recv_force(net_package);
+        do_force_respon(net_package);
+        RedDebug::log("TODO with FORCE");
+        break;
+    case NETWORK_RECV_ATTITUDE_INFO:
+        RedDebug::log("TODO with ATTITUDE_INFO");
+        do_with_network_attitude_info(net_package);
+        break;
+    case NETWORK_RECV_GUIDE:
+        RedDebug::log("TODO with GUIDE");
+        do_with_network_recv_guide(net_package);
+        break;
+    case NETWORK_RECV_PROBE:
+        RedDebug::log("TODO with PROBE");
+        do_with_network_recv_probe(net_package);
+        do_probe_respon(net_package);
+        break;
+    case NETWORK_RECV_OFF:
+        RedDebug::log("TODO with OFF");
+        break;
+    case NETWORK_PINPONG_TEST:
+        RedDebug::log("TODO with pingpong test");
+        /* 返回 99 表示测试 pingong */
+        ret = 99;
+        break;
+    default:
+        break;
     }
 
     return ret;

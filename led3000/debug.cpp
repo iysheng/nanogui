@@ -1,8 +1,8 @@
 /******************************************************************************
 * File:             debug.cpp
 *
-* Author:           yangyongsheng@jari.cn  
-* Created:          11/02/22 
+* Author:           yangyongsheng@jari.cn
+* Created:          11/02/22
 *                   debug 源文件
 *****************************************************************************/
 
@@ -27,13 +27,10 @@ static void flush_sigint_handler(int sigarg)
 int RedDebug::init(char *filename)
 {
     signal(SIGINT, flush_sigint_handler);
-    try
-    {
+    try {
         RedDebug::m_logger = spdlog::basic_logger_mt("SPD", filename);
         std::cout << "Log init ok at: " << filename << std::endl;
-    }
-    catch (const spdlog::spdlog_ex &ex)
-    {
+    } catch (const spdlog::spdlog_ex &ex) {
         std::cout << "Log init failed: " << ex.what() << std::endl;
         return -1;
     }
@@ -54,11 +51,11 @@ void RedDebug::print_soft_info()
 
 void RedDebug::log(char *fmt, ...)
 {
-	char buf[4096] = {0};
-	va_list args;
-	va_start(args, fmt);
-	vsnprintf(buf, sizeof(buf) - 1, fmt, args);
-	va_end(args);
+    char buf[4096] = {0};
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(buf, sizeof(buf) - 1, fmt, args);
+    va_end(args);
 
     RedDebug::m_logger->info(buf);
     spdlog::info(buf);

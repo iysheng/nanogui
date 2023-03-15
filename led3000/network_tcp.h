@@ -1,8 +1,8 @@
 /******************************************************************************
 * File:             network_tcp.h
 *
-* Author:           yangyongsheng@jari.cn  
-* Created:          10/26/22 
+* Author:           yangyongsheng@jari.cn
+* Created:          10/26/22
 *                   network tcp class head file
 *****************************************************************************/
 
@@ -17,10 +17,11 @@
 
 using namespace std;
 
-class NetworkTcp {
-  public:
+class NetworkTcp
+{
+public:
     ~NetworkTcp();
-    NetworkTcp():m_index(0){};
+    NetworkTcp(): m_index(0) {};
     NetworkTcp(string dstip, uint16_t dst_port);
     NetworkTcp(string dstip, uint16_t source_port, uint16_t dst_port);
     /* 表示该函数不会抛出异常 */
@@ -30,13 +31,13 @@ class NetworkTcp {
     int send2server(char *buffer, uint16_t len, int flags = 0);
     int recv_from_server(char *buffer, uint16_t len, int flags = 0);
 
-    int get_socket(){return m_socket;};
-    struct addrinfo * addrinfo(){return m_addrinfo;};
-    struct sockaddr_in source_sin(){return m_source_sin;};
+    int get_socket() {return m_socket;};
+    struct addrinfo * addrinfo() {return m_addrinfo;};
+    struct sockaddr_in source_sin() {return m_source_sin;};
     int stamp();
     char index() {return m_index;};
 
-  private:
+private:
     int m_index;
     int m_socket;
     /* 目的地址信息 */

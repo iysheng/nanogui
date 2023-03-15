@@ -25,14 +25,15 @@ enum class KeyboardType {
     Full = 2,
 };
 
-class NANOGUI_EXPORT Keyboard : public Window {
+class NANOGUI_EXPORT Keyboard : public Window
+{
 public:
     enum Side { Left = 0, Right };
 
     Keyboard(Widget *parent, Window *parentWindow, KeyboardType type = KeyboardType::Number);
-    TextBox *get_textbox(){return mTextBox;}
-    void set_textbox(TextBox *textbox){mTextBox = textbox;}
-    void set_value(std::string value){mKeyboardValue = value;}
+    TextBox *get_textbox() {return mTextBox;}
+    void set_textbox(TextBox *textbox) {mTextBox = textbox;}
+    void set_value(std::string value) {mKeyboardValue = value;}
     /// Create a new popup parented to a screen (first argument) and a parent window (if applicable)
     //Keyboard(Widget *parent, Window *parent_window = nullptr);
 

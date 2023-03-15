@@ -1,8 +1,8 @@
 /******************************************************************************
 * File:             network_thread.cpp
 *
-* Author:           yangyongsheng@jari.cn  
-* Created:          09/05/22 
+* Author:           yangyongsheng@jari.cn
+* Created:          09/05/22
 * Description:      指控通信的网络线程
 *****************************************************************************/
 
@@ -48,13 +48,10 @@ void *network_entry(void *arg)
 
     network_devp->udp.send2server("Hello World", strlen("Hello World"));
     RedDebug::log("send hello world to test\n");
-    while(1)
-    {
+    while (1) {
         len = network_devp->udp.recv_from_server(buffer_recv, sizeof(buffer_recv));
-        if (len > 0 && len == buffer_recv[0] << 8 | buffer_recv[1])
-        {
-            if (99 == handle_with_network_buffer(buffer_recv, len))
-            {
+        if (len > 0 && len == buffer_recv[0] << 8 | buffer_recv[1]) {
+            if (99 == handle_with_network_buffer(buffer_recv, len)) {
                 len = network_devp->udp.send2server("RED PINGPONG TEST", strlen("RED PINGPONG TEST"));
             }
         }
@@ -79,27 +76,19 @@ void *network_thread(void *arg)
     gs_network_fd[1].udp = udp_broadcast_client;
     screen_window_register(screen);
 
-    if (gs_network_fd[0].udp.get_socket() > 0)
-    {
-        if (network_protocol_registe(NETWORK_PROTOCOL_TYPE_SEND_GUIDE, gs_network_fd[0].udp) < 0)
-        {
+    if (gs_network_fd[0].udp.get_socket() > 0) {
+        if (network_protocol_registe(NETWORK_PROTOCOL_TYPE_SEND_GUIDE, gs_network_fd[0].udp) < 0) {
             RedDebug::log("Failed register network protocol.");
-        }
-        else
-        {
+        } else {
             RedDebug::log("Register guide socket success.");
         }
     }
 
     /* TODO just for test */
-    if (gs_network_fd[1].udp.get_socket() > 0)
-    {
-        if (network_protocol_registe(NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST, gs_network_fd[1].udp) < 0)
-        {
+    if (gs_network_fd[1].udp.get_socket() > 0) {
+        if (network_protocol_registe(NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST, gs_network_fd[1].udp) < 0) {
             RedDebug::log("Failed register network fd broadcast.");
-        }
-        else
-        {
+        } else {
             RedDebug::log("Register guide broadcast socket success.");
         }
     }
@@ -109,9 +98,8 @@ void *network_thread(void *arg)
 
     gsNetwork0Thread.detach();
     gsNetwork1Thread.detach();
-    
-    while(1)
-    {
+
+    while (1) {
         /* 保活临时构造的 NetworkUdp 对象 */
         sleep(100000);
     }
