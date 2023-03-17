@@ -15,6 +15,37 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+time_t NetworkPackage::s_stamp_stand = 0;
+
+void NetworkPackage::init_stamp_stand(void)
+{
+    struct tm tm4sync = {0};
+    time_t time4stand = 0;
+
+    time4stand = time(NULL);
+    if (-1 == time4stand)
+    {
+        red_debug_lite("failed do time function, err:%d", errno);
+        return;
+    }
+
+    if (NULL == gmtime_r(&time4stand, &tm4sync))
+    {
+        RedDebug::err("Failed gmtime_r, err:%d", errno);
+        return;
+    }
+    else
+    {
+        tm4sync.tm_sec = 0;
+        tm4sync.tm_min = 0;
+        tm4sync.tm_hour = 0;
+        NetworkPackage::s_stamp_stand = mktime(&tm4sync);
+        NetworkPackage::s_stamp_stand *= 1000;
+        red_debug_lite("init stand_stamp raw:%ld ok -------------", time4stand);
+        red_debug_lite("init stand_stamp:%ldok", NetworkPackage::s_stamp_stand);
+    }
+}
+
 NetworkPackage::~NetworkPackage()
 {
 }
@@ -26,8 +57,24 @@ NetworkPackage::NetworkPackage(uint32_t src_ip, uint32_t dst_ip, uint8_t sn, uin
     m_index(index), m_id(id), m_len(len), m_stamp(stamp)
 {
     struct timeval tv;
+    time_t t_stamp_ms = 0;
+
     if (0 == gettimeofday(&tv, NULL)) {
-        m_stamp = tv.tv_sec * 1000 + tv.tv_usec;
+        t_stamp_ms = tv.tv_sec * 1000 ;
+        if (t_stamp_ms > NetworkPackage::s_stamp_stand)
+        {
+            if (t_stamp_ms - NetworkPackage::s_stamp_stand < 24 * 60 * 60 * 1000)
+            {
+                m_stamp = t_stamp_ms - NetworkPackage::s_stamp_stand;
+                /* 但是是 0.1 ms */
+                m_stamp *= 10;
+                m_stamp += tv.tv_usec / 100;
+            }
+        }
+        else
+        {
+            m_stamp = 0;
+        }
     }
     m_src_ip_n = ntohl(inet_addr("168.9.0.1"));
     if (len - CSSMXP_MSG_PREFIX > CSSMXP_PACKAGE_PREFIX) {

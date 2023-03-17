@@ -33,7 +33,7 @@
 /* 上报系统关机信息 */
 #define NETWORK_SEND_OFF      0XE4
 
-#define BCD2CHAR(x)    ((x >> 4 & 0xf) * 10 + (x & 0xf))
+#define BCD2CHAR(x)    (((x) >> 4 & 0xf) * 10 + ((x) & 0xf))
 
 typedef enum {
     NETWORK_PROTOCOL_WHITE_LED_TYPE,

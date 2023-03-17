@@ -10,6 +10,7 @@
 #include "PolyM/include/polym/Msg.hpp"
 #include <nanogui/common.h>
 #include <led3000gui.h>
+#include <network_package.h>
 #include <thread>
 #include <unistd.h>
 #include <PolyM/include/polym/Queue.hpp>
@@ -64,12 +65,15 @@ void *network_thread(void *arg)
     RedDebug::log("Hello Network Thread json file path:%s", screen->getFileName().c_str());
     RedDebug::log("connect:%s@%u", screen->getJsonValue()->server.ip, screen->getJsonValue()->server.port);
 
+    /* init NetworkPackage::s_stamp_stand */
+    NetworkPackage::init_stamp_stand();
+
     /* 创建和指控广播组通信的句柄 */
     /* TODO just for test */
     gs_network_fd[0].screen = screen;
     gs_network_fd[1].screen = screen;
     NetworkUdp udp_client("224.100.100.101", screen->getJsonValue()->server.port, screen->getJsonValue()->server.port);
-    //NetworkUdp udp_client("10.20.52.39", screen->getJsonValue()->server.port, screen->getJsonValue()->server.port);
+    //NetworkUdp udp_client("10.20.52.35", screen->getJsonValue()->server.port, screen->getJsonValue()->server.port);
     gs_network_fd[0].udp = udp_client;
     /* 创建和指控通信的句柄 */
     NetworkUdp udp_broadcast_client("224.100.100.102", screen->getJsonValue()->server.port, screen->getJsonValue()->server.port, udp_client.get_socket());

@@ -67,6 +67,9 @@ public:
     uint8_t flag() {return m_flag;};
     uint8_t count() {return m_count;};
     uint32_t stamp() {return m_stamp;};
+    /* 全局的参考时戳 */
+    static time_t s_stamp_stand;
+    static void init_stamp_stand(void);
 
 private:
     uint32_t m_src_ip_n;
@@ -85,7 +88,9 @@ private:
     /* 帧负载的长度， 信息单元长度 - 单元序号(1) - 单元标识(1) - 单元长度(2) - 时戳(4) */
     short m_payload_len;
     /* 时戳 */
-    int m_stamp;
+    uint32_t m_stamp;
+    /* 时戳参考,参考当天 0 点的时戳 */
+    uint32_t m_stamp_stand;
     /* 根据协议，目前 payload 区最长的是眩目拒止协议，长度为 18 字节，这里留足空间 */
     char m_payload[NETWORK_PACKAGE_PAYLOAD_LEN];
 };

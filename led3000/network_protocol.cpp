@@ -140,6 +140,13 @@ static int do_with_network_timesync_info(NetworkPackage &net_package)
         {
             RedDebug::warn("Failed set time sync, err=%d", errno);
         }
+
+        /* 设置当天的参考时间 */
+        tm4sync.tm_sec = 0X0;
+        tm4sync.tm_min = 0X0;
+        tm4sync.tm_hour = 0X0;
+        NetworkPackage::s_stamp_stand = mktime(&tm4sync);
+        NetworkPackage::s_stamp_stand *= 1000;
     }
     red_debug_lite("time4sync[%d:%d:%d %d:%d:%d]", 1900+tm4sync.tm_year, 1+tm4sync.tm_mon, tm4sync.tm_mday,
         tm4sync.tm_hour, tm4sync.tm_min, tm4sync.tm_sec);
@@ -458,8 +465,7 @@ int do_probe_respon(NetworkPackage &network_package)
             dev_status[index] = 2;
         RedDebug::log("%s\n", gs_screen->get_dev_state_label(index)->caption().c_str());
 
-        if (json_value_ptr->devices[index].white_led.mode == LED_NORMAL_MODE &&
-            json_value_ptr->devices[index].white_led.normal_status == 0) {
+        if (json_value_ptr->devices[index].white_led.mode == LED_NORMAL_MODE_OFF) {
             dev_white_status[index] = 3;
         } else if (json_value_ptr->devices[index].white_led.mode == LED_MOCODE_MODE) {
             dev_white_status[index] = 2;
@@ -467,8 +473,7 @@ int do_probe_respon(NetworkPackage &network_package)
             dev_white_status[index] = 1;
         }
 
-        if (json_value_ptr->devices[index].green_led.mode == LED_NORMAL_MODE &&
-            json_value_ptr->devices[index].green_led.normal_status == 0) {
+        if (json_value_ptr->devices[index].green_led.mode == LED_NORMAL_MODE_OFF) {
             dev_green_status[index] = 3;
         } else if (json_value_ptr->devices[index].green_led.mode == LED_MOCODE_MODE) {
             dev_green_status[index] = 2;
