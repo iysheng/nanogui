@@ -77,7 +77,7 @@ static int do_with_network_attitude_info(NetworkPackage &net_package)
 
     info_valid_flags = net_package.payload()[0] << 8 | net_package.payload()[1];
     if (info_valid_flags & 0x01) {
-        RedDebug::log("invalid attitude info");
+        RedDebug::warn("invalid attitude info");
         return -2;
     }
 
