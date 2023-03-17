@@ -21,6 +21,8 @@
 #define NETWORK_PINPONG_TEST  0X59
 /* 指控舰艇姿态信息发送 */
 #define NETWORK_RECV_ATTITUDE_INFO      0XB0
+/* 时间同步信息发送 */
+#define NETWORK_RECV_TIMESYNC_INFO      0XB3
 
 
 /********************   发送给主控的命令集合   ******************************/
@@ -30,6 +32,8 @@
 #define NETWORK_SEND_INFO     0XA1
 /* 上报系统关机信息 */
 #define NETWORK_SEND_OFF      0XE4
+
+#define BCD2CHAR(x)    ((x >> 4 & 0xf) * 10 + (x & 0xf))
 
 typedef enum {
     NETWORK_PROTOCOL_WHITE_LED_TYPE,

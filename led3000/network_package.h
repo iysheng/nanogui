@@ -66,6 +66,7 @@ public:
     uint8_t ack() {return m_ack;};
     uint8_t flag() {return m_flag;};
     uint8_t count() {return m_count;};
+    uint32_t stamp() {return m_stamp;};
 
 private:
     uint32_t m_src_ip_n;

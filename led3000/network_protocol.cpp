@@ -16,6 +16,7 @@
 #include <PolyM/include/polym/Queue.hpp>
 #include <stdint.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
@@ -61,6 +62,7 @@ static inline int _do_format_dev_value_float2int(float value, double dimension)
         return (int)(value * dimension - 0.5 * dimension);
     }
 }
+
 /**
   * @brief 处理指控发送的舰艇姿态信息
   * retval .
@@ -99,6 +101,49 @@ static int do_with_network_attitude_info(NetworkPackage &net_package)
 
     RedDebug::log("flag:%hx direction:%d vertical:%d horizon:%d", info_valid_flags,
                   direction_info, vertical_info, horizon_info);
+    return 0;
+}
+
+/**
+  * @brief 处理时间同步信息
+  * retval .
+  */
+static int do_with_network_timesync_info(NetworkPackage &net_package)
+{
+#define TIME_SYNC_THREOLD_COUNTS    60
+    static int s_need_time_sync = 0;
+    struct timeval time4sync = {0};
+    struct tm tm4sync = {0};
+    int ret;
+
+    if (net_package.len() != 28) {
+        RedDebug::log("Invalid len of payload_len4time_sync_info");
+        return -1;
+    }
+
+    /* 因为时同信息的 m_stamp 包含了秒,分,小时,时区信息,所以此处要解析出来 */
+    tm4sync.tm_sec = BCD2CHAR(net_package.stamp() >> 24 & 0xff);
+    tm4sync.tm_min = BCD2CHAR(net_package.stamp() >> 16 & 0xff);
+    tm4sync.tm_hour = BCD2CHAR(net_package.stamp() >> 8 & 0xff);
+    /* net_package.stamp() & 0xff 表示时区 */
+
+    tm4sync.tm_mday = BCD2CHAR(net_package.payload()[0]);
+    tm4sync.tm_mon = BCD2CHAR(net_package.payload()[1] - 1);
+    tm4sync.tm_year = (BCD2CHAR(net_package.payload()[3]) - 19) * 100 + BCD2CHAR(net_package.payload()[2]);
+
+    /* TODO 间隔一定时间进行时间同步 */
+    if (1 == s_need_time_sync++ % TIME_SYNC_THREOLD_COUNTS)
+    {
+        time4sync.tv_sec = mktime(&tm4sync);
+        ret = settimeofday(&time4sync, NULL);
+        if (ret == -1)
+        {
+            RedDebug::warn("Failed set time sync, err=%d", errno);
+        }
+    }
+    red_debug_lite("time4sync[%d:%d:%d %d:%d:%d]", 1900+tm4sync.tm_year, 1+tm4sync.tm_mon, tm4sync.tm_mday,
+        tm4sync.tm_hour, tm4sync.tm_min, tm4sync.tm_sec);
+
     return 0;
 }
 
@@ -523,6 +568,10 @@ int handle_with_network_buffer(char *buffer, int size)
     case NETWORK_RECV_ATTITUDE_INFO:
         RedDebug::log("TODO with ATTITUDE_INFO");
         do_with_network_attitude_info(net_package);
+        break;
+    case NETWORK_RECV_TIMESYNC_INFO:
+        RedDebug::log("TODO with TIMESYNC_INFO");
+        do_with_network_timesync_info(net_package);
         break;
     case NETWORK_RECV_GUIDE:
         RedDebug::log("TODO with GUIDE");

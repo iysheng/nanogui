@@ -78,6 +78,9 @@ int NetworkPackage::convert_from_buffer(char *buffer, short int len)
     m_index = buffer[CSSMXP_MSG_PREFIX + 0];
     m_id = buffer[CSSMXP_MSG_PREFIX + 1];
     m_stamp = buffer[CSSMXP_MSG_PREFIX + 4] << 24 | buffer[CSSMXP_MSG_PREFIX + 5] << 16 | buffer[CSSMXP_MSG_PREFIX + 6] << 8 | buffer[CSSMXP_MSG_PREFIX + 7];
+    /* 时间同步信息,跳过 4 个字节,其中时间戳的 4 个字节保存的是
+     * 秒,分,时,时区 4 个信息, 在解析的时候需要特殊处理 m_stamp 字段
+     * */
     m_payload_len = MK_PAYLOAD_LEN(len - CSSMXP_MSG_PREFIX);
 
     /* correct payload length */
