@@ -29,6 +29,7 @@ public:
     static void print_soft_info(void);
     static void log(char *fmt, ...);
     static void warn(char *fmt, ...);
+    static void err(char *fmt, ...);
 private:
     static std::shared_ptr<logger> m_logger;
 };

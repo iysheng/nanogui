@@ -72,3 +72,15 @@ void RedDebug::warn(char *fmt, ...)
     RedDebug::m_logger->warn(buf);
     spdlog::warn(buf);
 }
+
+void RedDebug::err(char *fmt, ...)
+{
+    char buf[4096] = {0};
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(buf, sizeof(buf) - 1, fmt, args);
+    va_end(args);
+
+    RedDebug::m_logger->error(buf);
+    spdlog::error(buf);
+}
