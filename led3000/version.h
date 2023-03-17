@@ -5,6 +5,6 @@
 #define LED3000_MINOR_VERSION 9
 #define LED3000_PATCH_VERSION 5
 #define LED3000_VERSION (0 << 16 | 9 << 8 | 5)
-#define LED3000_COMMIT_ID     "b0c0758"
+#define LED3000_COMMIT_ID     "c6e75c7"
 
 #endif /* ifndef __VERSION_H__ */

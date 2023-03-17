@@ -70,14 +70,15 @@ static int do_with_network_attitude_info(NetworkPackage &net_package)
     short info_valid_flags /* 状态及数据有效标志 */;
     int direction_info /* 航向角 */, vertical_info /* 纵摇角 */, horizon_info /* 横摇角 */;
 
-    if (net_package.len() != 0X16) {
-        RedDebug::log("Invalid payload_len4recv_attitude_info");
+    if (net_package.len() != 0X26) {
+        RedDebug::log("Invalid len of payload_len4recv_attitude_info");
         return -1;
     }
 
     info_valid_flags = net_package.payload()[0] << 8 | net_package.payload()[1];
     if (info_valid_flags & 0x01) {
         RedDebug::log("invalid attitude info");
+        return -2;
     }
 
     memcpy(&direction_info, net_package.payload() + 2, sizeof(direction_info));
