@@ -27,8 +27,24 @@ static NetworkUdp gs_network_udp[NETWORK_PROTOCOL_TYPE_COUNTS];
 static Led3000Window *gs_screen = nullptr;
 static TurntableAttitude gs_turntable_attitude[2];
 
+#define DIMENSION_180_USHORT  (90.0 / (2 << 13)) /* 180 / 2^15 */
+
 #define DIMENSION_90_SHORT    (90.0 / (2 << 13))
 #define DIMENSION_90_INT      (90.0 / (2 << 13))
+
+static inline float _do_format_dev_ushort2float(unsigned short value, double dimension)
+{
+    float ans = (float)value * dimension;
+    RedDebug::warn("%u -> %.2f\n", value, ans);
+    return ans;
+}
+
+static inline float _do_format_dev_short2float(short value, double dimension)
+{
+    float ans = value * dimension;
+    RedDebug::warn("%u -> %.2f\n", value, ans);
+    return ans;
+}
 
 static inline short _do_format_dev_value_short(float value, double dimension)
 {
@@ -199,7 +215,7 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
 {
     short control_word, target_batch_number /* 目标批号 */;
     int target_distance /* 目标距离 */;
-    short target_direction /* 方位角 */, target_elevation /* 仰角 */;
+    float target_direction /* 方位角 */, target_elevation /* 仰角 */;
     char target_position_buffer[32] = {0};
 
     uint8_t dev_num, led_type, led_mode, guide_enable;
@@ -225,7 +241,7 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
     if (guide_enable) {
         /* 退出引导模式 */
         gs_screen->set_guide_mode(false);
-        RedDebug::log("no guide enable, just return.");
+        RedDebug::warn("no guide enable, just return.");
         return 0;
     }
     /* 进入引导模式 */
@@ -235,21 +251,24 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
 
     target_distance = net_package.payload()[4] << 24 | net_package.payload()[5] << 16 | net_package.payload()[6] << 8 | net_package.payload()[7];
 
-    short target_value_tmp;
-    memcpy(&target_value_tmp, 8 + net_package.payload(), sizeof(target_value_tmp));
-    target_direction = ntohs(target_value_tmp);
-    target_direction = _do_format_dev_value_float2short(target_direction, DIMENSION_90_SHORT);
-    memcpy(&target_value_tmp, 10 + net_package.payload(), sizeof(target_value_tmp));
-    target_elevation = ntohs(target_value_tmp);
-    target_elevation = _do_format_dev_value_float2short(target_elevation, DIMENSION_90_SHORT);
+    unsigned short target_direction_value_tmp;
+    short target_elevation_value_tmp;
+    memcpy(&target_direction_value_tmp, 8 + net_package.payload(), sizeof(target_direction_value_tmp));
+    target_direction_value_tmp = (unsigned short)ntohs(target_direction_value_tmp);
+    target_direction = _do_format_dev_ushort2float(target_direction_value_tmp, DIMENSION_180_USHORT);
+
+    memcpy(&target_elevation_value_tmp, 10 + net_package.payload(), sizeof(target_elevation_value_tmp));
+    target_elevation_value_tmp = ntohs(target_elevation_value_tmp);
+    target_elevation = _do_format_dev_short2float(target_elevation_value_tmp , DIMENSION_90_SHORT);
 
     /* TODO correct target info with attitude */
-    gs_turntable_attitude[dev_num].correct_target_info(target_direction, target_elevation);
+    /* WAITING TEST [U]SHORT2FLOAT JUST IGNORE THIS NOW */
+    //gs_turntable_attitude[dev_num].correct_target_info(target_direction, target_elevation);
 
     /* 方向,俯仰 */
-    snprintf(target_position_buffer, sizeof(target_position_buffer), "%hd,%hd", target_direction, target_elevation);
+    snprintf(target_position_buffer, sizeof(target_position_buffer), "%.2f,%.2f", target_direction, target_elevation);
 
-    RedDebug::log("control_word:%hx batch_number:%hx distance:%x direction:%hx elevation:%hx", control_word, target_batch_number,
+    RedDebug::warn("control_word:%hx batch_number:%hx distance:%x direction:%.2f elevation:%.2f", control_word, target_batch_number,
                   target_distance, target_direction, target_elevation);
     /* TODO 发送消息到对应的设备控制线程 */
     /* 发送消息控制转台转动到指定角度 */
@@ -257,24 +276,30 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
     if (led_type == NETWORK_PROTOCOL_WHITE_LED_TYPE) {
         if (led_mode == NETWORK_PROTOCOL_NORMAL_LED_MODE) {
             gs_screen->getJsonValue()->devices[dev_num].white_led.normal_status = 100;
+            gs_screen->getJsonValue()->devices[dev_num].white_led.mode = LED_NORMAL_MODE;
             gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_WHITE_NORMAL_SETTING, to_string(100)));
         } else if (led_mode == NETWORK_PROTOCOL_BINK_LED_MODE) {
             /* 默认 5HZ 爆闪 */
             gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_WHITE_BLINK_SETTING, to_string(5)));
+            gs_screen->getJsonValue()->devices[dev_num].white_led.mode = LED_BLINK_MODE;
         } else if (led_mode == NETWORK_PROTOCOL_NORMAL_OFF_LED_MODE) {
             /* 关灯 */
             gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_WHITE_NORMAL_SETTING, to_string(0)));
+            gs_screen->getJsonValue()->devices[dev_num].white_led.mode = LED_NORMAL_MODE_OFF;
         }
     } else if (led_type == NETWORK_PROTOCOL_GREEN_LED_TYPE) {
         if (led_mode == NETWORK_PROTOCOL_NORMAL_LED_MODE) {
             gs_screen->getJsonValue()->devices[dev_num].white_led.normal_status = 100;
+            gs_screen->getJsonValue()->devices[dev_num].green_led.mode = LED_NORMAL_MODE;
             gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_GREEN_NORMAL_SETTING, to_string(100)));
         } else if (led_mode == NETWORK_PROTOCOL_BINK_LED_MODE) {
             /* 默认 5HZ 爆闪 */
             gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_GREEN_BLINK_SETTING, to_string(5)));
+            gs_screen->getJsonValue()->devices[dev_num].green_led.mode = LED_BLINK_MODE;
         } else if (led_mode == NETWORK_PROTOCOL_NORMAL_OFF_LED_MODE) {
             /* 关灯 */
             gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_GREEN_NORMAL_SETTING, to_string(0)));
+            gs_screen->getJsonValue()->devices[dev_num].green_led.mode = LED_NORMAL_MODE_OFF;
         }
     }
     return 0;
@@ -374,31 +399,35 @@ int do_report_dev_off(NetworkPackage &net_package)
 
 /**
   * @brief 上报设备数据
-  * @param short dev1_direction: 设备一指向角， 指向角，右边为正，左边为负，+-180
-  * @param short dev1_elevatioon: 设备一仰角，仰角范围是 +-90， 采用二进制补码
-  * @param short dev2_direction: 设备二指向角
-  * @param short dev2_elevation: 设备二仰角
+  * @param float dev1_direction_float: 设备一指向角， 指向角，右边为正，左边为负，+-180
+  * @param float dev1_elevatioon_float: 设备一仰角，仰角范围是 +-90， 采用二进制补码
+  * @param float dev2_direction_float: 设备二指向角
+  * @param float dev2_elevation_float: 设备二仰角
   * retval Linux/errno.
   */
-int do_report_dev_info(NetworkPackage &net_package, short dev1_direction, short dev1_elevation, short dev2_direction, short dev2_elevation)
+int do_report_dev_info(NetworkPackage &net_package, float dev1_direction_float, float dev1_elevation_float, float dev2_direction_float, float dev2_elevation_float)
 {
+    short dev1_direction, dev1_elevation;
+    short dev2_direction, dev2_elevation;
     if (gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].get_socket() <= 0) {
         RedDebug::log("Novalid socket for network udp");
         return -EINVAL;
     }
     char dev_info_buffer[NETWORK_PACKGE_LEN_MAX] = {0};
 
-    dev1_direction = _do_format_dev_value_short(dev1_direction, DIMENSION_90_SHORT);
+    RedDebug::warn("test float2short %f,%f %f,%f", dev1_direction_float, dev1_elevation_float,
+        dev2_direction_float, dev2_elevation_float);
+    dev1_direction = _do_format_dev_value_short(dev1_direction_float, DIMENSION_90_SHORT);
     dev_info_buffer[6] = dev1_direction >> 8 & 0xff;
     dev_info_buffer[7] = dev1_direction & 0xff;
-    dev1_elevation = _do_format_dev_value_short(dev1_elevation, DIMENSION_90_SHORT);
+    dev1_elevation = _do_format_dev_value_short(dev1_elevation_float, DIMENSION_90_SHORT);
     dev_info_buffer[8] = dev1_elevation >> 8 & 0xff;
     dev_info_buffer[9] = dev1_elevation & 0xff;
 
-    dev2_direction = _do_format_dev_value_short(dev2_direction, DIMENSION_90_SHORT);
+    dev2_direction = _do_format_dev_value_short(dev2_direction_float, DIMENSION_90_SHORT);
     dev_info_buffer[14] = dev2_direction >> 8 & 0xff;
     dev_info_buffer[15] = dev2_direction & 0xff;
-    dev2_elevation = _do_format_dev_value_short(dev2_elevation, DIMENSION_90_SHORT);
+    dev2_elevation = _do_format_dev_value_short(dev2_elevation_float, DIMENSION_90_SHORT);
     dev_info_buffer[16] = dev2_elevation >> 8 & 0xff;
     dev_info_buffer[17] = dev2_elevation & 0xff;
 
@@ -420,7 +449,7 @@ int do_report_dev_info(NetworkPackage &net_package, short dev1_direction, short 
 int do_force_respon(NetworkPackage &net_package)
 {
     if (gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].get_socket() <= 0) {
-        RedDebug::log("Novalid socket for network udp");
+        RedDebug::err("Novalid socket for network udp");
         return -EINVAL;
     }
     char force_respon_buffer[NETWORK_PACKGE_LEN_MAX] = {0};
@@ -442,7 +471,7 @@ int do_force_respon(NetworkPackage &net_package)
     hints.ai_protocol = IPPROTO_UDP;
     int r(getaddrinfo("168.6.0.4", "20840", &hints, &p_addrinfo));
     if (r != 0 || p_addrinfo == NULL) {
-        RedDebug::log("failed convert addrinfo.-------------------------------");
+        RedDebug::err("failed convert addrinfo.");
         return -1;
     }
 
@@ -458,7 +487,7 @@ int do_probe_respon(NetworkPackage &network_package)
     char dev_status[2] = {0, 0}; char dev_green_status[2] = {0, 0}; char dev_white_status[2] = {0, 0};
     char dev_auth_status[2] = {0, 0};
 
-    short int direction[2], elevation[2];
+    float direction[2], elevation[2];
     std::string dev_info_str, direction_str, elevation_str;
     std::size_t split_index = 0;
     const led3000_config_t *json_value_ptr = gs_screen->getJsonValue();
@@ -503,8 +532,8 @@ int do_probe_respon(NetworkPackage &network_package)
         elevation_str = dev_info_str.substr(1 + split_index);
         RedDebug::log("gre:%s dire:%s elevation:%s whole:%s\n", gs_screen->get_dev_auth_label(index)->caption().c_str(),
                       direction_str.c_str(), elevation_str.c_str(), dev_info_str.c_str());
-        direction[index] = std::atoi(direction_str.c_str());
-        elevation[index] = std::atoi(elevation_str.c_str());
+        sscanf(direction_str.c_str(), "%f", &direction[index]);
+        sscanf(elevation_str.c_str(), "%f", &elevation[index]);
     }
     do_report_dev_status(network_package, dev_status[0], dev_green_status[0], dev_white_status[0], dev_auth_status[0],
                          dev_status[1], dev_green_status[1], dev_white_status[1], dev_auth_status[1]);

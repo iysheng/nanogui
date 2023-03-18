@@ -409,10 +409,11 @@ static void _do_with_turntable_track_setting(led_device_t* devp, std::string mes
 
 static void _do_with_turntable_position_setting(led_device_t* devp, std::string message)
 {
-    int16_t direction, elevation;
-    sscanf(message.c_str(), "%hd,%hd", &direction, &elevation);
-    direction *= 100;
-    elevation *= 100;
+    float direction_float, elevation_float;
+    short direction, elevation;
+    sscanf(message.c_str(), "%f,%f", &direction_float, &elevation_float);
+    direction = direction_float * 100;
+    elevation = elevation_float * 100;
 
     uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X51 /* 手动,角度 */,
                           direction >> 8, direction, elevation >> 8, elevation, 0X00 /* 校验和 */, 0XE7
@@ -552,15 +553,16 @@ static int _do_analysis_hear_msg(int index, char * buffer, int len)
     green_mode_param = buffer[6];
     turntable_mode = buffer[7];
     turntable_horizon = buffer[8] << 8 | buffer[9];
-    turntable_horizon /= 100;
+    //turntable_horizon /= 100;
     turntable_vertical = buffer[10] << 8 | buffer[11];
-    turntable_vertical /= 100;
+    //turntable_vertical /= 100;
     turntable_horizon_speed = buffer[12] << 8 | buffer[13];
     turntable_vertical_speed = buffer[14] << 8 | buffer[15];
     camera_falcon = buffer[16];
 
     gs_led_devices[index].screen->get_dev_state_label(index)->set_caption(dev_status ? "故障" : "正常");
-    gs_led_devices[index].screen->get_dev_angle_label(index)->set_caption(to_string(turntable_horizon) + '/' + to_string(turntable_vertical));
+    gs_led_devices[index].screen->get_dev_angle_label(index)->set_caption(to_string(turntable_horizon / 100) + '.' +
+        to_string(turntable_horizon % 100) + '/' + to_string(turntable_vertical / 100) + '.' + to_string(turntable_vertical % 100));
     gs_led_devices[index].screen->get_dev_angular_speed_label(index)->set_caption(to_string(turntable_horizon_speed) + '/' + to_string(turntable_vertical_speed));
 
     RedDebug::log("valid heart msg:dev_status:%u %u|%u %u|%u", dev_status, turntable_horizon, turntable_vertical, turntable_horizon_speed, turntable_vertical_speed);
