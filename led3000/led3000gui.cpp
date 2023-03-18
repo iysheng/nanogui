@@ -910,7 +910,7 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
 
         auto *guide_name_label = swindow->add<Label>("", "sans-bold");
         guide_name_label->set_icon(RED_LED3000_ASSETS_DIR"/guide.png");
-        guide_name_label->set_position(Vector2i(900, 19));
+        guide_name_label->set_position(Vector2i(900, 15));
         guide_name_label->set_font_size(15);
         set_guide_mode_icon(guide_name_label);
         get_guide_mode_icon()->set_visible(false);

@@ -261,6 +261,9 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
         } else if (led_mode == NETWORK_PROTOCOL_BINK_LED_MODE) {
             /* 默认 5HZ 爆闪 */
             gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_WHITE_BLINK_SETTING, to_string(5)));
+        } else if (led_mode == NETWORK_PROTOCOL_NORMAL_OFF_LED_MODE) {
+            /* 关灯 */
+            gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_WHITE_NORMAL_SETTING, to_string(0)));
         }
     } else if (led_type == NETWORK_PROTOCOL_GREEN_LED_TYPE) {
         if (led_mode == NETWORK_PROTOCOL_NORMAL_LED_MODE) {
@@ -269,6 +272,9 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
         } else if (led_mode == NETWORK_PROTOCOL_BINK_LED_MODE) {
             /* 默认 5HZ 爆闪 */
             gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_GREEN_BLINK_SETTING, to_string(5)));
+        } else if (led_mode == NETWORK_PROTOCOL_NORMAL_OFF_LED_MODE) {
+            /* 关灯 */
+            gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_GREEN_NORMAL_SETTING, to_string(0)));
         }
     }
     return 0;
