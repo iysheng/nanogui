@@ -13,6 +13,7 @@
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/rotating_file_sink.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/fmt/bin_to_hex.h"
 
 using namespace spdlog;
@@ -32,4 +33,5 @@ public:
     static void err(char *fmt, ...);
 private:
     static std::shared_ptr<logger> m_logger;
+    static std::shared_ptr<logger> m_console_logger;
 };
