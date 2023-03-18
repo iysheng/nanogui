@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <led3000gui.h>
 #include <stdlib.h>
+#include <sys/time.h>
 #include <string>
 #include <version.h>
 
@@ -915,6 +916,10 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         set_guide_mode_icon(guide_name_label);
         get_guide_mode_icon()->set_visible(false);
 
+        m_time4dispaly= swindow->add<Label>("       ", "digital");
+        m_time4dispaly->set_position(Vector2i(1120, 30));
+        m_time4dispaly->set_font_size(20);
+
         sysconfig_btn = swindow->add<Button>("", RED_LED3000_ASSETS_DIR"/power.png", 0);
         sysconfig_btn->set_position({1219, 15});
         sysconfig_btn->set_fixed_size({46, 46});
@@ -1226,3 +1231,13 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
     m_shader->set_uniform("intensity", 0.5f);
 }
 
+void Led3000Window::update_time4display(void)
+{
+    struct timeval tv = {0};
+    char current_time[64] = {0};
+    if (0 == gettimeofday(&tv, NULL))
+    {
+        if (ctime_r(&tv.tv_sec, current_time))
+            m_time4dispaly->set_caption(&current_time[11]);
+    }
+}

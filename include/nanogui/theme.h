@@ -30,8 +30,9 @@ class NANOGUI_EXPORT Theme : public Object {
 public:
     /* 需要 nanovg 上下文来加载字体 */
     Theme(NVGcontext *ctx);
-
     /* Fonts */
+    /* 数码字体用来显示时间 */
+    int m_font_digital4time;
     /// The standard font face (default: ``"sans"`` from ``resources/roboto_regular.ttf``).
     int m_font_sans_regular;
     /// The bold font face (default: ``"sans-bold"`` from ``resources/roboto_regular.ttf``).
