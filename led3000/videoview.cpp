@@ -117,7 +117,7 @@ float mpp_get_bpp_from_format(int format)
         bpp = 4;
         break;
     default:
-        printf("Is unsupport format now, please fix \n");
+        red_debug_lite("Is unsupport format now, please fix \n");
         return 0;
     }
 
@@ -202,14 +202,14 @@ int mpp_hardware_init(MpiDecLoopData *data)
     MppBuffer frm_buf   = NULL;
 
 
-    printf("mpi_dec_test start\n");
+    red_debug_lite("mpi_dec_test start\n");
     memset(data, 0, sizeof(MpiDecLoopData));
 
     // decoder demo
     ret = mpp_create(&ctx, &mpi);
 
     if (MPP_OK != ret) {
-        printf("mpp_create failed\n");
+        red_debug_lite("mpp_create failed\n");
         deInit(&packet, &frame, ctx, buf, data);
     }
 
@@ -218,7 +218,7 @@ int mpp_hardware_init(MpiDecLoopData *data)
     param = &need_split;
     ret = mpi->control(ctx, mpi_cmd, param);
     if (MPP_OK != ret) {
-        printf("format mpi->control failed\n");
+        red_debug_lite("format mpi->control failed\n");
         deInit(&packet, &frame, ctx, buf, data);
     }
 
@@ -226,13 +226,13 @@ int mpp_hardware_init(MpiDecLoopData *data)
     param = &need_split;
     ret = mpi->control(ctx, mpi_cmd, param);
     if (MPP_OK != ret) {
-        printf("mpi->control failed\n");
+        red_debug_lite("mpi->control failed\n");
         deInit(&packet, &frame, ctx, buf, data);
     }
 
     ret = mpp_init(ctx, MPP_CTX_DEC, type);
     if (MPP_OK != ret) {
-        printf("mpp_init failed\n");
+        red_debug_lite("mpp_init failed\n");
         deInit(&packet, &frame, ctx, buf, data);
     }
 
@@ -242,10 +242,10 @@ int mpp_hardware_init(MpiDecLoopData *data)
     param = &rgba_format;
     ret = mpi->control(ctx, mpi_cmd, param);
     if (MPP_OK != ret) {
-        printf("mpi->control failed aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n");
+        red_debug_lite("mpi->control failed aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n");
         deInit(&packet, &frame, ctx, buf, data);
     } else {
-        printf("mpi->control success bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\n");
+        red_debug_lite("mpi->control success bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\n");
     }
 #endif
 
@@ -318,7 +318,7 @@ int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_b
             if (MPP_OK == ret)
                 pkt_done = 1;
             else
-                printf("送入码流出错:%d\n", ret);
+                red_debug_lite("送入码流出错:%d\n", ret);
         }
 
         int abc = 0, def_index = 0;
@@ -338,10 +338,10 @@ int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_b
                     msleep(2);
                     goto try_again;
                 }
-                printf("decode_get_frame failed too much time\n");
+                red_debug_lite("decode_get_frame failed too much time\n");
             }
             if (MPP_OK != ret) {
-                printf("decode_get_frame failed 这里不应该出错，等了很久了 ret %d\n", ret);
+                red_debug_lite("decode_get_frame failed 这里不应该出错，等了很久了 ret %d\n", ret);
                 break;
             }
 
@@ -355,13 +355,13 @@ int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_b
                     RK_U32 ver_stride = mpp_frame_get_ver_stride(frame);
                     RK_U32 buf_size = mpp_frame_get_buf_size(frame);
 
-                    printf("decode_get_frame get info changed found 不应该出现信息变换帧\n");
-                    printf("decoder require buffer w:h [%d:%d] stride [%d:%d] buf_size %d",
+                    red_debug_lite("decode_get_frame get info changed found 不应该出现信息变换帧\n");
+                    red_debug_lite("decoder require buffer w:h [%d:%d] stride [%d:%d] buf_size %d",
                            width, height, hor_stride, ver_stride, buf_size);
 
                     ret = mpp_buffer_group_get_internal(&data->frm_grp, MPP_BUFFER_TYPE_ION);
                     if (ret) {
-                        printf("get mpp buffer group  failed ret %d\n", ret);
+                        red_debug_lite("get mpp buffer group  failed ret %d\n", ret);
                         break;
                     }
                     mpi->control(ctx, MPP_DEC_SET_EXT_BUF_GROUP, data->frm_grp);
@@ -370,7 +370,7 @@ int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_b
                 } else {
                     err_info = mpp_frame_get_errinfo(frame) | mpp_frame_get_discard(frame);
                     if (err_info) {
-                        printf("解码的帧出错了 decoder_get_frame get err info:%d discard:%d.\n",
+                        red_debug_lite("解码的帧出错了 decoder_get_frame get err info:%d discard:%d.\n",
                                mpp_frame_get_errinfo(frame), mpp_frame_get_discard(frame));
                     }
                     data->frame_count++;
@@ -404,7 +404,7 @@ int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_b
                         /* RGA 模块封装目的信息 */
                         dst = wrapbuffer_virtualaddr(display_buffer, VIDEO_SHOW_FIXED_WIDTH, VIDEO_SHOW_FIXED_HEIGH, DST_FORMAT);
                         if (dst.width == 0) {
-                            printf("%s, %s\n", __FUNCTION__, imStrError());
+                            red_debug_lite("%s, %s\n", __FUNCTION__, imStrError());
                             return ERROR;
                         }
 
@@ -478,7 +478,7 @@ int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_b
             }
 
             if (frm_eos) {
-                printf("最后一帧退出 found last frame\n");
+                red_debug_lite("最后一帧退出 found last frame\n");
                 break;
             }
 
@@ -494,7 +494,7 @@ int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_b
 
         if (data->frame_num > 0 && data->frame_count >= data->frame_num) {
             data->eos = 1;
-            printf("reach max frame number %d\n", data->frame_count);
+            red_debug_lite("reach max frame number %d\n", data->frame_count);
             break;
         }
 
