@@ -32,6 +32,7 @@ public:
     int recv_from_server(char *buffer, uint16_t len, int flags = 0);
 
     int get_socket() {return m_socket;};
+    void invalid_socket(void) {m_socket = -1;};
     struct addrinfo * addrinfo() {return m_addrinfo;};
     struct sockaddr_in source_sin() {return m_source_sin;};
     int stamp();

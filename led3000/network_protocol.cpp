@@ -652,6 +652,15 @@ int handle_with_network_buffer(char *buffer, int size)
 
     return ret;
 }
+/************************* special function ****************************/
+static void network_fds_invalid(void)
+{
+    int i = 0;
+    for (; i < NETWORK_PROTOCOL_TYPE_COUNTS; i++)
+    {
+        gs_network_udp[i].invalid_socket();
+    }
+}
 
 /******************** export function ****************************/
 int update_sysinfo2network(void)
@@ -664,5 +673,7 @@ int update_offinfo2network(void)
 {
     NetworkPackage network_package;
     do_report_dev_off(network_package);
+    /* 无效所有网络句柄,防止发送关机后还会发送其他状态报文 */
+    network_fds_invalid();
 }
 
