@@ -553,16 +553,17 @@ static int _do_analysis_hear_msg(int index, char * buffer, int len)
     green_mode_param = buffer[6];
     turntable_mode = buffer[7];
     turntable_horizon = buffer[8] << 8 | buffer[9];
-    //turntable_horizon /= 100;
     turntable_vertical = buffer[10] << 8 | buffer[11];
-    //turntable_vertical /= 100;
     turntable_horizon_speed = buffer[12] << 8 | buffer[13];
     turntable_vertical_speed = buffer[14] << 8 | buffer[15];
     camera_falcon = buffer[16];
 
     gs_led_devices[index].screen->get_dev_state_label(index)->set_caption(dev_status ? "故障" : "正常");
-    gs_led_devices[index].screen->get_dev_angle_label(index)->set_caption(to_string(turntable_horizon / 100) + '.' +
-        to_string(turntable_horizon % 100) + '/' + to_string(turntable_vertical / 100) + '.' + to_string(turntable_vertical % 100));
+    gs_led_devices[index].screen->get_dev_angle_label(index)->set_caption(
+        to_string(turntable_horizon / 100) + '.' +
+        to_string(abs(turntable_horizon % 100)) + '/' +
+        to_string(turntable_vertical / 100) + '.' +
+        to_string(abs(turntable_vertical % 100)));
     gs_led_devices[index].screen->get_dev_angular_speed_label(index)->set_caption(to_string(turntable_horizon_speed) + '/' + to_string(turntable_vertical_speed));
 
     RedDebug::log("valid heart msg:dev_status:%u %u|%u %u|%u", dev_status, turntable_horizon, turntable_vertical, turntable_horizon_speed, turntable_vertical_speed);
