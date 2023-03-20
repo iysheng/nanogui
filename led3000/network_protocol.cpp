@@ -47,7 +47,7 @@ static inline float _do_format_dev_short2float(short value, double dimension)
     return ans;
 }
 
-static inline float _do_format_dev_int2float(short value, double dimension)
+static inline float _do_format_dev_int2float(int value, double dimension)
 {
     float ans = value * dimension;
     RedDebug::log("[int2f]%d -> %.2f\n", value, ans);
@@ -116,7 +116,7 @@ static int do_with_network_attitude_info(NetworkPackage &net_package)
     vertical_info = (int)ntohl(vertical_info);
     vertical_info_float = (int)_do_format_dev_int2float(vertical_info, DIMENSION_90_INT);
 
-    memcpy(&horizon_info, net_package.payload() + 6, sizeof(horizon_info));
+    memcpy(&horizon_info, net_package.payload() + 10, sizeof(horizon_info));
     horizon_info = (int)ntohl(horizon_info);
     horizon_info_float = _do_format_dev_int2float(horizon_info, DIMENSION_90_INT);
 
