@@ -429,7 +429,7 @@ int do_report_dev_info(NetworkPackage &net_package, float dev1_direction_float, 
     }
     char dev_info_buffer[NETWORK_PACKGE_LEN_MAX] = {0};
 
-    RedDebug::warn("test float2short %f,%f %f,%f", dev1_direction_float, dev1_elevation_float,
+    RedDebug::log("float2short %f,%f %f,%f", dev1_direction_float, dev1_elevation_float,
         dev2_direction_float, dev2_elevation_float);
     dev1_direction = _do_format_dev_value_short(dev1_direction_float, DIMENSION_90_SHORT);
     dev_info_buffer[6] = dev1_direction >> 8 & 0xff;
