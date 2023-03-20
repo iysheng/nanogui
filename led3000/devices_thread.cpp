@@ -83,7 +83,8 @@ int init_uart_port(uartport_t *uart)
     }
 
     ////// 参考周立功提供的串口回环测试修改
-    fd = open(uart->name, O_RDWR | O_NOCTTY);
+    /// 添加 O_NONBLOCK 判断离线
+    fd = open(uart->name, O_RDWR | O_NOCTTY | O_NONBLOCK);
     if (fd <= 0) {
         RedDebug::log("Failed open %s err=%d.", uart->name, fd);
         return -1;
@@ -606,11 +607,27 @@ static int get_device_heart_msg(int index)
 static void *heart_msg_entry(void *arg)
 {
     led_device_t * led_devp = (led_device_t *)arg;
+    int ret = 0;
+    int offline_counts = 0;
 
     while (1) {
         /* 尝试读取心跳信息 */
-        get_device_heart_msg(led_devp->uart.index);
+        ret = get_device_heart_msg(led_devp->uart.index);
         sleep(1);
+        if (-1 == ret)
+        {
+            RedDebug::warn("offline_counts=%d", offline_counts);
+            /* TODO 超过 30s 没有心跳判定为离线 */
+            if (offline_counts++ > 30)
+            {
+                gs_led_devices[led_devp->uart.index].screen->get_dev_state_label(led_devp->uart.index)->set_caption("离线");
+            }
+
+        }
+        else
+        {
+            offline_counts = 0;
+        }
     }
 }
 
