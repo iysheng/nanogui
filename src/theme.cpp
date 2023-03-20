@@ -80,7 +80,7 @@ Theme::Theme(NVGcontext *ctx) {
 
     /* 从内存中加载的字体 */
     m_font_sans_regular = nvgCreateFont(ctx, "sans", RED_LED3000_ASSETS_DIR"/MYH.ttf");
-    m_font_digital4time = nvgCreateFont(ctx, "digital", RED_LED3000_ASSETS_DIR"/digital_counter_7.ttf");
+    m_font_digital4time = nvgCreateFont(ctx, "digital", RED_LED3000_ASSETS_DIR"/DigitalCounterLite.ttf");
     m_font_sans_bold = nvgCreateFont(ctx, "sans-bold", RED_LED3000_ASSETS_DIR"/MYHB.ttf");
     m_font_icons = nvgCreateFontMem(ctx, "icons", (uint8_t *) fontawesome_solid_ttf,
                                     fontawesome_solid_ttf_size, 0);
