@@ -380,7 +380,7 @@ int do_report_dev_status(NetworkPackage &net_package, char dev1_status, char dev
                               0X01,
                               0X01,
                               0X01, NETWORK_SEND_STATUS, MK_MSG_FULL_LEN(0X0C),
-                              gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].stamp(),
+                              0X00,
                               dev_status_buffer);
 
     return _do_report_msg2net(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST], dev_status);
@@ -399,14 +399,16 @@ int do_report_dev_off(NetworkPackage &net_package)
     char dev_off_buffer[NETWORK_PACKGE_LEN_MAX] = {0};
 
     NetworkPackage dev_off(net_package.src_ip_n(),
-                           ntohl(((sockaddr_in *)gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].addrinfo()->ai_addr)->sin_addr.s_addr),
-                           gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].sn(),
-                           0X00,
-                           0X01,
-                           0X01,
-                           0X01,
-                           NETWORK_SEND_OFF, MK_MSG_FULL_LEN(0X8),
-                           gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].stamp(), dev_off_buffer);
+        0X00,
+        gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE].sn(),
+        0X00,
+        0X01,
+        0X01,
+        0X01,
+        NETWORK_SEND_OFF,
+        MK_MSG_FULL_LEN(0X8),
+        0X00,
+        dev_off_buffer);
 
     return _do_report_msg2net(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE], dev_off);
 }
