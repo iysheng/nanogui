@@ -193,7 +193,11 @@ int mpp_hardware_init(MpiDecLoopData *data)
     /* H.265 使用  MPP_VIDEO_CodingHEVC
      * H.264 使用  MPP_VIDEO_CodingAVC
      * */
+#ifdef LED3000_MPP_H265
     MppCodingType type  = MPP_VIDEO_CodingHEVC;
+#else
+    MppCodingType type  = MPP_VIDEO_CodingAVC;
+#endif
 
     // resources
     char *buf           = NULL;
@@ -447,7 +451,7 @@ int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_b
                         ret = (MPP_RET)imresize(crop, dst);
                         //dump_file("imcrop", display_buffer, 4 * VIDEO_SHOW_FIXED_HEIGH * VIDEO_SHOW_FIXED_WIDTH);
 #else
-                        ret = (MPP_RET)imcheck(src, crop, crop_rect, src);
+                        ret = (MPP_RET)imcheck(src, dst, src_rect, dst_rect);
                         if (IM_STATUS_NOERROR != ret) {
                             red_debug_lite("%d, check error! %s", __LINE__, imStrError((IM_STATUS)ret));
                             return -1;

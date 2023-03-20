@@ -64,9 +64,9 @@ protected:
     std::thread *m_thread;
     VideoViewStatus mStatus;
     uint8_t * m_pixels;
-#ifdef LED3000_MPP_H265
+//#ifdef LED3000_MPP_H265
     uint8_t * m_crop4h265;
-#endif
+//#endif
     Texture *m_texture;
     int m_no_frame_counts;
 };
