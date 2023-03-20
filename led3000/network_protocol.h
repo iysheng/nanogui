@@ -73,7 +73,7 @@ public:
     TurntableAttitude(): m_direction_info(0), m_vertical_info(0), m_horizon_info(0), m_delta_info(0) {};
     TurntableAttitude(int delta_info): m_direction_info(0), m_vertical_info(0), m_horizon_info(0), m_delta_info(delta_info) {};
     void set_delta_info(int delta_info) {m_delta_info = delta_info;};
-    void update_attitude_info(int direction_info, int vertical_info, int horizon_info)
+    void update_attitude_info(float direction_info, float vertical_info, float horizon_info)
     {
 #if 1
         m_direction_info = direction_info;
@@ -87,7 +87,7 @@ public:
         m_vertical_info = vertical_info;
         m_horizon_info = horizon_info;
     }
-    void correct_target_info(short int &direction_info, short int &vertical_info)
+    void correct_target_info(float &direction_info, float &vertical_info)
     {
         /* TODO use shipinfo correct target info */
         direction_info -= m_direction_info;
@@ -108,12 +108,12 @@ public:
 
 private:
     /* 航向角 */
-    int m_direction_info;
+    float m_direction_info;
     /* 横摇角 */
-    int m_vertical_info;
+    float m_vertical_info;
     /* 纵摇角 */
-    int m_horizon_info;
-    int m_delta_info;
+    float m_horizon_info;
+    float m_delta_info;
 };
 
 /**

@@ -28,21 +28,29 @@ static Led3000Window *gs_screen = nullptr;
 static TurntableAttitude gs_turntable_attitude[2];
 
 #define DIMENSION_180_USHORT  (90.0 / (2 << 13)) /* 180 / 2^15 */
+#define DIMENSION_180_INT     (180.0 / (2 << 29)) /* 180 / 2^30 */
+#define DIMENSION_90_INT      (90.0 / (2 << 29))  /* 90 / 2^30 */
 
 #define DIMENSION_90_SHORT    (90.0 / (2 << 13))
-#define DIMENSION_90_INT      (90.0 / (2 << 13))
 
 static inline float _do_format_dev_ushort2float(unsigned short value, double dimension)
 {
     float ans = (float)value * dimension;
-    RedDebug::warn("%u -> %.2f\n", value, ans);
+    RedDebug::warn("[ushort2f]%u -> %.2f\n", value, ans);
     return ans;
 }
 
 static inline float _do_format_dev_short2float(short value, double dimension)
 {
     float ans = value * dimension;
-    RedDebug::warn("%u -> %.2f\n", value, ans);
+    RedDebug::warn("[short2f]%hd -> %.2f\n", value, ans);
+    return ans;
+}
+
+static inline float _do_format_dev_int2float(short value, double dimension)
+{
+    float ans = value * dimension;
+    RedDebug::log("[int2f]%d -> %.2f\n", value, ans);
     return ans;
 }
 
@@ -87,6 +95,7 @@ static int do_with_network_attitude_info(NetworkPackage &net_package)
 {
     short info_valid_flags /* 状态及数据有效标志 */;
     int direction_info /* 航向角 */, vertical_info /* 纵摇角 */, horizon_info /* 横摇角 */;
+    float direction_info_float /* 航向角 */, vertical_info_float /* 纵摇角 */, horizon_info_float /* 横摇角 */;
 
     if (net_package.len() != 0X26) {
         RedDebug::log("Invalid len of payload_len4recv_attitude_info");
@@ -101,22 +110,22 @@ static int do_with_network_attitude_info(NetworkPackage &net_package)
 
     memcpy(&direction_info, net_package.payload() + 2, sizeof(direction_info));
     direction_info = (int)ntohl(direction_info);
-    direction_info = (int)_do_format_dev_value_float2int(direction_info, DIMENSION_90_INT);
+    direction_info_float = _do_format_dev_int2float(direction_info, DIMENSION_180_INT);
 
     memcpy(&vertical_info, net_package.payload() + 6, sizeof(vertical_info));
-    vertical_info = ntohl(vertical_info);
-    vertical_info = (int)_do_format_dev_value_float2int(vertical_info, DIMENSION_90_INT);
+    vertical_info = (int)ntohl(vertical_info);
+    vertical_info_float = (int)_do_format_dev_int2float(vertical_info, DIMENSION_90_INT);
 
     memcpy(&horizon_info, net_package.payload() + 6, sizeof(horizon_info));
-    horizon_info = ntohl(horizon_info);
-    horizon_info = (int)_do_format_dev_value_float2int(horizon_info, DIMENSION_90_INT);
+    horizon_info = (int)ntohl(horizon_info);
+    horizon_info_float = _do_format_dev_int2float(horizon_info, DIMENSION_90_INT);
 
     /* Update ship attitude info */
-    gs_turntable_attitude[0].update_attitude_info(direction_info, vertical_info, horizon_info);
-    gs_turntable_attitude[1].update_attitude_info(direction_info, vertical_info, horizon_info);
+    gs_turntable_attitude[0].update_attitude_info(direction_info_float, vertical_info_float, horizon_info_float);
+    gs_turntable_attitude[1].update_attitude_info(direction_info_float, vertical_info_float, horizon_info_float);
 
-    RedDebug::log("flag:%hx direction:%d vertical:%d horizon:%d", info_valid_flags,
-                  direction_info, vertical_info, horizon_info);
+    RedDebug::log("flag:%hx direction:%f vertical:%f horizon:%f", info_valid_flags,
+                  direction_info_float, vertical_info_float, horizon_info_float);
     return 0;
 }
 
@@ -263,7 +272,7 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
 
     /* TODO correct target info with attitude */
     /* WAITING TEST [U]SHORT2FLOAT JUST IGNORE THIS NOW */
-    //gs_turntable_attitude[dev_num].correct_target_info(target_direction, target_elevation);
+    gs_turntable_attitude[dev_num].correct_target_info(target_direction, target_elevation);
 
     /* 方向,俯仰 */
     snprintf(target_position_buffer, sizeof(target_position_buffer), "%.2f,%.2f", target_direction, target_elevation);
@@ -288,6 +297,11 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
             gs_screen->getJsonValue()->devices[dev_num].white_led.mode = LED_NORMAL_MODE_OFF;
         }
     } else if (led_type == NETWORK_PROTOCOL_GREEN_LED_TYPE) {
+        if (gs_screen->get_dev_auth_label(dev_num)->caption() == std::string("禁止射击")) {
+            /* 权限不允许 */
+            return -EPERM;
+        }
+
         if (led_mode == NETWORK_PROTOCOL_NORMAL_LED_MODE) {
             gs_screen->getJsonValue()->devices[dev_num].white_led.normal_status = 100;
             gs_screen->getJsonValue()->devices[dev_num].green_led.mode = LED_NORMAL_MODE;

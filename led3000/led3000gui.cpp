@@ -200,15 +200,12 @@ static void _do_paint_green_light_no_auth(Widget *widget)
     msg_dlg->confirm_button()->set_visible(false);
 }
 
-
 void do_with_white_light_normal(Widget *widget, int choose)
 {
     std::cout << "white light normal:" << choose << std::endl;
     Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->screen());
     const std::vector<Button *> * white_dev_btns = led3000Window->get_white_dev_control_btns();
     if (choose != 2) {
-        /* TODO 检验是否授权 */
-
         switch (choose) {
         case 0:
             led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mode = LED_NORMAL_MODE_OFF;
