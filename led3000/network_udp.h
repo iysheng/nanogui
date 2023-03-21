@@ -39,6 +39,9 @@ public:
     char index() {return m_index;};
     char sn() {return m_sn;};
 
+    /* 相同端口的 fd 句柄,用来同步用 */
+    static int gs_socket_udp_alone_fd;
+
 private:
     uint32_t m_src_ip_n; /* big endian */
     uint32_t m_dst_ip_n; /* big endian */
