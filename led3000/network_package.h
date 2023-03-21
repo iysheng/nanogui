@@ -43,7 +43,7 @@ using namespace std;
 class NetworkPackage
 {
 public:
-    NetworkPackage(): m_payload_len(0) {memset(m_payload, 0, sizeof(m_payload));};
+    NetworkPackage(): m_payload_len(0), m_dst_ip_n(0), m_src_ip_n(0) {memset(m_payload, 0, sizeof(m_payload));};
     NetworkPackage(int payload_len): m_payload_len(payload_len) {memset(m_payload, 0, sizeof(m_payload));};
     NetworkPackage(char index, char id, char len, int stamp, char * payload);
     NetworkPackage(uint32_t src_ip, uint32_t dst_ip, uint8_t sn, uint8_t ack,

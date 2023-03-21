@@ -123,6 +123,7 @@ public:
     {
     }
     void update_time4display(void);
+    void update_attitudeinfo4display(float direction, float horizon, float vertical);
     void init_json_file(void);
 #if 1
     virtual bool keyboard_event(int key, int scancode, int action, int modifiers)
@@ -349,7 +350,8 @@ private:
     Label *m_white_dev;
     Label *m_turntable_dev;
     Label *m_guide_mode_icon;
-    Label *m_time4dispaly; /* 显示时统时间 */
+    Label *m_time4dispaly;  /* 显示时统时间 */
+    Label *m_attitude_info; /* 显示姿态信息 */
 
     const std::vector<Button *> *m_green_dev_control_btns;
     const std::vector<Button *> *m_white_dev_control_btns;

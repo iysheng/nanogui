@@ -76,6 +76,7 @@ NetworkPackage::NetworkPackage(uint32_t src_ip, uint32_t dst_ip, uint8_t sn, uin
             m_stamp = 0;
         }
     }
+    /* 强制源头地址 */
     m_src_ip_n = ntohl(inet_addr("168.9.0.1"));
     if (len - CSSMXP_MSG_PREFIX > CSSMXP_PACKAGE_PREFIX) {
         m_payload_len = MK_PAYLOAD_LEN(len - CSSMXP_MSG_PREFIX);
@@ -90,8 +91,24 @@ NetworkPackage::NetworkPackage(char index, char id, char len, int stamp, char * 
     m_id(id), m_len(len), m_stamp(stamp)
 {
     struct timeval tv;
+    time_t t_stamp_ms = 0;
+
     if (0 == gettimeofday(&tv, NULL)) {
-        m_stamp = tv.tv_sec * 1000 + tv.tv_usec;
+        t_stamp_ms = tv.tv_sec * 1000 ;
+        if (t_stamp_ms > NetworkPackage::s_stamp_stand)
+        {
+            if (t_stamp_ms - NetworkPackage::s_stamp_stand < 24 * 60 * 60 * 1000)
+            {
+                m_stamp = t_stamp_ms - NetworkPackage::s_stamp_stand;
+                /* 但是是 0.1 ms */
+                m_stamp *= 10;
+                m_stamp += tv.tv_usec / 100;
+            }
+        }
+        else
+        {
+            m_stamp = 0;
+        }
     }
     /* net to host */
     m_src_ip_n = ntohl(inet_addr("168.9.0.1"));
@@ -115,8 +132,9 @@ int NetworkPackage::convert_from_buffer(char *buffer, short int len)
     }
 
     m_len = buffer[0] << 8 | buffer[1];
-    //m_src_ip_n = inet_addr("168.9.0.1");//buffer[4] << 24 | buffer[5] << 16 | buffer[6] << 8 | buffer[7];
-    m_dst_ip_n = buffer[8] << 24 | buffer[9] << 16 | buffer[10] << 8 | buffer[11];
+    /* 这里可以拿到发送放的地址 */
+    m_src_ip_n = buffer[4] << 24 | buffer[5] << 16 | buffer[6] << 8 | buffer[7];
+    //m_dst_ip_n = buffer[8] << 24 | buffer[9] << 16 | buffer[10] << 8 | buffer[11];
     m_sn = buffer[12];
     m_ack = buffer[13];
     m_flag = buffer[14];

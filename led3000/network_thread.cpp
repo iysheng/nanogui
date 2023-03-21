@@ -88,7 +88,6 @@ void *network_thread(void *arg)
         }
     }
 
-    /* TODO just for test */
     if (gs_network_fd[1].udp.get_socket() > 0) {
         if (network_protocol_registe(NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST, gs_network_fd[1].udp) < 0) {
             RedDebug::log("Failed register network fd broadcast.");

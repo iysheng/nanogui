@@ -595,7 +595,7 @@ void do_with_scan_setting(Widget *widget, int choose)
 
 
 Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", false, true),
-    mFileName("/opt/led3000.json"), mFp(nullptr)
+    mFileName("/opt/led3000.json"), mFp(nullptr), m_attitude_info(nullptr), m_time4dispaly(nullptr)
 {
     /* 系统配置参数初始化 */
     {
@@ -1029,6 +1029,15 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         }
     }
 
+    /* 显示船体姿态状态窗口 at 990,780 font size 14
+     * 弦角:-000.00 横摇:-00.00 纵摇:-00.00
+     * */
+    {
+        m_attitude_info = new Label(this, "弦角:-000.00 横摇:-00.00 纵摇:-00.00", "sans");
+        m_attitude_info->set_position(Vector2i(990, 780));
+        m_attitude_info->set_font_size(16);
+    }
+
     {
         /* 创建一个新的 window 对象用来显示图片 */
         auto* img_window = new Window(this, "");
@@ -1238,3 +1247,20 @@ void Led3000Window::update_time4display(void)
             m_time4dispaly->set_caption(&current_time[11]);
     }
 }
+
+void Led3000Window::update_attitudeinfo4display(float direction_float, float horizon_float, float vertical_float)
+{
+    int direction = 100 * direction_float, horizon = 100 * horizon_float, vertical = 100 * vertical_float;
+    if (!m_attitude_info)
+        return;
+    m_attitude_info->set_caption(
+        "弦角:" +
+        to_string(direction / 100) + '.' +
+        to_string(abs(direction % 100)) + " 横摇:" +
+        to_string(horizon / 100) + '.' +
+        to_string(abs(horizon % 100)) + " 纵摇:" +
+        to_string(vertical / 100) + '.' +
+        to_string(abs(vertical % 100))
+        );
+}
+

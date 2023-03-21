@@ -123,6 +123,7 @@ static int do_with_network_attitude_info(NetworkPackage &net_package)
     /* Update ship attitude info */
     gs_turntable_attitude[0].update_attitude_info(direction_info_float, vertical_info_float, horizon_info_float);
     gs_turntable_attitude[1].update_attitude_info(direction_info_float, vertical_info_float, horizon_info_float);
+    gs_screen->update_attitudeinfo4display(direction_info_float, vertical_info_float, horizon_info_float);
 
     RedDebug::log("flag:%hx direction:%f vertical:%f horizon:%f", info_valid_flags,
                   direction_info_float, vertical_info_float, horizon_info_float);
@@ -374,7 +375,7 @@ int do_report_dev_status(NetworkPackage &net_package, char dev1_status, char dev
     dev_status_buffer[3] = 0x00;
 
     NetworkPackage dev_status(net_package.src_ip_n(),
-                              net_package.dst_ip_n(),
+                              0X00,
                               gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].sn(),
                               0X00,
                               0X01,
@@ -447,13 +448,16 @@ int do_report_dev_info(NetworkPackage &net_package, float dev1_direction_float, 
     dev_info_buffer[16] = dev2_elevation >> 8 & 0xff;
     dev_info_buffer[17] = dev2_elevation & 0xff;
 
-    NetworkPackage dev_info(net_package.src_ip_n(), net_package.dst_ip_n(),
+    NetworkPackage dev_info(net_package.src_ip_n(),
+                            0X00,
                             gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].sn(),
                             0X00,
                             0X01,
                             0X01,
                             0X01,
-                            NETWORK_SEND_INFO, MK_MSG_FULL_LEN(0X1A), gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].stamp(), dev_info_buffer);
+                            NETWORK_SEND_INFO, MK_MSG_FULL_LEN(0X1A),
+                            0X00,
+                            dev_info_buffer);
 
     return _do_report_msg2net(gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST], dev_info);
 }
