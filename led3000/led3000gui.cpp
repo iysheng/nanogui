@@ -14,7 +14,6 @@
 #include <version.h>
 
 using namespace nanogui;
-using std::cout;
 using std::endl;
 
 #define LED3000_ID         11000001u
@@ -160,7 +159,6 @@ void do_paint_sysconfig(Widget *widget)
 
 void do_with_sysconfig(Widget *widget, int choose)
 {
-    std::cout << "do with sysconfig :" << choose << std::endl;
     if (choose == 1) {
         Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
         /* "json"  消息表示更新配置文件 */
@@ -170,7 +168,6 @@ void do_with_sysconfig(Widget *widget, int choose)
 
 void do_with_power_off(Widget *widget, int choose)
 {
-    std::cout << "do with power off :" << choose << std::endl;
     if (choose == 1) {
         /* TODO 发送关机消息到一体化网络 */
         extern int update_offinfo2network(void);
@@ -202,7 +199,6 @@ static void _do_paint_green_light_no_auth(Widget *widget)
 
 void do_with_white_light_normal(Widget *widget, int choose)
 {
-    std::cout << "white light normal:" << choose << std::endl;
     Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->screen());
     const std::vector<Button *> * white_dev_btns = led3000Window->get_white_dev_control_btns();
     if (choose != 2) {
@@ -261,7 +257,6 @@ void do_paint_white_light_blink(Widget *widget)
 
 void do_with_white_light_blink(Widget *widget, int choose)
 {
-    std::cout << "white light blink:" << choose << std::endl;
     Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->screen());
     const std::vector<Button *> * white_dev_btns = led3000Window->get_white_dev_control_btns();
     if (choose == 1) {
@@ -356,7 +351,6 @@ void do_paint_green_light_normal(Widget *widget)
 
 void do_with_green_light_normal(Widget *widget, int choose)
 {
-    std::cout << "green light normal:" << choose << std::endl;
     Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->screen());
     const std::vector<Button *> * green_dev_btns = led3000Window->get_green_dev_control_btns();
 
@@ -427,7 +421,6 @@ void do_paint_green_light_blink(Widget *widget)
 
 void do_with_green_light_blink(Widget *widget, int choose)
 {
-    std::cout << "green light blink:" << choose << std::endl;
     Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->screen());
     const std::vector<Button *> * green_dev_btns = led3000Window->get_green_dev_control_btns();
 
@@ -605,7 +598,6 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
             fread(mjsonBuffer, sizeof(char), sizeof(mjsonBuffer), mFp);
             cout << "mjsonBuffer:" << mjsonBuffer << "@" << mFileName << endl;
             if (mDocument.ParseInsitu(mjsonBuffer).HasParseError()) {
-                std::cout << "Invalid content of " << mFileName << std::endl;
                 return;
             }
         } else if (!mFp) {
