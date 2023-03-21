@@ -469,14 +469,14 @@ int do_report_dev_info(NetworkPackage &net_package, float dev1_direction_float, 
 int do_force_respon(NetworkPackage &net_package)
 {
     if (gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].get_socket() <= 0) {
-        RedDebug::err("Novalid socket for network udp");
+        RedDebug::err("No valid socket for network udp");
         return -EINVAL;
     }
     char force_respon_buffer[NETWORK_PACKGE_LEN_MAX] = {0};
     NetworkPackage force_respon(net_package.src_ip_n(),
-                                net_package.dst_ip_n(),
+                                net_package.src_ip_n(), /* 应答帧需要单点发送给对方,这里需要填写消息源的发送地址 */
                                 gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].sn(),
-                                net_package.ack(),
+                                net_package.sn(),
                                 0X03,
                                 0X00,
                                 gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].index(), 0X0, MK_MSG_FULL_LEN(0X0), 0X0, nullptr);
@@ -489,7 +489,11 @@ int do_force_respon(NetworkPackage &net_package)
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_DGRAM;
     hints.ai_protocol = IPPROTO_UDP;
-    int r(getaddrinfo("168.6.0.4", "20840", &hints, &p_addrinfo));
+
+    //struct in_addr force_respon_dstaddr = inet_makeaddr(htons(net_package.src_ip_n()), htons(20840));
+    struct in_addr dst_ip;
+    dst_ip.s_addr = htonl(net_package.src_ip_n());
+    int r(getaddrinfo(inet_ntoa(dst_ip), "20840", &hints, &p_addrinfo));
     if (r != 0 || p_addrinfo == NULL) {
         RedDebug::err("failed convert addrinfo.");
         return -1;

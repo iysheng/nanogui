@@ -132,7 +132,7 @@ int NetworkPackage::convert_from_buffer(char *buffer, short int len)
     }
 
     m_len = buffer[0] << 8 | buffer[1];
-    /* 这里可以拿到发送放的地址 */
+    /* 这里可以拿到发送方的地址 */
     m_src_ip_n = buffer[4] << 24 | buffer[5] << 16 | buffer[6] << 8 | buffer[7];
     //m_dst_ip_n = buffer[8] << 24 | buffer[9] << 16 | buffer[10] << 8 | buffer[11];
     m_sn = buffer[12];
