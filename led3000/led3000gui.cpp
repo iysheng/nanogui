@@ -596,7 +596,6 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         mFp = fopen(mFileName.c_str(), "r");
         if (mFp) {
             fread(mjsonBuffer, sizeof(char), sizeof(mjsonBuffer), mFp);
-            cout << "mjsonBuffer:" << mjsonBuffer << "@" << mFileName << endl;
             if (mDocument.ParseInsitu(mjsonBuffer).HasParseError()) {
                 return;
             }
@@ -614,7 +613,6 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
             sys_config.AddMember("version", LED3000_VERSION, allocator);
             sys_config.AddMember("id", LED3000_ID, allocator);
             mDocument.AddMember("sys_config", sys_config, allocator);
-            cout << "Add sys_config object" << endl;
         } else {
             mJsonValue.sys_config.version = Pointer("/sys_config/version").Get(mDocument)->GetUint();
             mJsonValue.sys_config.id = Pointer("/sys_config/id").Get(mDocument)->GetUint();
@@ -639,7 +637,6 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
             eth_array.PushBack(eth1_config, allocator);
 
             mDocument.AddMember("eths", eth_array, allocator);
-            cout << "Add eths array" << endl;
         } else {
             const Value& eths_info = mDocument["eths"];
             for (SizeType i = 0; i < eths_info.Size(); i++) {
@@ -657,7 +654,6 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
             server_config.AddMember("port", 5000, allocator);
 
             mDocument.AddMember("server", server_config, allocator);
-            cout << "Add sever info" << endl;
         } else {
             const Value& server = mDocument["server"];
             memcpy(mJsonValue.server.ip, server["ip"].GetString(), strlen(server["ip"].GetString()) + 1);
@@ -701,7 +697,6 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
             }
 
             mDocument.AddMember("devices", device_array, allocator);
-            cout << "Add devices array" << endl;
         } else {
             const Value& devices = mDocument["devices"];
             for (SizeType i = 0; i < devices.Size(); i++) {
@@ -928,7 +923,6 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         devBtn->set_fixed_size({220, 50});
         devBtn->set_pushed(true);
         devBtn->set_callback([this]() {
-            cout << "choose device 1" << endl;
             this->get_green_dev_label()->set_caption("灯光装置终端一 绿灯");
             this->get_white_dev_label()->set_caption("灯光装置终端一 白灯");
             this->get_turntable_label()->set_caption("灯光装置终端一 转台");
@@ -945,7 +939,6 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         devBtn2->set_position({645, 13});
         devBtn2->set_fixed_size({220, 50});
         devBtn2->set_callback([this]() {
-            cout << "choose device 2" << endl;
             this->get_green_dev_label()->set_caption("灯光装置终端二 绿灯");
             this->get_white_dev_label()->set_caption("灯光装置终端二 白灯");
             this->get_turntable_label()->set_caption("灯光装置终端二 转台");
@@ -1070,7 +1063,6 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         label->set_position(Vector2i(570, 64));
         auto *btn = img_window->add<Button>("", RED_LED3000_ASSETS_DIR"/dec_focal.png");
         btn->set_callback([this]() {
-            cout << "decrease camera 1 focal len" << endl;
             this->getDeviceQueue(0).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "-"));
         });
         btn->set_fixed_size({30, 30});
@@ -1080,7 +1072,6 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         btn->set_position({560, 276});
         btn->set_callback([this]() {
             this->getDeviceQueue(0).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "+"));
-            cout << "increase camera 1 focal len" << endl;
         });
 
         auto* img2_window = new Window(this, "");
@@ -1118,14 +1109,12 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         btn->set_position({560, 240});
         btn->set_callback([this]() {
             this->getDeviceQueue(1).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "-"));
-            cout << "decrease camera 2 focal len" << endl;
         });
         btn = img2_window->add<Button>("", RED_LED3000_ASSETS_DIR"/inc_focal.png", 0);
         btn->set_fixed_size({30, 30});
         btn->set_position({560, 276});
         btn->set_callback([this]() {
             this->getDeviceQueue(1).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "+"));
-            cout << "increase camera 2 focal len" << endl;
         });
 
         /* 在这个 window 上创建一个 img2_window 控件 */
