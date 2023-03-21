@@ -18,7 +18,7 @@
 
 using namespace spdlog;
 
-#define red_debug_lite(format, ...) {fprintf(stderr, "[%s@%d] " format "\n", __FUNCTION__, __LINE__, ##__VA_ARGS__);}
+#define red_debug_lite(format, ...) RedDebug::log(format, ##__VA_ARGS__)
 #define RED_DEBUG_PREFIX    "[Red]"
 
 class RedDebug
