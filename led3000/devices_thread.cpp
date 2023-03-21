@@ -40,6 +40,7 @@ typedef struct {
     unsigned char stop_bit;
     unsigned char even;
     unsigned char index;
+    int offline_counts;
 } uartport_t;
 
 typedef struct {
@@ -58,6 +59,7 @@ static led_device_t gs_led_devices[2] = {
             .stop_bit = 1, /* 一个停止位 */
             .even = 0, /* 无校验 */
             .index = 0,
+            .offline_counts = 0,
         },
     },
     {
@@ -68,6 +70,7 @@ static led_device_t gs_led_devices[2] = {
             .stop_bit = 1, /* 一个停止位 */
             .even = 0, /* 无校验 */
             .index = 1,
+            .offline_counts = 0,
         },
     },
 };
@@ -84,7 +87,7 @@ int init_uart_port(uartport_t *uart)
 
     ////// 参考周立功提供的串口回环测试修改
     /// 添加 O_NONBLOCK 判断离线
-    fd = open(uart->name, O_RDWR | O_NOCTTY | O_NONBLOCK);
+    fd = open(uart->name, O_RDWR | O_NOCTTY);
     if (fd <= 0) {
         RedDebug::log("Failed open %s err=%d.", uart->name, fd);
         return -1;
@@ -608,26 +611,12 @@ static void *heart_msg_entry(void *arg)
 {
     led_device_t * led_devp = (led_device_t *)arg;
     int ret = 0;
-    int offline_counts = 0;
 
     while (1) {
+        led_devp->uart.offline_counts++;
         /* 尝试读取心跳信息 */
         ret = get_device_heart_msg(led_devp->uart.index);
         sleep(1);
-        if (-1 == ret)
-        {
-            RedDebug::warn("offline_counts=%d", offline_counts);
-            /* TODO 超过 30s 没有心跳判定为离线 */
-            if (offline_counts++ > 30)
-            {
-                gs_led_devices[led_devp->uart.index].screen->get_dev_state_label(led_devp->uart.index)->set_caption("离线");
-            }
-
-        }
-        else
-        {
-            offline_counts = 0;
-        }
     }
 }
 
@@ -729,6 +718,39 @@ void *devices_entry(void *arg)
     }
 }
 
+void *devices_guard_entry(void *arg)
+{
+    int led_offline_counts[2];
+    int i = 0;
+    led_device_t * led_devp[2];
+    if (!arg)
+    {
+        RedDebug::err("invalid devp4guard");
+        return nullptr;
+    }
+
+    led_devp[0] = (led_device_t *)arg;
+    led_devp[1] = 1 + led_devp[0];
+    led_offline_counts[0] = led_devp[0]->uart.offline_counts;
+    led_offline_counts[1] = led_devp[1]->uart.offline_counts;
+
+    while(1)
+    {
+        sleep(30);
+        for (i = 0; i < 2; i++)
+        {
+            if (led_offline_counts[i] == led_devp[i]->uart.offline_counts)
+            {
+
+                gs_led_devices[led_devp[i]->uart.index].screen->get_dev_state_label(led_devp[0]->uart.index)->set_caption("离线");
+            }
+            led_offline_counts[i] = led_devp[i]->uart.offline_counts;
+        }
+    }
+
+    return nullptr;
+}
+
 void *devices_thread(void *arg)
 {
     gs_led_devices[0].screen = (Led3000Window *)arg;
@@ -738,6 +760,9 @@ void *devices_thread(void *arg)
     std::thread gsDevice0Thread(devices_entry, &gs_led_devices[0]);
     std::thread gsDevice1Thread(devices_entry, &gs_led_devices[1]);
 
+    /* 监控串口数据通信线程 */
+    std::thread gsDevicesGuardThread(devices_guard_entry, &gs_led_devices[0]);
+
     NetworkTcp tcp_client("192.168.1.11", 1025);
     gs_led_devices[0].tcp_fd = tcp_client;
     NetworkTcp tcp_client_debug("192.168.1.50", 5000);
@@ -745,6 +770,7 @@ void *devices_thread(void *arg)
 
     gsDevice0Thread.detach();
     gsDevice1Thread.detach();
+    gsDevicesGuardThread.detach();
 
     tcp_client.send2server("Hello Red", strlen("Hello Red"));
     printf("send data to network tcp----------------------------------\n");
