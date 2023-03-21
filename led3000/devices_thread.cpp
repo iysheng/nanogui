@@ -292,7 +292,7 @@ static void _do_with_turntable_mode_fuzzy_track(led_device_t* devp, std::string 
                          };
     devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
     if (ret != -1) {
-        red_debug_lite("set fuzzy track mode failed")
+        red_debug_lite("set fuzzy track mode failed");
     } else {
         RedDebug::hexdump("FUZZY TRACK TARGET", (char*)tcp_buffer, sizeof(tcp_buffer));
     }
