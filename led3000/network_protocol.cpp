@@ -268,7 +268,6 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
     RedDebug::log("control_word:%hx batch_number:%hx distance:%x direction:%.2f elevation:%.2f",
             control_word, target_batch_number,
             target_distance, target_direction, target_elevation);
-    /* TODO 发送消息到对应的设备控制线程 */
     /* 发送消息控制转台转动到指定角度 */
     gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_POSITION_SETTING, string(target_position_buffer)));
     if (led_type == NETWORK_PROTOCOL_WHITE_LED_TYPE) {
@@ -285,6 +284,9 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
             gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_WHITE_NORMAL_SETTING, to_string(0)));
             gs_screen->getJsonValue()->devices[dev_num].white_led.mode = LED_NORMAL_MODE_OFF;
         }
+        /* 跟随指控命令更新界面显示 */
+        gs_screen->set_white_dev_control_btns_status(gs_screen->getJsonValue()->devices[dev_num].white_led.mode);
+
     } else if (led_type == NETWORK_PROTOCOL_GREEN_LED_TYPE) {
         if (gs_screen->get_dev_auth_label(dev_num)->caption() == std::string("禁止射击")) {
             /* 权限不允许 */
@@ -304,6 +306,9 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
             gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_GREEN_NORMAL_SETTING, to_string(0)));
             gs_screen->getJsonValue()->devices[dev_num].green_led.mode = LED_NORMAL_MODE_OFF;
         }
+
+        /* 跟随指控命令更新界面显示 */
+        gs_screen->set_green_dev_control_btns_status(gs_screen->getJsonValue()->devices[dev_num].green_led.mode);
     }
     return 0;
 }
