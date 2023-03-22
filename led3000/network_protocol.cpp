@@ -465,7 +465,6 @@ int do_force_respon(NetworkPackage &net_package)
         RedDebug::err("No valid socket for network udp");
         return -EINVAL;
     }
-    char force_respon_buffer[NETWORK_PACKGE_LEN_MAX] = {0};
     NetworkPackage force_respon(net_package.src_ip_n(),
                                 net_package.src_ip_n(), /* 应答帧需要单点发送给对方,这里需要填写消息源的发送地址 */
                                 gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].sn(),
@@ -670,6 +669,7 @@ int update_sysinfo2network(void)
 {
     NetworkPackage network_package;
     do_probe_respon(network_package);
+    return 0;
 }
 
 int update_offinfo2network(void)
@@ -678,5 +678,6 @@ int update_offinfo2network(void)
     do_report_dev_off(network_package);
     /* 无效所有网络句柄,防止发送关机后还会发送其他状态报文 */
     network_fds_invalid();
+    return 0;
 }
 

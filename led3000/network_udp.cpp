@@ -183,9 +183,7 @@ NetworkUdp::NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port, in
 int NetworkUdp::send2server(char *buffer, uint16_t len, int flags)
 {
 #define MAX_BUFFER_LEN    256
-    static char s_counts;
     int ret;
-    uint32_t dstip;
     if ((m_socket <= 0) && (try_to_connect() <= 0)) {
         //RedDebug::log("invalid udp socket and try to connect server failed");
         return -1;
@@ -208,9 +206,7 @@ int NetworkUdp::send2server(char *buffer, uint16_t len, int flags)
 int NetworkUdp::send2server(char *buffer, uint16_t len, int flags, struct addrinfo *addr)
 {
 #define MAX_BUFFER_LEN    256
-    static char s_counts;
     int ret;
-    uint32_t dstip;
     if ((m_socket <= 0) && (try_to_connect() <= 0)) {
         //RedDebug::log("invalid udp socket and try to connect server failed");
         return -1;
@@ -226,7 +222,6 @@ int NetworkUdp::send2server(char *buffer, uint16_t len, int flags, struct addrin
     if (0 == ++m_sn) {
         m_sn = 1;
     }
-
 
     return ret;
 }

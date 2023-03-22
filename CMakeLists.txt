@@ -720,6 +720,8 @@ elseif(MSVC)
   set_source_files_properties(ext/nanovg/src/nanovg.c PROPERTIES COMPILE_FLAGS "/wd4005 /wd4456 /wd4457")
 endif()
 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Werror=unused-variable")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Werror=unused-variable")
 # Build example application if desired
 if (NANOGUI_BUILD_EXAMPLES)
   add_executable(example1      src/example1.cpp)

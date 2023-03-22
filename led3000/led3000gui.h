@@ -112,7 +112,6 @@ typedef struct {
 #define GET_LABEL_WITH_INDEX(x, i) \
     (i < LED3000_DEVICES_COUNTS) ? x[i] : NULL
 
-static Window *g_cwindow;
 /* 测试窗口类 */
 class NANOGUI_EXPORT Led3000Window : public Screen
 {
@@ -125,24 +124,11 @@ public:
     void update_time4display(void);
     void update_attitudeinfo4display(float direction, float horizon, float vertical);
     void init_json_file(void);
-#if 1
     virtual bool keyboard_event(int key, int scancode, int action, int modifiers)
     {
         RedDebug::log("key=%d action=%d", key, action);
         switch (key) {
         case GLFW_KEY_F1: {
-#if 0
-            if (!g_cwindow)
-                g_cwindow = new Window(this, "TEST KEYBOARD");
-            if (action == GLFW_PRESS) {
-                g_cwindow->set_background_image(RED_LED3000_ASSETS_DIR"/green1.png");
-                /* 确定了 g_cwindow 的位置 */
-                g_cwindow->set_fixed_size({400, 150});
-                g_cwindow->center();
-                g_cwindow->request_focus();
-                g_cwindow->set_visible(true);
-            }
-#else
             /* 取消设备二激光授权,支持自锁按键 */
             if (action == GLFW_PRESS) {
                 mJsonValue.devices[1].green_led.auth = 0;
@@ -153,7 +139,6 @@ public:
                 m_dev_auth[1]->set_caption("允许射击");
                 RedDebug::log("F1 release");
             }
-#endif
         }
         break;
         case GLFW_KEY_F2: {
@@ -372,7 +357,6 @@ private:
     std::string mFileName;
 public:
     std::string m4PolyM[POLYM_TYPE_MAX];
-#endif
 };
 
 NAMESPACE_END(nanogui)

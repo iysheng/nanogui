@@ -183,7 +183,6 @@ void do_with_power_off(Widget *widget, int choose)
 static void _do_paint_green_light_no_auth(Widget *widget)
 {
     MessageDialog * msg_dlg = dynamic_cast<MessageDialog *>(widget);
-    Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
 
     widget->window()->set_fixed_size(Vector2i(480, 324));
     widget->window()->set_background_image(RED_LED3000_ASSETS_DIR"/set_msgdlg2.png");
@@ -572,7 +571,7 @@ void do_paint_scan_setting(Widget *widget)
 
 void do_with_scan_setting(Widget *widget, int choose)
 {
-    Led3000Window * window = dynamic_cast<Led3000Window *>(widget->screen());
+    //Led3000Window * window = dynamic_cast<Led3000Window *>(widget->screen());
     Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
     /* 需要对该数据在发送端转换为大端发送出去 */
     short value_nethost = 0;
@@ -834,7 +833,7 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         btn_green_mocode->set_fixed_size({120, 92});
         btn_green_mocode->set_position({270, 48});
         btn_green_mocode->set_callback([&] {
-            MessageDialog *dlg = new MessageDialog(this, MessageDialog::Type::Question, "", "开启绿光莫码模式？", "确认", "取消", "", do_with_green_light_mocode, do_paint_green_light_mocode);
+            new MessageDialog(this, MessageDialog::Type::Question, "", "开启绿光莫码模式？", "确认", "取消", "", do_with_green_light_mocode, do_paint_green_light_mocode);
         });
 
         btn_green_led->push_button_group(btn_green_led);
@@ -867,7 +866,7 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         btn_white_mocode->set_position({270, 48});
         btn_white_mocode->set_fixed_size({120, 92});
         btn_white_mocode->set_callback([&] {
-            MessageDialog *dlg = new MessageDialog(this, MessageDialog::Type::Question, "", "开启白光莫码模式？", "确认", "取消", "", do_with_white_light_mocode, do_paint_white_light_mocode);
+            new MessageDialog(this, MessageDialog::Type::Question, "", "开启白光莫码模式？", "确认", "取消", "", do_with_white_light_mocode, do_paint_white_light_mocode);
         });
 
         btn_white_led->push_button_group(btn_white_led);

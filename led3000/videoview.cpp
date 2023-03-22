@@ -172,7 +172,6 @@ void deInit(MppPacket *packet, MppFrame *frame, MppCtx ctx, char *buf, MpiDecLoo
 int mpp_hardware_init(MpiDecLoopData *data)
 {
     MPP_RET ret         = MPP_OK;
-    size_t file_size    = 0;
 
     // base flow context
     MppCtx ctx          = NULL;
@@ -187,9 +186,6 @@ int mpp_hardware_init(MpiDecLoopData *data)
     RK_U32 need_split   = 1;
 //    MppPollType timeout = 5;
 
-    // paramter for resource malloc
-    RK_U32 width        = 1920;
-    RK_U32 height       = 1080;
     /* H.265 使用  MPP_VIDEO_CodingHEVC
      * H.264 使用  MPP_VIDEO_CodingAVC
      * */
@@ -202,9 +198,6 @@ int mpp_hardware_init(MpiDecLoopData *data)
     // resources
     char *buf           = NULL;
     size_t packet_size  = 8 * 1024;
-    MppBuffer pkt_buf   = NULL;
-    MppBuffer frm_buf   = NULL;
-
 
     red_debug_lite("mpi_dec_test start\n");
     memset(data, 0, sizeof(MpiDecLoopData));
@@ -292,13 +285,11 @@ int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_b
     MppApi *mpi = data->mpi;
     MppPacket packet = NULL;
     MppFrame  frame  = NULL;
-    size_t read_size = 0;
-    size_t packet_size = data->packet_size;
+    RK_U32 buf_size = 0;
     RK_U32 h_stride = 0;
     RK_U32 v_stride = 0;
     RK_U32 width = 0;
     RK_U32 height = 0;
-    RK_U32 buf_size;
 
     MppBuffer buffer    = NULL;
 
@@ -325,9 +316,6 @@ int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_b
                 red_debug_lite("送入码流出错:%d\n", ret);
         }
 
-        int abc = 0, def_index = 0;
-        char file_name[32] = {0};
-        FILE *yuv_file_fd;
         // then get all available frame and release
         do {
             RK_S32 get_frm = 0;
@@ -550,11 +538,7 @@ int VideoView::video_draw_handler(void *object)
     AVDictionary* options = NULL;
     int options_need_set = 1;
 
-    enum AVPixelFormat src_fix_fmt;
-    enum AVPixelFormat dst_fix_fmt;
-
     AVPacket packet;
-    struct SwsContext* sws_clx = NULL;
     AVFrame* p_frame = NULL;
     int video_stream_index;
     int value;
@@ -748,7 +732,6 @@ VideoView::VideoView(Widget* parent): ImageView(parent), m_texture(nullptr), m_p
     m_thread(nullptr), mSrcUrl("rtsp://admin:jariled123@192.168.100.64"), m_no_frame_counts(0)
 {
     Window * wnd = parent->window();
-    int hh = wnd->theme()->m_window_header_height;
     Screen* screen = dynamic_cast<Screen*>(wnd->parent());
     assert(screen);
     if (!m_texture) {

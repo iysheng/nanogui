@@ -30,8 +30,6 @@ using std::endl;
 using namespace nanogui;
 using namespace std;
 
-static Led3000Window *gs_screen;
-
 typedef struct {
     char name[32];
     int fd;
@@ -245,7 +243,6 @@ static void _do_with_turntable_up(led_device_t* devp, std::string message)
 
 static void _do_with_turntable_stop(led_device_t* devp, std::string message)
 {
-    uint16_t level = (uint16_t)stoi(message);
     uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X01 /* 停止手动 */,
                           0XFF, 0XFF, 0XFF, 0XFF, 0X00 /* 校验和 */, 0XE7
                          };
@@ -550,10 +547,16 @@ static int _do_analysis_hear_msg(int index, char * buffer, int len)
     turntable_mode = buffer[7];
     turntable_horizon = buffer[8] << 8 | buffer[9];
     turntable_vertical = buffer[10] << 8 | buffer[11];
+
     turntable_horizon_speed = buffer[12] << 8 | buffer[13];
     turntable_vertical_speed = buffer[14] << 8 | buffer[15];
     camera_falcon = buffer[16];
-
+#if 0
+    static int test_counts = 0;
+    if (test_counts++ < 20)
+        gs_led_devices[index].screen->get_dev_state_label(index)->set_caption("故障");
+    else
+#endif
     gs_led_devices[index].screen->get_dev_state_label(index)->set_caption(dev_status ? "故障" : "正常");
     gs_led_devices[index].screen->get_dev_angle_label(index)->set_caption(
         to_string(turntable_horizon / 100) + '.' +
@@ -734,7 +737,9 @@ void *devices_guard_entry(void *arg)
 
     while(1)
     {
-        sleep(30);
+        /* 确认真正持续了 30s 的时间 */
+        if (0 != sleep(30))
+            continue;
         for (i = 0; i < 2; i++)
         {
             if (led_offline_counts[i] == led_devp[i]->uart.offline_counts)

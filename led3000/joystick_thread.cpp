@@ -176,8 +176,6 @@ void *joystick_thread(void *arg)
 {
     gs_screen = (Led3000Window *)arg;
     std::string msg_payload;
-    int msg_id;
-    int fd, ret;
     int present, axis_count;
     const float* axes;
     char thread_name[16] = {0};
@@ -200,7 +198,6 @@ void *joystick_thread(void *arg)
     }
     red_debug_lite("Oh no Hello joystick");
 
-    int i;
     while (1) {
         axes = glfwGetJoystickAxes(present, &axis_count);
         if (!axes)
