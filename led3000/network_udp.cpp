@@ -195,7 +195,7 @@ int NetworkUdp::send2server(char *buffer, uint16_t len, int flags)
         RedDebug::log("Send msg to server %s failed:%d\n",
                       inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr), errno);
     } else {
-        RedDebug::log("Send msg to server %s success\n", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr));
+        //RedDebug::log("Send msg to server %s success\n", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr));
         RedDebug::hexdump("UDP SEND", (char *)buffer, len);
     }
     if (0 == ++m_sn) {
@@ -219,9 +219,8 @@ int NetworkUdp::send2server(char *buffer, uint16_t len, int flags, struct addrin
     if (-1 == ret) {
         RedDebug::log("Send msg to server %s failed:%d\n",
                       inet_ntoa(((sockaddr_in *)addr->ai_addr)->sin_addr), errno);
-        RedDebug::hexdump("UDP SEND", (char *)buffer, len);
     } else {
-        RedDebug::log("Send msg to server %s success\n", inet_ntoa(((sockaddr_in *)addr->ai_addr)->sin_addr));
+        //RedDebug::log("Send msg to server %s success\n", inet_ntoa(((sockaddr_in *)addr->ai_addr)->sin_addr));
         RedDebug::hexdump("UDP SEND", (char *)buffer, len);
     }
     if (0 == ++m_sn) {
@@ -239,7 +238,7 @@ int NetworkUdp::recv_from_server(char *buffer, uint16_t len, int flags)
         //RedDebug::log("invalid udp socket and try to connect server failed");
         return -1;
     }
-    RedDebug::log("before udp socket recv:%s %p", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr), m_addrinfo);
+    //RedDebug::log("before udp socket recv:%s %p", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr), m_addrinfo);
     ret = recvfrom(m_socket, buffer, len, flags, NULL, NULL);
     if (-1 == ret) {
         RedDebug::err("Failed recvfrom server :%d %s %p", errno, inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr), m_addrinfo);
