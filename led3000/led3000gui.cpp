@@ -201,28 +201,24 @@ void do_with_white_light_normal(Widget *widget, int choose)
 {
     Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->screen());
     const std::vector<Button *> * white_dev_btns = led3000Window->get_white_dev_control_btns();
-    if (choose != 2) {
-        switch (choose) {
-        case 0:
-            led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mode = LED_NORMAL_MODE_OFF;
-            led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.normal_status = 0;
-            led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
-            /* 发送消息控制关灯 */
-            led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_WHITE_NORMAL_SETTING, to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.normal_status)));
-            break;
-        case 1:
-            /* 发送消息控制开灯 */
-            led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mode = LED_NORMAL_MODE;
-            led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.normal_status = 100;
-            led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_WHITE_NORMAL_SETTING, to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.normal_status)));
-            led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
-            white_dev_btns->at(0)->set_pushed(true);
-            white_dev_btns->at(1)->set_pushed(false);
-            white_dev_btns->at(2)->set_pushed(false);
-            break;
-        default:
-            break;
-        }
+    if (choose == 1)
+    {
+        /* 发送消息控制开灯 */
+        led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mode = LED_NORMAL_MODE;
+        led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.normal_status = 100;
+        led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_WHITE_NORMAL_SETTING, to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.normal_status)));
+        led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
+        white_dev_btns->at(0)->set_pushed(true);
+        white_dev_btns->at(1)->set_pushed(false);
+        white_dev_btns->at(2)->set_pushed(false);
+    }
+    else if (led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mode == LED_NORMAL_MODE)
+    {
+        led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mode = LED_NORMAL_MODE_OFF;
+        led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.normal_status = 0;
+        led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
+        /* 发送消息控制关灯 */
+        led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_WHITE_NORMAL_SETTING, to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.normal_status)));
     }
 }
 
@@ -269,9 +265,12 @@ void do_with_white_light_blink(Widget *widget, int choose)
         white_dev_btns->at(0)->set_pushed(false);
         white_dev_btns->at(1)->set_pushed(true);
         white_dev_btns->at(2)->set_pushed(false);
-    } else {
+    }
+    else if (led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mode == LED_BLINK_MODE)
+    {
         /* 发送消息关灯 */
         led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_WHITE_NORMAL_SETTING, to_string(0X00)));
+        led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mode = LED_NORMAL_MODE_OFF;
         /* 同步消息内容到 json 文件 */
         led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
         white_dev_btns->at(1)->set_pushed(false);
@@ -323,7 +322,11 @@ void do_with_white_light_mocode(Widget *widget, int choose)
         white_dev_btns->at(1)->set_pushed(false);
         white_dev_btns->at(2)->set_pushed(true);
         return;
-    } else {
+    }
+    else if (led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mode == LED_MOCODE_MODE)
+    {
+        led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_WHITE_NORMAL_SETTING, to_string(0X00)));
+        led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mode = LED_NORMAL_MODE_OFF;
         led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
         white_dev_btns->at(2)->set_pushed(false);
         return;
@@ -358,31 +361,26 @@ void do_with_green_light_normal(Widget *widget, int choose)
         return;
     }
 
-    if (choose != 2) {
-        switch (choose) {
-        case 0:
-
-            led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mode = LED_NORMAL_MODE_OFF;
-            led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.normal_status = 0;
-            led3000Window->m4PolyM[POLYM_GREEN_NORMAL_SETTING].assign(to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.normal_status));
-            /* 发送消息控制关灯 */
-            led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_GREEN_NORMAL_SETTING, led3000Window->m4PolyM[POLYM_GREEN_NORMAL_SETTING]));
-            led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
-            break;
-        case 1:
-            /* 发送消息控制开灯 */
-            led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mode = LED_NORMAL_MODE_OFF;
-            led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.normal_status = 100;
-            led3000Window->m4PolyM[POLYM_GREEN_NORMAL_SETTING].assign(to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.normal_status));
-            led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_GREEN_NORMAL_SETTING, led3000Window->m4PolyM[POLYM_GREEN_NORMAL_SETTING]));
-            led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
-            green_dev_btns->at(0)->set_pushed(true);
-            green_dev_btns->at(1)->set_pushed(false);
-            green_dev_btns->at(2)->set_pushed(false);
-            break;
-        default:
-            break;
-        }
+    if (1 == choose)
+    {
+        /* 发送消息控制开灯 */
+        led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mode = LED_NORMAL_MODE;
+        led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.normal_status = 100;
+        led3000Window->m4PolyM[POLYM_GREEN_NORMAL_SETTING].assign(to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.normal_status));
+        led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_GREEN_NORMAL_SETTING, led3000Window->m4PolyM[POLYM_GREEN_NORMAL_SETTING]));
+        led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
+        green_dev_btns->at(0)->set_pushed(true);
+        green_dev_btns->at(1)->set_pushed(false);
+        green_dev_btns->at(2)->set_pushed(false);
+    }
+    else if (led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mode == LED_NORMAL_MODE)
+    {
+        led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mode = LED_NORMAL_MODE_OFF;
+        led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.normal_status = 0;
+        led3000Window->m4PolyM[POLYM_GREEN_NORMAL_SETTING].assign(to_string(0));
+        /* 发送消息控制关灯 */
+        led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_GREEN_NORMAL_SETTING, led3000Window->m4PolyM[POLYM_GREEN_NORMAL_SETTING]));
+        led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
     }
 }
 
@@ -438,8 +436,11 @@ void do_with_green_light_blink(Widget *widget, int choose)
         green_dev_btns->at(0)->set_pushed(false);
         green_dev_btns->at(1)->set_pushed(true);
         green_dev_btns->at(2)->set_pushed(false);
-    } else {
+    }
+    else if (led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mode = LED_BLINK_MODE)
+    {
         led3000Window->m4PolyM[POLYM_GREEN_NORMAL_SETTING].assign(to_string(0));
+        led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mode = LED_NORMAL_MODE_OFF;
         /* 发送消息关灯 */
         led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_GREEN_NORMAL_SETTING, led3000Window->m4PolyM[POLYM_GREEN_NORMAL_SETTING]));
         /* 同步消息内容到 json 文件 */
@@ -496,7 +497,14 @@ void do_with_green_light_mocode(Widget *widget, int choose)
         green_dev_btns->at(1)->set_pushed(false);
         green_dev_btns->at(2)->set_pushed(true);
         return;
-    } else {
+    }
+    else if (led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mode = LED_MOCODE_MODE)
+    {
+        led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mode = LED_NORMAL_MODE_OFF;
+        led3000Window->m4PolyM[POLYM_GREEN_NORMAL_SETTING].assign(to_string(0));
+        /* 发送消息关灯 */
+        led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_GREEN_NORMAL_SETTING, led3000Window->m4PolyM[POLYM_GREEN_NORMAL_SETTING]));
+        /* 同步消息内容到 json 文件 */
         led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
         green_dev_btns->at(2)->set_pushed(false);
         return;
