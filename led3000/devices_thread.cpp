@@ -547,6 +547,8 @@ static int _do_analysis_hear_msg(int index, char * buffer, int len)
     uint8_t green_mode, green_mode_param;
     uint8_t turntable_mode;
     int16_t turntable_horizon, turntable_vertical;
+    /* 保存两个转台的水平和垂直角度信息 */
+    static int16_t s_turntable_horizon_last[2], s_turntable_vertical_last[2];
     uint16_t turntable_horizon_speed, turntable_vertical_speed;
     uint16_t camera_falcon; /* 摄像头焦距 */
 
@@ -569,8 +571,15 @@ static int _do_analysis_hear_msg(int index, char * buffer, int len)
         to_string(turntable_vertical / 100) + '.' +
         to_string(abs(turntable_vertical % 100)));
     gs_led_devices[index].screen->get_dev_angular_speed_label(index)->set_caption(to_string(turntable_horizon_speed) + '/' + to_string(turntable_vertical_speed));
-
-    RedDebug::log("valid heart msg:dev_status:%u %u|%u %u|%u", dev_status, turntable_horizon, turntable_vertical, turntable_horizon_speed, turntable_vertical_speed);
+    /* check heart info then send when different */
+    if (s_turntable_horizon_last[index] != turntable_horizon || 
+        s_turntable_vertical_last[index] != turntable_vertical)
+    {
+        s_turntable_horizon_last[index] = turntable_horizon;
+        s_turntable_vertical_last[index] = turntable_vertical;
+        extern int update_sysinfo2network(void);
+        update_sysinfo2network();
+    }
 }
 
 static int get_device_heart_msg(int index)
