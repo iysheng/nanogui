@@ -72,7 +72,6 @@ int NetworkUdp::try_to_connect(void)
     }
     else if (0 == r)
     {
-        red_debug_lite("Try to bind socket success.");
         /* 根据对方要求修改 TTL */
         char ttl = 8;
         if (setsockopt(m_socket, IPPROTO_IP, IP_MULTICAST_TTL, (char *)&ttl, sizeof(ttl)) != 0) {
@@ -80,8 +79,6 @@ int NetworkUdp::try_to_connect(void)
             close(m_socket);
             m_socket = -1;
             return -4;
-        } else {
-            RedDebug::log("Success set ttl to %d", ttl);
         }
     }
 

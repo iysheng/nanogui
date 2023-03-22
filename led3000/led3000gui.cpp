@@ -632,9 +632,9 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
             Value eth1_config(kObjectType);
 
             eth0_config.AddMember("name", "引导", allocator);
-            eth0_config.AddMember("ip", "10.20.52.110", allocator);
-            eth0_config.AddMember("netmask", "255.255.255.0", allocator);
-            eth0_config.AddMember("gateway", "10.20.52.1", allocator);
+            eth0_config.AddMember("ip", "168.9.0.1", allocator);
+            eth0_config.AddMember("netmask", "255.255.0.0", allocator);
+            eth0_config.AddMember("gateway", "168.9.255.254", allocator);
 
             eth1_config.AddMember("name", "摄像头", allocator);
             eth1_config.AddMember("ip", "192.168.100.110", allocator);
@@ -658,8 +658,8 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         if (mDocument.MemberEnd() == mDocument.FindMember("server")) {
             Value server_config(kObjectType);
 
-            server_config.AddMember("ip", "10.20.52.110", allocator);
-            server_config.AddMember("port", 5000, allocator);
+            server_config.AddMember("ip", "168.6.0.4", allocator);
+            server_config.AddMember("port", 20840, allocator);
 
             mDocument.AddMember("server", server_config, allocator);
         } else {
@@ -675,14 +675,16 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
             Value green_led_config(kObjectType);
             Value turntable_config(kObjectType);
 
-            device_config_template.AddMember("camera_url", "192.168.100.64", allocator);
-            white_led_config.AddMember("mode", 1, allocator);
+            device_config_template.AddMember("camera_url", "rtsp://192.168.100.64", allocator);
+            /* 默认为关灯模式 */
+            white_led_config.AddMember("mode", 3, allocator);
             white_led_config.AddMember("normal_status", 0, allocator);
             white_led_config.AddMember("blink_freq", 1, allocator);
             white_led_config.AddMember("mocode", "", allocator);
 
-            green_led_config.AddMember("auth", 1, allocator);
-            green_led_config.AddMember("mode", 1, allocator);
+            /* 默认为禁止射击并且关灯模式 */
+            green_led_config.AddMember("auth", 0, allocator);
+            green_led_config.AddMember("mode", 3, allocator);
             green_led_config.AddMember("normal_status", 0, allocator);
             green_led_config.AddMember("blink_freq", 1, allocator);
             green_led_config.AddMember("mocode", "", allocator);
