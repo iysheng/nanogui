@@ -36,31 +36,26 @@ static TurntableAttitude gs_turntable_attitude[2];
 static inline float _do_format_dev_ushort2float(unsigned short value, double dimension)
 {
     float ans = (float)value * dimension;
-    RedDebug::warn("[ushort2f]%u -> %.2f", value, ans);
     return ans;
 }
 
 static inline float _do_format_dev_short2float(short value, double dimension)
 {
     float ans = value * dimension;
-    RedDebug::warn("[short2f]%hd -> %.2f", value, ans);
     return ans;
 }
 
 static inline float _do_format_dev_int2float(int value, double dimension)
 {
     float ans = value * dimension;
-    RedDebug::log("[int2f]%d -> %.2f", value, ans);
     return ans;
 }
 
 static inline short _do_format_dev_value_short(float value, double dimension)
 {
     if (value < 0) {
-        RedDebug::log("%f = %04hx", value, short((value - 0.5 * dimension) / dimension));
         return short((value - 0.5 * dimension) / dimension);
     } else {
-        RedDebug::log("%f = %04hx", value, short((value + 0.5 * dimension) / dimension));
         return short((value + 0.5 * dimension) / dimension);
     }
 }
@@ -68,10 +63,8 @@ static inline short _do_format_dev_value_short(float value, double dimension)
 static inline short _do_format_dev_value_float2short(float value, double dimension)
 {
     if (value < 0) {
-        RedDebug::log("%f = %hd", value, short(value * dimension + 0.5 * dimension));
         return (short)(value * dimension + 0.5 * dimension);
     } else {
-        RedDebug::log("%f = %hd", value, short(value * dimension - 0.5 * dimension));
         return (short)(value * dimension - 0.5 * dimension);
     }
 }
@@ -79,10 +72,8 @@ static inline short _do_format_dev_value_float2short(float value, double dimensi
 static inline int _do_format_dev_value_float2int(float value, double dimension)
 {
     if (value < 0) {
-        RedDebug::log("%f = %04hx", value, short(value * dimension + 0.5 * dimension));
         return (int)(value * dimension + 0.5 * dimension);
     } else {
-        RedDebug::log("%f = %04hx", value, short(value * dimension - 0.5 * dimension));
         return (int)(value * dimension - 0.5 * dimension);
     }
 }
