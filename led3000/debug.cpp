@@ -30,8 +30,8 @@ int RedDebug::init(char *filename)
 {
     signal(SIGINT, flush_sigint_handler);
     try {
-        /* 单个文件最大 16MB, 3 个 rotated file */
-        RedDebug::m_logger = spdlog::rotating_logger_mt("LED", filename, 0X1000000, 3);
+        /* 单个文件最大 16MB, 100 个 rotated file */
+        RedDebug::m_logger = spdlog::rotating_logger_mt("LED", filename, 0X1000000, 100);
         RedDebug::m_console_logger = spdlog::stdout_color_mt("console");
         std::cout << "Log init ok at: " << filename << std::endl;
         /* 设置 console 的打印级别为 warn */

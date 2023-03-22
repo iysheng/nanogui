@@ -127,7 +127,9 @@ int NetworkPackage::convert_from_buffer(char *buffer, short int len)
         return -1;
     }
 
-    if (len - CSSMXP_MSG_PREFIX != (buffer[2 + CSSMXP_MSG_PREFIX] << 8 | buffer[3 + CSSMXP_MSG_PREFIX])) {
+    if (len != 16 && (len - CSSMXP_MSG_PREFIX != (buffer[2 + CSSMXP_MSG_PREFIX] << 8 | buffer[3 + CSSMXP_MSG_PREFIX])) )
+    {
+        RedDebug::hexdump("errPackage", buffer, len);
         return -2;
     }
 

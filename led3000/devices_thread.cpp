@@ -194,9 +194,8 @@ static void _do_with_turntable_left(led_device_t* devp, std::string message)
     buffer[10] = _get_xor(&buffer[2], 8);
     ret = write(devp->uart.fd, buffer, sizeof(buffer));
     if (ret != sizeof(buffer)) {
-        RedDebug::log("Failed --------------------------------------------------- %d %d", ret, errno);
+        RedDebug::log("Failed send2uart %d %d", ret, errno);
     }
-    RedDebug::log("left:%u", level);
 }
 
 static void _do_with_turntable_right(led_device_t* devp, std::string message)
@@ -210,9 +209,8 @@ static void _do_with_turntable_right(led_device_t* devp, std::string message)
     buffer[10] = _get_xor(&buffer[2], 8);
     ret = write(devp->uart.fd, buffer, sizeof(buffer));
     if (ret != sizeof(buffer)) {
-        RedDebug::log("Failed --------------------------------------------------- %d %d", ret, errno);
+        RedDebug::log("Failed send2uart %d %d", ret, errno);
     }
-    RedDebug::log("right:%s", message.c_str());
 }
 
 static void _do_with_turntable_down(led_device_t* devp, std::string message)
@@ -226,9 +224,8 @@ static void _do_with_turntable_down(led_device_t* devp, std::string message)
     buffer[10] = _get_xor(&buffer[2], 8);
     ret = write(devp->uart.fd, buffer, sizeof(buffer));
     if (ret != sizeof(buffer)) {
-        RedDebug::log("Failed --------------------------------------------------- %d %d", ret, errno);
+        RedDebug::log("Failed send2uart %d %d", ret, errno);
     }
-    RedDebug::log("down:%s", message.c_str());
 }
 
 static void _do_with_turntable_up(led_device_t* devp, std::string message)
@@ -242,9 +239,8 @@ static void _do_with_turntable_up(led_device_t* devp, std::string message)
     buffer[10] = _get_xor(&buffer[2], 8);
     ret = write(devp->uart.fd, buffer, sizeof(buffer));
     if (ret != sizeof(buffer)) {
-        RedDebug::log("Failed --------------------------------------------------- %d %d", ret, errno);
+        RedDebug::log("Failed send2uart %d %d", ret, errno);
     }
-    RedDebug::log("up:%s", message.c_str());
 }
 
 static void _do_with_turntable_stop(led_device_t* devp, std::string message)
@@ -256,7 +252,6 @@ static void _do_with_turntable_stop(led_device_t* devp, std::string message)
 
     buffer[10] = _get_xor(&buffer[2], 8);
     write(devp->uart.fd, buffer, sizeof(buffer));
-    RedDebug::log("stop:%s", message.c_str());
 }
 
 static void _do_with_turntable_mode_track(led_device_t* devp, std::string message)
@@ -307,7 +302,6 @@ static void _do_with_turntable_mode_scan(led_device_t* devp, std::string message
 
     buffer[10] = _get_xor(&buffer[2], 8);
     write(devp->uart.fd, buffer, sizeof(buffer));
-    RedDebug::log("scan:%s", message.c_str());
 }
 
 /* 扫海模式参数配置
@@ -389,7 +383,6 @@ static void _do_with_turntable_mode_setting(led_device_t* devp, std::string mess
     default:
         break;
     }
-    RedDebug::log("mode_setting:%s", message.c_str());
 }
 
 static void _do_with_turntable_track_setting(led_device_t* devp, std::string message)
@@ -425,9 +418,7 @@ static void _do_with_turntable_position_setting(led_device_t* devp, std::string 
 
     buffer[12] = _get_xor(&buffer[2], 0X08);
     write(devp->uart.fd, buffer, sizeof(buffer));
-
     RedDebug::log("position_setting:%s direction=%hd elevation=%hd", message.c_str(), direction, elevation);
-    RedDebug::hexdump("TURNTABLE_POS", (char *)buffer, sizeof(buffer));
 }
 
 static void _do_with_focal(led_device_t* devp, std::string message)
@@ -443,7 +434,6 @@ static void _do_with_focal(led_device_t* devp, std::string message)
     tcp_buffer[7] = _get_sum(&tcp_buffer[0], 7);
     devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
     devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
-    RedDebug::hexdump("FOCAL CONTROL", (char*)tcp_buffer, sizeof(tcp_buffer));
     RedDebug::log("focal:%s", message.c_str());
 }
 
@@ -572,7 +562,7 @@ static int _do_analysis_hear_msg(int index, char * buffer, int len)
         to_string(abs(turntable_vertical % 100)));
     gs_led_devices[index].screen->get_dev_angular_speed_label(index)->set_caption(to_string(turntable_horizon_speed) + '/' + to_string(turntable_vertical_speed));
     /* check heart info then send when different */
-    if (s_turntable_horizon_last[index] != turntable_horizon || 
+    if (s_turntable_horizon_last[index] != turntable_horizon ||
         s_turntable_vertical_last[index] != turntable_vertical)
     {
         s_turntable_horizon_last[index] = turntable_horizon;
@@ -610,7 +600,6 @@ static int get_device_heart_msg(int index)
          * */
         return -3;
     }
-    /* TODO 处理心跳数据 */
     _do_analysis_hear_msg(index, &buffer[2], 0X12);
 
     return ret;
@@ -782,9 +771,9 @@ void *devices_thread(void *arg)
     gsDevicesGuardThread.detach();
 
     tcp_client.send2server("Hello Red", strlen("Hello Red"));
-    printf("send data to network tcp----------------------------------\n");
+    printf("send data to network tcp");
     while (1) {
-        sleep(10000);
+        sleep(10000000);
     }
 
     return NULL;

@@ -240,13 +240,10 @@ int NetworkUdp::recv_from_server(char *buffer, uint16_t len, int flags)
         return -1;
     }
     RedDebug::log("before udp socket recv:%s %p", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr), m_addrinfo);
-    //ret = recvfrom(m_socket, buffer, len, flags, m_addrinfo->ai_addr, &(m_addrinfo->ai_addrlen));
     ret = recvfrom(m_socket, buffer, len, flags, NULL, NULL);
     if (-1 == ret) {
-        /* 为了测试暂时屏蔽该错误打印 */
-        RedDebug::log("Failed recvfrom server :%d %s %p", errno, inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr), m_addrinfo);
+        RedDebug::err("Failed recvfrom server :%d %s %p", errno, inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr), m_addrinfo);
     } else if (ret > 0) {
-        RedDebug::log("%s %p", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr), m_addrinfo);
         RedDebug::hexdump("RECV_FROM_SEREVR", buffer, ret);
     }
 

@@ -162,7 +162,7 @@ int main(int /* argc */, char ** /* argv */)
 #ifdef BACKTRACE_DEBUG
     init_backtrace(&signal_func4trace);
 #endif
-    RedDebug::init("/tmp/ledmain_log.txt");
+    RedDebug::init("/userdata/ledlogs/ledmain_log.txt");
     RedDebug::print_soft_info();
     /* 创建了测试窗口类 */
     try {

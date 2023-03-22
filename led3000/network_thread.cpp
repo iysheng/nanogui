@@ -47,13 +47,11 @@ void *network_entry(void *arg)
     if (strlen(network_devp->name))
         prctl(PR_SET_NAME, network_devp->name);
 
-    network_devp->udp.send2server("Hello World", strlen("Hello World"));
-    RedDebug::log("send hello world to test\n");
     while (1) {
         len = network_devp->udp.recv_from_server(buffer_recv, sizeof(buffer_recv));
         if (len > 0 && len == buffer_recv[0] << 8 | buffer_recv[1]) {
             if (99 == handle_with_network_buffer(buffer_recv, len)) {
-                len = network_devp->udp.send2server("RED PINGPONG TEST", strlen("RED PINGPONG TEST"));
+                //len = network_devp->udp.send2server("RED PINGPONG TEST", strlen("RED PINGPONG TEST"));
             }
         }
     }

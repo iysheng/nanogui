@@ -116,8 +116,6 @@ static int do_with_network_attitude_info(NetworkPackage &net_package)
     gs_turntable_attitude[1].update_attitude_info(direction_info_float, vertical_info_float, horizon_info_float);
     gs_screen->update_attitudeinfo4display(direction_info_float, vertical_info_float, horizon_info_float);
 
-    RedDebug::log("flag:%hx direction:%f vertical:%f horizon:%f", info_valid_flags,
-                  direction_info_float, vertical_info_float, horizon_info_float);
     return 0;
 }
 
@@ -165,8 +163,6 @@ static int do_with_network_timesync_info(NetworkPackage &net_package)
         NetworkPackage::s_stamp_stand = mktime(&tm4sync);
         NetworkPackage::s_stamp_stand *= 1000;
     }
-    red_debug_lite("time4sync[%d:%d:%d %d:%d:%d]", 1900+tm4sync.tm_year, 1+tm4sync.tm_mon, tm4sync.tm_mday,
-        tm4sync.tm_hour, tm4sync.tm_min, tm4sync.tm_sec);
 
     return 0;
 }
@@ -269,8 +265,9 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
     /* 方向,俯仰 */
     snprintf(target_position_buffer, sizeof(target_position_buffer), "%.2f,%.2f", target_direction, target_elevation);
 
-    RedDebug::warn("control_word:%hx batch_number:%hx distance:%x direction:%.2f elevation:%.2f", control_word, target_batch_number,
-                  target_distance, target_direction, target_elevation);
+    RedDebug::log("control_word:%hx batch_number:%hx distance:%x direction:%.2f elevation:%.2f",
+            control_word, target_batch_number,
+            target_distance, target_direction, target_elevation);
     /* TODO 发送消息到对应的设备控制线程 */
     /* 发送消息控制转台转动到指定角度 */
     gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_POSITION_SETTING, string(target_position_buffer)));
@@ -513,7 +510,6 @@ int do_probe_respon(NetworkPackage &network_package)
             dev_status[index] = 1;
         else if (gs_screen->get_dev_state_label(index)->caption() == std::string("离线"))
             dev_status[index] = 2;
-        RedDebug::log("%s", gs_screen->get_dev_state_label(index)->caption().c_str());
 
         if (json_value_ptr->devices[index].white_led.mode == LED_NORMAL_MODE_OFF) {
             dev_white_status[index] = 3;
@@ -534,19 +530,23 @@ int do_probe_respon(NetworkPackage &network_package)
         if (gs_screen->get_dev_auth_label(index)->caption() == std::string("禁止射击")) {
             dev_auth_status[index] = 1;
         }
+#if 0
         RedDebug::log("%d: status:%d green_status:%d white_status=%d auth:%d",
                       index,
                       dev_status[index],
                       dev_green_status[index],
                       dev_white_status[index],
                       dev_auth_status[index]);
+#endif
 
         dev_info_str = gs_screen->get_dev_angle_label(index)->caption();
         split_index = dev_info_str.find("/");
         direction_str = dev_info_str.substr(0, split_index);
         elevation_str = dev_info_str.substr(1 + split_index);
+#if 0
         RedDebug::log("gre:%s dire:%s elevation:%s whole:%s", gs_screen->get_dev_auth_label(index)->caption().c_str(),
                       direction_str.c_str(), elevation_str.c_str(), dev_info_str.c_str());
+#endif
         sscanf(direction_str.c_str(), "%f", &direction[index]);
         sscanf(elevation_str.c_str(), "%f", &elevation[index]);
     }
@@ -608,7 +608,7 @@ int handle_with_network_buffer(char *buffer, int size)
     /* TODO check gs_screen valid */
     ret = net_package.convert_from_buffer(buffer, size);
     if (ret < 0) {
-        RedDebug::log("Failed convert buffer to NetworkPackage err=%d.", ret);
+        RedDebug::err("Failed convert buffer to NetworkPackage err=%d.", ret);
         return ret;
     }
     /* TODO debug buffer msg */
@@ -620,11 +620,11 @@ int handle_with_network_buffer(char *buffer, int size)
         RedDebug::log("TODO with FORCE");
         break;
     case NETWORK_RECV_ATTITUDE_INFO:
-        RedDebug::log("TODO with ATTITUDE_INFO");
+        //RedDebug::log("TODO with ATTITUDE_INFO");
         do_with_network_attitude_info(net_package);
         break;
     case NETWORK_RECV_TIMESYNC_INFO:
-        RedDebug::log("TODO with TIMESYNC_INFO");
+        //RedDebug::log("TODO with TIMESYNC_INFO");
         do_with_network_timesync_info(net_package);
         break;
     case NETWORK_RECV_GUIDE:
@@ -632,7 +632,7 @@ int handle_with_network_buffer(char *buffer, int size)
         do_with_network_recv_guide(net_package);
         break;
     case NETWORK_RECV_PROBE:
-        RedDebug::log("TODO with PROBE");
+        //RedDebug::log("TODO with PROBE");
         do_with_network_recv_probe(net_package);
         do_probe_respon(net_package);
         break;
