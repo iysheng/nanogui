@@ -36,31 +36,31 @@ static TurntableAttitude gs_turntable_attitude[2];
 static inline float _do_format_dev_ushort2float(unsigned short value, double dimension)
 {
     float ans = (float)value * dimension;
-    RedDebug::warn("[ushort2f]%u -> %.2f\n", value, ans);
+    RedDebug::warn("[ushort2f]%u -> %.2f", value, ans);
     return ans;
 }
 
 static inline float _do_format_dev_short2float(short value, double dimension)
 {
     float ans = value * dimension;
-    RedDebug::warn("[short2f]%hd -> %.2f\n", value, ans);
+    RedDebug::warn("[short2f]%hd -> %.2f", value, ans);
     return ans;
 }
 
 static inline float _do_format_dev_int2float(int value, double dimension)
 {
     float ans = value * dimension;
-    RedDebug::log("[int2f]%d -> %.2f\n", value, ans);
+    RedDebug::log("[int2f]%d -> %.2f", value, ans);
     return ans;
 }
 
 static inline short _do_format_dev_value_short(float value, double dimension)
 {
     if (value < 0) {
-        RedDebug::log("%f = %04hx\n", value, short((value - 0.5 * dimension) / dimension));
+        RedDebug::log("%f = %04hx", value, short((value - 0.5 * dimension) / dimension));
         return short((value - 0.5 * dimension) / dimension);
     } else {
-        RedDebug::log("%f = %04hx\n", value, short((value + 0.5 * dimension) / dimension));
+        RedDebug::log("%f = %04hx", value, short((value + 0.5 * dimension) / dimension));
         return short((value + 0.5 * dimension) / dimension);
     }
 }
@@ -68,10 +68,10 @@ static inline short _do_format_dev_value_short(float value, double dimension)
 static inline short _do_format_dev_value_float2short(float value, double dimension)
 {
     if (value < 0) {
-        RedDebug::log("%f = %hd\n", value, short(value * dimension + 0.5 * dimension));
+        RedDebug::log("%f = %hd", value, short(value * dimension + 0.5 * dimension));
         return (short)(value * dimension + 0.5 * dimension);
     } else {
-        RedDebug::log("%f = %hd\n", value, short(value * dimension - 0.5 * dimension));
+        RedDebug::log("%f = %hd", value, short(value * dimension - 0.5 * dimension));
         return (short)(value * dimension - 0.5 * dimension);
     }
 }
@@ -79,10 +79,10 @@ static inline short _do_format_dev_value_float2short(float value, double dimensi
 static inline int _do_format_dev_value_float2int(float value, double dimension)
 {
     if (value < 0) {
-        RedDebug::log("%f = %04hx\n", value, short(value * dimension + 0.5 * dimension));
+        RedDebug::log("%f = %04hx", value, short(value * dimension + 0.5 * dimension));
         return (int)(value * dimension + 0.5 * dimension);
     } else {
-        RedDebug::log("%f = %04hx\n", value, short(value * dimension - 0.5 * dimension));
+        RedDebug::log("%f = %04hx", value, short(value * dimension - 0.5 * dimension));
         return (int)(value * dimension - 0.5 * dimension);
     }
 }
@@ -304,7 +304,7 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
         }
 
         if (led_mode == NETWORK_PROTOCOL_NORMAL_LED_MODE) {
-            gs_screen->getJsonValue()->devices[dev_num].white_led.normal_status = 100;
+            gs_screen->getJsonValue()->devices[dev_num].green_led.normal_status = 100;
             gs_screen->getJsonValue()->devices[dev_num].green_led.mode = LED_NORMAL_MODE;
             gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_GREEN_NORMAL_SETTING, to_string(100)));
         } else if (led_mode == NETWORK_PROTOCOL_BINK_LED_MODE) {
@@ -481,7 +481,7 @@ int do_force_respon(NetworkPackage &net_package)
                                 0X00,
                                 gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].index(), 0X0, MK_MSG_FULL_LEN(0X0), 0X0, nullptr);
 
-    RedDebug::log("force respon 2 network\n");
+    RedDebug::log("force respon 2 network");
 
     struct addrinfo hints;
     struct addrinfo *p_addrinfo;
@@ -522,7 +522,7 @@ int do_probe_respon(NetworkPackage &network_package)
             dev_status[index] = 1;
         else if (gs_screen->get_dev_state_label(index)->caption() == std::string("离线"))
             dev_status[index] = 2;
-        RedDebug::log("%s\n", gs_screen->get_dev_state_label(index)->caption().c_str());
+        RedDebug::log("%s", gs_screen->get_dev_state_label(index)->caption().c_str());
 
         if (json_value_ptr->devices[index].white_led.mode == LED_NORMAL_MODE_OFF) {
             dev_white_status[index] = 3;
@@ -543,7 +543,7 @@ int do_probe_respon(NetworkPackage &network_package)
         if (gs_screen->get_dev_auth_label(index)->caption() == std::string("禁止射击")) {
             dev_auth_status[index] = 1;
         }
-        RedDebug::log("%d: status:%d green_status:%d white_status=%d auth:%d\n",
+        RedDebug::log("%d: status:%d green_status:%d white_status=%d auth:%d",
                       index,
                       dev_status[index],
                       dev_green_status[index],
@@ -554,7 +554,7 @@ int do_probe_respon(NetworkPackage &network_package)
         split_index = dev_info_str.find("/");
         direction_str = dev_info_str.substr(0, split_index);
         elevation_str = dev_info_str.substr(1 + split_index);
-        RedDebug::log("gre:%s dire:%s elevation:%s whole:%s\n", gs_screen->get_dev_auth_label(index)->caption().c_str(),
+        RedDebug::log("gre:%s dire:%s elevation:%s whole:%s", gs_screen->get_dev_auth_label(index)->caption().c_str(),
                       direction_str.c_str(), elevation_str.c_str(), dev_info_str.c_str());
         sscanf(direction_str.c_str(), "%f", &direction[index]);
         sscanf(elevation_str.c_str(), "%f", &elevation[index]);
@@ -562,7 +562,6 @@ int do_probe_respon(NetworkPackage &network_package)
     do_report_dev_status(network_package, dev_status[0], dev_green_status[0], dev_white_status[0], dev_auth_status[0],
                          dev_status[1], dev_green_status[1], dev_white_status[1], dev_auth_status[1]);
     do_report_dev_info(network_package, direction[0], elevation[0], direction[1], elevation[1]);
-    RedDebug::log("respon 2 network\n");
 }
 
 /**
