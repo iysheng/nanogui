@@ -595,7 +595,8 @@ void do_with_scan_setting(Widget *widget, int choose)
 
 
 Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", false, true),
-    mFileName("/opt/led3000.json"), mFp(nullptr), m_attitude_info(nullptr), m_time4dispaly(nullptr)
+    mFileName("/opt/led3000.json"), mFp(nullptr), m_attitude_info(nullptr),
+    m_time4dispaly(nullptr), m_guide_mode_icon(nullptr), m_guide_info_label(nullptr)
 {
     /* 系统配置参数初始化 */
     {
@@ -902,12 +903,15 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         ver_label->set_position(Vector2i(81, 40));
         ver_label->set_font_size(15);
 
-        auto *guide_name_label = swindow->add<Label>("", "sans-bold");
-        guide_name_label->set_icon(RED_LED3000_ASSETS_DIR"/guide.png");
-        guide_name_label->set_position(Vector2i(900, 15));
-        guide_name_label->set_font_size(15);
-        set_guide_mode_icon(guide_name_label);
+        m_guide_mode_icon = swindow->add<Label>("", "sans-bold");
+        m_guide_mode_icon->set_icon(RED_LED3000_ASSETS_DIR"/guide.png");
+        m_guide_mode_icon->set_position(Vector2i(870, 15));
         get_guide_mode_icon()->set_visible(false);
+
+        m_guide_info_label = swindow->add<Label>("[-123.456/-12.34]", "sans-bold");
+        m_guide_info_label->set_position(Vector2i(920, 40));
+        m_guide_info_label->set_font_size(20);
+        m_guide_info_label->set_visible(false);
 
         m_time4dispaly= swindow->add<Label>("       ", "digital");
         m_time4dispaly->set_position(Vector2i(1120, 30));

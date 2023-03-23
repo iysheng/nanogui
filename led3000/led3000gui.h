@@ -235,17 +235,40 @@ public:
     {
         return m_turntable_dev;
     }
+
     Label *get_guide_mode_icon()
     {
         return m_guide_mode_icon;
     }
 
+    Label *get_guide_info_icon()
+    {
+        return m_guide_info_label;
+    }
+
+    void set_guide_info(bool info, float direction_float = 0.0, float elevation_float = 0.0)
+    {
+        int direction = direction_float * 100;
+        int elevation = elevation_float * 100;
+        if (nullptr == m_guide_info_label)
+            return;
+        m_guide_info_label->set_visible(info);
+        m_guide_info_label->set_caption('[' + to_string(direction / 100) + '.' + to_string(abs(direction % 100))
+            + '/'
+            + to_string(elevation / 100) + '.' + to_string(abs(elevation % 100)) + ']');
+    }
+
     bool check_guide_mode(void)
     {
+        if (nullptr == m_guide_mode_icon)
+            return false;
         return m_guide_mode_icon->visible();
     }
+
     void set_guide_mode(bool mode)
     {
+        if (nullptr == m_guide_mode_icon)
+            return;
         m_guide_mode_icon->set_visible(mode);
     }
 
@@ -335,6 +358,7 @@ private:
     Label *m_white_dev;
     Label *m_turntable_dev;
     Label *m_guide_mode_icon;
+    Label *m_guide_info_label;
     Label *m_time4dispaly;  /* 显示时统时间 */
     Label *m_attitude_info; /* 显示姿态信息 */
 

@@ -238,6 +238,7 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
     if (guide_enable) {
         /* 退出引导模式 */
         gs_screen->set_guide_mode(false);
+        gs_screen->set_guide_info(false);
         RedDebug::warn("no guide enable, just return.");
         return 0;
     }
@@ -257,6 +258,9 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
     memcpy(&target_elevation_value_tmp, 10 + net_package.payload(), sizeof(target_elevation_value_tmp));
     target_elevation_value_tmp = ntohs(target_elevation_value_tmp);
     target_elevation = _do_format_dev_short2float(target_elevation_value_tmp , DIMENSION_90_SHORT);
+
+    /* 显示角度信息 */
+    gs_screen->set_guide_info(true, target_direction, target_elevation);
 
     /* TODO correct target info with attitude */
     /* WAITING TEST [U]SHORT2FLOAT JUST IGNORE THIS NOW */
