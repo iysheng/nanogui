@@ -237,13 +237,13 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
 
     if (guide_enable) {
         /* 退出引导模式 */
-        gs_screen->set_guide_mode(false);
-        gs_screen->set_guide_info(false);
+        gs_screen->set_guide_mode(false, dev_num);
+        gs_screen->set_guide_info(false, 0, 0, dev_num);
         RedDebug::warn("no guide enable, just return.");
         return 0;
     }
     /* 进入引导模式 */
-    gs_screen->set_guide_mode(true);
+    gs_screen->set_guide_mode(true, dev_num);
 
     target_batch_number = net_package.payload()[2] << 8 | net_package.payload()[3];
 
@@ -260,7 +260,7 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
     target_elevation = _do_format_dev_short2float(target_elevation_value_tmp , DIMENSION_90_SHORT);
 
     /* 显示角度信息 */
-    gs_screen->set_guide_info(true, target_direction, target_elevation);
+    gs_screen->set_guide_info(true, target_direction, target_elevation, dev_num);
 
     /* TODO correct target info with attitude */
     /* WAITING TEST [U]SHORT2FLOAT JUST IGNORE THIS NOW */
@@ -289,7 +289,8 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
             gs_screen->getJsonValue()->devices[dev_num].white_led.mode = LED_NORMAL_MODE_OFF;
         }
         /* 跟随指控命令更新界面显示 */
-        gs_screen->set_white_dev_control_btns_status(gs_screen->getJsonValue()->devices[dev_num].white_led.mode);
+        if (dev_num == gs_screen->getCurrentDevice())
+            gs_screen->set_white_dev_control_btns_status(gs_screen->getJsonValue()->devices[dev_num].white_led.mode);
 
     } else if (led_type == NETWORK_PROTOCOL_GREEN_LED_TYPE) {
         if (gs_screen->get_dev_auth_label(dev_num)->caption() == std::string("禁止射击")) {
@@ -312,7 +313,8 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
         }
 
         /* 跟随指控命令更新界面显示 */
-        gs_screen->set_green_dev_control_btns_status(gs_screen->getJsonValue()->devices[dev_num].green_led.mode);
+        if (dev_num == gs_screen->getCurrentDevice())
+            gs_screen->set_green_dev_control_btns_status(gs_screen->getJsonValue()->devices[dev_num].green_led.mode);
     }
     return 0;
 }

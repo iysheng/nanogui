@@ -34,7 +34,6 @@ public:
     int get_socket() {return m_socket;};
     struct addrinfo * addrinfo() {return m_addrinfo;};
     struct sockaddr_in source_sin() {return m_source_sin;};
-    int stamp();
     char index() {return m_index;};
 
 private:

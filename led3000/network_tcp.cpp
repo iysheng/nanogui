@@ -25,15 +25,6 @@ NetworkTcp& NetworkTcp::operator=(NetworkTcp& ref) noexcept
     return *this;
 }
 
-int NetworkTcp::stamp()
-{
-    static int stamp = 0;
-
-    stamp += 10;
-
-    return stamp;
-}
-
 int NetworkTcp::try_to_connect(void)
 {
     if (!m_addrinfo) {
@@ -154,7 +145,7 @@ int NetworkTcp::send2server(char *buffer, uint16_t len, int flags)
 {
     int ret;
     if ((m_socket <= 0) && (try_to_connect() <= 0)) {
-        RedDebug::log("invalid socket and try to connect server failed");
+        RedDebug::err("invalid socket and try to connect server failed");
         return -1;
     }
     ret = send(m_socket, buffer, len, flags);

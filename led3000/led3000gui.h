@@ -236,40 +236,56 @@ public:
         return m_turntable_dev;
     }
 
-    Label *get_guide_mode_icon()
-    {
-        return m_guide_mode_icon;
-    }
-
-    Label *get_guide_info_icon()
-    {
-        return m_guide_info_label;
-    }
-
-    void set_guide_info(bool info, float direction_float = 0.0, float elevation_float = 0.0)
+    void set_guide_info(bool info, float direction_float = 0.0,
+        float elevation_float = 0.0, uint8_t dev_num = 0)
     {
         int direction = direction_float * 100;
         int elevation = elevation_float * 100;
-        if (nullptr == m_guide_info_label)
+        if (dev_num > LED3000_DEVICES_COUNTS - 1)
             return;
-        m_guide_info_label->set_visible(info);
-        m_guide_info_label->set_caption('[' + to_string(direction / 100) + '.' + to_string(abs(direction % 100))
+        else if (nullptr == m_guide_info_label[dev_num])
+            return;
+
+        m_guide_info_label[dev_num]->set_caption('[' + to_string(direction / 100) + '.' + to_string(abs(direction % 100))
             + '/'
             + to_string(elevation / 100) + '.' + to_string(abs(elevation % 100)) + ']');
+        m_guide_status[dev_num] = info;
+        if (mCurrentDevice == dev_num)
+        {
+            m_guide_info_label[dev_num]->set_visible(m_guide_status[dev_num]);
+        }
     }
 
-    bool check_guide_mode(void)
+    void set_guide_mode(bool mode, uint8_t dev_num = 0)
     {
-        if (nullptr == m_guide_mode_icon)
-            return false;
-        return m_guide_mode_icon->visible();
-    }
-
-    void set_guide_mode(bool mode)
-    {
-        if (nullptr == m_guide_mode_icon)
+        if (dev_num > LED3000_DEVICES_COUNTS - 1)
             return;
-        m_guide_mode_icon->set_visible(mode);
+        else if (nullptr == m_guide_mode_icon[dev_num])
+            return;
+
+        m_guide_status[dev_num] = mode;
+        if (mCurrentDevice == dev_num)
+        {
+            m_guide_mode_icon[dev_num]->set_visible(m_guide_status[dev_num]);
+        }
+    }
+
+    void sync_guide_relate_display(uint8_t dev_num)
+    {
+        if (0 == dev_num)
+        {
+            m_guide_info_label[1]->set_visible(false);
+            m_guide_mode_icon[1]->set_visible(false);
+            m_guide_info_label[0]->set_visible(m_guide_status[0]);
+            m_guide_mode_icon[0]->set_visible(m_guide_status[0]);
+        }
+        else if (1 == dev_num)
+        {
+            m_guide_info_label[0]->set_visible(false);
+            m_guide_mode_icon[0]->set_visible(false);
+            m_guide_info_label[1]->set_visible(m_guide_status[1]);
+            m_guide_mode_icon[1]->set_visible(m_guide_status[1]);
+        }
     }
 
     void set_green_dev_control_btns(const std::vector<Button *> *btns)
@@ -343,9 +359,10 @@ public:
         }
     }
 
-    void set_guide_mode_icon(Label *label)
+    void set_guide_mode_icon(Label *label, uint8_t dev_num = 0)
     {
-        m_guide_mode_icon = label;
+        if (dev_num < LED3000_DEVICES_COUNTS)
+            m_guide_mode_icon[dev_num] = label;
     }
 private:
     /* 设备状态窗口 label 控件 */
@@ -357,8 +374,9 @@ private:
     Label *m_green_dev;
     Label *m_white_dev;
     Label *m_turntable_dev;
-    Label *m_guide_mode_icon;
-    Label *m_guide_info_label;
+    Label *m_guide_mode_icon[LED3000_DEVICES_COUNTS];
+    Label *m_guide_info_label[LED3000_DEVICES_COUNTS];
+    bool   m_guide_status[LED3000_DEVICES_COUNTS];
     Label *m_time4dispaly;  /* 显示时统时间 */
     Label *m_attitude_info; /* 显示姿态信息 */
 
