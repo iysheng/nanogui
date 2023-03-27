@@ -606,8 +606,29 @@ int screen_window_register(void *window)
     return ret;
 }
 
+/************************* special function ****************************/
+static void network_fds_invalid(void)
+{
+    int i = 0;
+    for (; i < NETWORK_PROTOCOL_TYPE_COUNTS; i++)
+    {
+        gs_network_udp[i].invalid_socket();
+    }
+}
+
+/* 无效所有的引导指令 */
+static void network_guide_invalid(void)
+{
+    int i = 0;
+    for (; i < NETWORK_PROTOCOL_TYPE_COUNTS; i++)
+    {
+        gs_screen->set_guide_mode(false, i);
+        gs_screen->set_guide_info(false, 0, 0, i);
+    }
+}
+
 /**
-  * @brief
+  * @brief 处理网络报文
   * retval .
   */
 int handle_with_network_buffer(char *buffer, int size)
@@ -649,6 +670,7 @@ int handle_with_network_buffer(char *buffer, int size)
     case NETWORK_RECV_OFF:
         RedDebug::log("TODO with OFF");
         /* 清零引导状态显示 */
+        network_guide_invalid();
         break;
     case NETWORK_PINPONG_TEST:
         RedDebug::log("TODO with pingpong test");
@@ -660,26 +682,6 @@ int handle_with_network_buffer(char *buffer, int size)
     }
 
     return ret;
-}
-/************************* special function ****************************/
-static void network_fds_invalid(void)
-{
-    int i = 0;
-    for (; i < NETWORK_PROTOCOL_TYPE_COUNTS; i++)
-    {
-        gs_network_udp[i].invalid_socket();
-    }
-}
-
-/* 无效所有的引导指令 */
-static void network_guide_invalid(void)
-{
-    int i = 0;
-    for (; i < NETWORK_PROTOCOL_TYPE_COUNTS; i++)
-    {
-        gs_screen->set_guide_mode(false, i);
-        gs_screen->set_guide_info(false, 0, 0, i);
-    }
 }
 
 /******************** export function ****************************/
