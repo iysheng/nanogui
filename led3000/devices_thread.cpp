@@ -293,7 +293,7 @@ static void _do_with_turntable_mode_fuzzy_track(led_device_t* devp, std::string 
 
 static void _do_with_turntable_mode_scan(led_device_t* devp, std::string message)
 {
-    uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X2 /* 扫海 */,
+    uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X32 /* 扫海 */,
                           0XFF, 0XFF, 0XFF, 0XFF, 0X00 /* 校验和 */, 0XE7
                          };
 
@@ -386,9 +386,12 @@ static void _do_with_turntable_track_setting(led_device_t* devp, std::string mes
 {
     int x_pos, y_pos, ret;
     sscanf(message.c_str(), "%d,%d", &x_pos, &y_pos);
+    uint8_t buffer[14] = {0X7E, 0X0A /* 帧长 */, 0X82, 0X11, 1 + devp->uart.index, 0X01 /* 停止手动,目标有效 */,
+        x_pos >> 8, x_pos, y_pos >> 8, y_pos, 0X00 /* 不调焦 */, 0X00/* 不调视场 */, 0X00 /* 校验和 */, 0XE7};
     char tcp_buffer[16] = {0XAA, 0XAA, 0X00, 0X00, 0X00, 0X10, 0XFE /* zuobiaogenzong */,
                            x_pos >> 24, x_pos >> 16, x_pos >> 8, x_pos, y_pos >> 24, y_pos >> 16, y_pos >> 8, y_pos, 0X00 /* 校验和 */
                           };
+    buffer[12] = _get_xor(&buffer[2], 0X0A);
 
     tcp_buffer[15] = _get_sum(&tcp_buffer[0], 0X0F);
 
@@ -399,6 +402,7 @@ static void _do_with_turntable_track_setting(led_device_t* devp, std::string mes
         RedDebug::hexdump("TRACK TARGET", (char*)tcp_buffer, sizeof(tcp_buffer));
     }
     devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
+    write(devp->uart.fd, buffer, sizeof(buffer));
 }
 
 static void _do_with_turntable_position_setting(led_device_t* devp, std::string message)
@@ -534,6 +538,7 @@ static int _do_analysis_hear_msg(int index, char * buffer, int len)
     uint8_t green_mode, green_mode_param;
     uint8_t turntable_mode;
     int16_t turntable_horizon, turntable_vertical;
+    float turntable_horizon_float, turntable_vertical_float;
     /* 保存两个转台的水平和垂直角度信息 */
     static int16_t s_turntable_horizon_last[2], s_turntable_vertical_last[2];
     uint16_t turntable_horizon_speed, turntable_vertical_speed;
@@ -547,6 +552,8 @@ static int _do_analysis_hear_msg(int index, char * buffer, int len)
     turntable_mode = buffer[7];
     turntable_horizon = buffer[8] << 8 | buffer[9];
     turntable_vertical = buffer[10] << 8 | buffer[11];
+    turntable_horizon_float = (float)turntable_horizon / 100;
+    turntable_vertical_float = (float)turntable_vertical / 100;
 
     turntable_horizon_speed = buffer[12] << 8 | buffer[13];
     turntable_vertical_speed = buffer[14] << 8 | buffer[15];
@@ -559,10 +566,9 @@ static int _do_analysis_hear_msg(int index, char * buffer, int len)
 #endif
     gs_led_devices[index].screen->get_dev_state_label(index)->set_caption(dev_status ? "故障" : "正常");
     gs_led_devices[index].screen->get_dev_angle_label(index)->set_caption(
-        to_string(turntable_horizon / 100) + '.' +
-        to_string(abs(turntable_horizon % 100)) + '/' +
-        to_string(turntable_vertical / 100) + '.' +
-        to_string(abs(turntable_vertical % 100)));
+        to_string(turntable_horizon_float).erase(to_string(turntable_horizon_float).find('.')+3, string::npos)
+        + '/' +
+        to_string(turntable_vertical_float).erase(to_string(turntable_vertical_float).find('.')+3, string::npos));
     gs_led_devices[index].screen->get_dev_angular_speed_label(index)->set_caption(to_string(turntable_horizon_speed) + '/' + to_string(turntable_vertical_speed));
     /* check heart info then send when different */
     if (s_turntable_horizon_last[index] != turntable_horizon ||
@@ -617,7 +623,7 @@ static void *heart_msg_entry(void *arg)
         led_devp->uart.offline_counts++;
         /* 尝试读取心跳信息 */
         ret = get_device_heart_msg(led_devp->uart.index);
-        sleep(1);
+        usleep(200000);
     }
 }
 

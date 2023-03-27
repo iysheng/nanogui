@@ -648,6 +648,7 @@ int handle_with_network_buffer(char *buffer, int size)
         break;
     case NETWORK_RECV_OFF:
         RedDebug::log("TODO with OFF");
+        /* 清零引导状态显示 */
         break;
     case NETWORK_PINPONG_TEST:
         RedDebug::log("TODO with pingpong test");
@@ -667,6 +668,17 @@ static void network_fds_invalid(void)
     for (; i < NETWORK_PROTOCOL_TYPE_COUNTS; i++)
     {
         gs_network_udp[i].invalid_socket();
+    }
+}
+
+/* 无效所有的引导指令 */
+static void network_guide_invalid(void)
+{
+    int i = 0;
+    for (; i < NETWORK_PROTOCOL_TYPE_COUNTS; i++)
+    {
+        gs_screen->set_guide_mode(false, i);
+        gs_screen->set_guide_info(false, 0, 0, i);
     }
 }
 

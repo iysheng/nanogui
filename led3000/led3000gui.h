@@ -239,16 +239,16 @@ public:
     void set_guide_info(bool info, float direction_float = 0.0,
         float elevation_float = 0.0, uint8_t dev_num = 0)
     {
-        int direction = direction_float * 100;
-        int elevation = elevation_float * 100;
         if (dev_num > LED3000_DEVICES_COUNTS - 1)
             return;
         else if (nullptr == m_guide_info_label[dev_num])
             return;
 
-        m_guide_info_label[dev_num]->set_caption('[' + to_string(direction / 100) + '.' + to_string(abs(direction % 100))
+        m_guide_info_label[dev_num]->set_caption('['
+            + std::to_string(direction_float).erase(to_string(direction_float).find('.')+3, string::npos)
             + '/'
-            + to_string(elevation / 100) + '.' + to_string(abs(elevation % 100)) + ']');
+            + std::to_string(elevation_float).erase(to_string(elevation_float).find('.')+3, string::npos)
+            + ']');
         m_guide_status[dev_num] = info;
         if (mCurrentDevice == dev_num)
         {
