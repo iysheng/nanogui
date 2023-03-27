@@ -243,12 +243,22 @@ static void _do_with_turntable_up(led_device_t* devp, std::string message)
 
 static void _do_with_turntable_stop(led_device_t* devp, std::string message)
 {
+    int ret;
     uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X01 /* 停止手动 */,
                           0XFF, 0XFF, 0XFF, 0XFF, 0X00 /* 校验和 */, 0XE7
                          };
 
     buffer[10] = _get_xor(&buffer[2], 8);
     write(devp->uart.fd, buffer, sizeof(buffer));
+
+    char tcp_buffer[9] = {0XAA, 0XAA, 0X00, 0X00, 0X00, 0X09, 0XFD /* setting track enable */,
+                          0X00, 0X5A /* 校验和 */
+                         };
+    ret = devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
+    if (ret == -1) {
+        red_debug_lite("Failed exit mode track mode");
+    }
+    devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
 }
 
 static void _do_with_turntable_mode_track(led_device_t* devp, std::string message)
@@ -293,12 +303,22 @@ static void _do_with_turntable_mode_fuzzy_track(led_device_t* devp, std::string 
 
 static void _do_with_turntable_mode_scan(led_device_t* devp, std::string message)
 {
+    int ret;
     uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X32 /* 扫海 */,
                           0XFF, 0XFF, 0XFF, 0XFF, 0X00 /* 校验和 */, 0XE7
                          };
 
     buffer[10] = _get_xor(&buffer[2], 8);
     write(devp->uart.fd, buffer, sizeof(buffer));
+
+    char tcp_buffer[9] = {0XAA, 0XAA, 0X00, 0X00, 0X00, 0X09, 0XFD /* setting track enable */,
+                          0X00, 0X5A /* 校验和 */
+                         };
+    ret = devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
+    if (ret == -1) {
+        red_debug_lite("Failed exit mode track mode");
+    }
+    devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
 }
 
 /* 扫海模式参数配置
@@ -774,8 +794,8 @@ void *devices_thread(void *arg)
 
     NetworkTcp tcp_client("192.168.1.11", 1025);
     gs_led_devices[0].tcp_fd = tcp_client;
-    NetworkTcp tcp_client_debug("192.168.1.50", 5000);
-    gs_led_devices[0].tcp_fd_debug = tcp_client_debug;
+    NetworkTcp tcp_client_debug("192.168.1.2", 5000);
+    gs_led_devices[1].tcp_fd_debug = tcp_client_debug;
 
     gsDevice0Thread.detach();
     gsDevice1Thread.detach();
