@@ -795,13 +795,19 @@ void *devices_thread(void *arg)
     NetworkTcp tcp_client("192.168.1.11", 1025);
     gs_led_devices[0].tcp_fd = tcp_client;
     NetworkTcp tcp_client_debug("192.168.1.2", 5000);
-    gs_led_devices[1].tcp_fd_debug = tcp_client_debug;
+    gs_led_devices[0].tcp_fd_debug = tcp_client_debug;
+
+    NetworkTcp tcp_client2("192.168.1.12", 1025);
+    gs_led_devices[1].tcp_fd = tcp_client2;
+    NetworkTcp tcp_client2_debug("192.168.1.2", 5001);
+    gs_led_devices[1].tcp_fd_debug = tcp_client2_debug;
 
     gsDevice0Thread.detach();
     gsDevice1Thread.detach();
     gsDevicesGuardThread.detach();
 
-    tcp_client.send2server("Hello Red", strlen("Hello Red"));
+    tcp_client_debug.send2server("Hello Red", strlen("Hello Red"));
+    tcp_client2_debug.send2server("Hello Red", strlen("Hello Red"));
     printf("send data to network tcp");
     while (1) {
         sleep(10000000);
