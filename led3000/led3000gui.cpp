@@ -760,9 +760,9 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         label->set_position(Vector2i(60, 10));
         label = swindow->add<Label>("设备状态", "sans-bold");
         label->set_position(Vector2i(323, 10));
-        label = swindow->add<Label>("水平|垂直角度(糖)", "sans-bold");
+        label = swindow->add<Label>("水平|垂直角度(度)", "sans-bold");
         label->set_position(Vector2i(516, 10));
-        label = swindow->add<Label>("水平|垂直速度(糖/s)", "sans-bold");
+        label = swindow->add<Label>("水平|垂直速度(度/秒)", "sans-bold");
         label->set_position(Vector2i(701, 10));
         label = swindow->add<Label>("莫码信息", "sans-bold");
         label->set_position(Vector2i(930, 10));
