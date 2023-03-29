@@ -1067,16 +1067,16 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         track_video_btn->set_fixed_size(Vector2i(30, 72));
         track_video_btn->set_position(Vector2i(560, 20));
         track_video_btn->set_callback([&] {
-            if (getJsonValue()->devices[this->getCurrentDevice()].turntable.mode <= TURNTABLE_FUZZY_TRACK_MODE)
+            if (getJsonValue()->devices[0].turntable.mode <= TURNTABLE_FUZZY_TRACK_MODE)
             {
-                if (this->getJsonValue()->devices[this->getCurrentDevice()].turntable.mode == TURNTABLE_TRACK_MODE) {
+                if (this->getJsonValue()->devices[0].turntable.mode == TURNTABLE_TRACK_MODE) {
 
-                    this->getJsonValue()->devices[this->getCurrentDevice()].turntable.mode = TURNTABLE_FUZZY_TRACK_MODE;
+                    this->getJsonValue()->devices[0].turntable.mode = TURNTABLE_FUZZY_TRACK_MODE;
                     this->m4PolyM[POLYM_TURNTABLE_MODE_SETTING].assign(to_string(TURNTABLE_FUZZY_TRACK_MODE));
                     this->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_MODE_SETTING, this->m4PolyM[POLYM_TURNTABLE_MODE_SETTING]));
                     red_debug_lite("switch fuzzy track mode");
                 } else {
-                    this->getJsonValue()->devices[this->getCurrentDevice()].turntable.mode = TURNTABLE_TRACK_MODE;
+                    this->getJsonValue()->devices[0].turntable.mode = TURNTABLE_TRACK_MODE;
                     this->m4PolyM[POLYM_TURNTABLE_MODE_SETTING].assign(to_string(TURNTABLE_TRACK_MODE));
                     this->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_MODE_SETTING, this->m4PolyM[POLYM_TURNTABLE_MODE_SETTING]));
                     red_debug_lite("switch target track mode");
@@ -1116,21 +1116,21 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         track_video_btn2->set_fixed_size(Vector2i(30, 72));
         track_video_btn2->set_position(Vector2i(560, 20));
         track_video_btn2->set_callback([&] {
-            if (getJsonValue()->devices[this->getCurrentDevice()].turntable.mode <= TURNTABLE_FUZZY_TRACK_MODE)
+            if (getJsonValue()->devices[1].turntable.mode <= TURNTABLE_FUZZY_TRACK_MODE)
             {
-                if (this->getJsonValue()->devices[this->getCurrentDevice()].turntable.mode == TURNTABLE_TRACK_MODE) {
+                if (this->getJsonValue()->devices[1].turntable.mode == TURNTABLE_TRACK_MODE) {
 
-                    this->getJsonValue()->devices[this->getCurrentDevice()].turntable.mode = TURNTABLE_FUZZY_TRACK_MODE;
+                    this->getJsonValue()->devices[1].turntable.mode = TURNTABLE_FUZZY_TRACK_MODE;
                     this->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_MODE_SETTING, to_string(TURNTABLE_FUZZY_TRACK_MODE)));
                     red_debug_lite("switch fuzzy track mode");
                 } else {
-                    this->getJsonValue()->devices[this->getCurrentDevice()].turntable.mode = TURNTABLE_TRACK_MODE;
+                    this->getJsonValue()->devices[1].turntable.mode = TURNTABLE_TRACK_MODE;
                     this->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_MODE_SETTING, to_string(TURNTABLE_TRACK_MODE)));
                     red_debug_lite("switch target track mode");
                 }
             }
         }
-                                      );
+        );
 
         label = img2_window->add<Label>("2");
         label->set_font("sans-bold");
