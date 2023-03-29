@@ -559,9 +559,10 @@ static int _do_analysis_hear_msg(int index, char * buffer, int len)
     uint8_t turntable_mode;
     int16_t turntable_horizon, turntable_vertical;
     float turntable_horizon_float, turntable_vertical_float;
+    float turntable_horizon_speed_float, turntable_vertical_speed_float;
     /* 保存两个转台的水平和垂直角度信息 */
     static int16_t s_turntable_horizon_last[2], s_turntable_vertical_last[2];
-    uint16_t turntable_horizon_speed, turntable_vertical_speed;
+    int16_t turntable_horizon_speed, turntable_vertical_speed;
     uint16_t camera_falcon; /* 摄像头焦距 */
 
     dev_status = buffer[2];
@@ -577,6 +578,9 @@ static int _do_analysis_hear_msg(int index, char * buffer, int len)
 
     turntable_horizon_speed = buffer[12] << 8 | buffer[13];
     turntable_vertical_speed = buffer[14] << 8 | buffer[15];
+
+    turntable_horizon_speed_float = (float)turntable_horizon_speed / 100;
+    turntable_vertical_speed_float = (float)turntable_vertical_speed / 100;
     camera_falcon = buffer[16];
 #if 0
     static int test_counts = 0;
@@ -589,7 +593,10 @@ static int _do_analysis_hear_msg(int index, char * buffer, int len)
         to_string(turntable_horizon_float).erase(to_string(turntable_horizon_float).find('.')+3, string::npos)
         + '/' +
         to_string(turntable_vertical_float).erase(to_string(turntable_vertical_float).find('.')+3, string::npos));
-    gs_led_devices[index].screen->get_dev_angular_speed_label(index)->set_caption(to_string(turntable_horizon_speed) + '/' + to_string(turntable_vertical_speed));
+    gs_led_devices[index].screen->get_dev_angular_speed_label(index)->set_caption(
+        to_string(turntable_horizon_speed_float).erase(to_string(turntable_horizon_speed_float).find('.')+3, string::npos)
+        + '/' +
+        to_string(turntable_vertical_speed_float).erase(to_string(turntable_vertical_speed_float).find('.')+3, string::npos));
     /* check heart info then send when different */
     if (s_turntable_horizon_last[index] != turntable_horizon ||
         s_turntable_vertical_last[index] != turntable_vertical)
