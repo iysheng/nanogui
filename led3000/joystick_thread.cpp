@@ -141,6 +141,7 @@ static int do_with_xy_bias(int x_bias, int y_bias)
 static int do_with_handle_axis(float x_axis, float y_axis)
 {
     int x_turn_bais = 0, y_turn_bais = 0;
+    static int x_turn_bais_last = 0, y_turn_bais_last = 0;
 
     if (x_axis < X_LEFT_POINT) {
         /* TODO 左转 */
@@ -160,6 +161,16 @@ static int do_with_handle_axis(float x_axis, float y_axis)
         y_turn_bais = y_axis - Y_UP_POINT;
     } else {
         y_turn_bais = 0;
+    }
+
+    if (x_turn_bais == x_turn_bais_last && y_turn_bais == y_turn_bais_last)
+    {
+        return -1;
+    }
+    else
+    {
+        x_turn_bais_last = x_turn_bais;
+        y_turn_bais_last = y_turn_bais;
     }
 
     if (!x_turn_bais && !y_turn_bais) {
