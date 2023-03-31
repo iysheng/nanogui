@@ -593,6 +593,16 @@ void do_with_scan_setting(Widget *widget, int choose)
     }
 }
 
+void do_with_turntable_reset(Widget *widget, int choose)
+{
+    Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
+    /* 需要对该数据在发送端转换为大端发送出去 */
+    if (choose == 1) {
+        /* 发送复位转台消息 */
+        led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_RESET, ""));
+        return;
+    }
+}
 
 Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", false, true),
     mFileName("/opt/led3000.json"), mFp(nullptr), m_attitude_info(nullptr),
@@ -997,6 +1007,14 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         m_turntable_dev = turntableWindow->add<Label>("灯光装置终端一 转台");
         m_turntable_dev->set_position({39, 9});
 
+        /* 转台复位按键 */
+        Button *turntable_reset_btn = turntableWindow->add<Button>("", RED_LED3000_ASSETS_DIR"/turntable_reset.png", 0);
+        turntable_reset_btn->set_position({260, 4});
+        turntable_reset_btn->set_fixed_size({32, 32});
+        turntable_reset_btn->set_callback([this]() {
+            new MessageDialog(this, MessageDialog::Type::Warning, "", "确认要复位当前转台么?", "确认", "取消", "", do_with_turntable_reset);
+        });
+
         /* 扫海参数配置按键 */
         Button *scan_setting_btn = turntableWindow->add<Button>("", RED_LED3000_ASSETS_DIR"/setting_scan.png", 0);
         scan_setting_btn->set_position({305, 4});
@@ -1093,12 +1111,14 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         auto *label = img_window->add<Label>("1");
         label->set_font("sans-bold");
         label->set_position(Vector2i(570, 64));
+
         auto *btn = img_window->add<Button>("", RED_LED3000_ASSETS_DIR"/dec_focal.png");
         btn->set_callback([this]() {
             this->getDeviceQueue(0).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "-"));
         });
         btn->set_fixed_size({30, 30});
         btn->set_position({560, 240});
+
         btn = img_window->add<Button>("", RED_LED3000_ASSETS_DIR"/inc_focal.png");
         btn->set_fixed_size({30, 30});
         btn->set_position({560, 276});
@@ -1142,6 +1162,7 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         btn->set_callback([this]() {
             this->getDeviceQueue(1).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "-"));
         });
+
         btn = img2_window->add<Button>("", RED_LED3000_ASSETS_DIR"/inc_focal.png", 0);
         btn->set_fixed_size({30, 30});
         btn->set_position({560, 276});

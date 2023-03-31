@@ -773,12 +773,22 @@ bool VideoView::mouse_button_event(const Vector2i &p, int button, bool down, int
 {
     char track_buffer[32] = {0};
     Vector2i track_p;
+    float xx_float, yy_float;
+    float xx_factor = 1.0 * VIDEO_TRACK_FIXED_WIDTH;
+    xx_factor /= VIDEO_SHOW_FIXED_WIDTH;
+    float yy_factor = 1.0 * VIDEO_TRACK_FIXED_HEIGH;
+    yy_factor /= VIDEO_SHOW_FIXED_HEIGH;
 
     Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(window()->parent());
     if (led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].turntable.mode > TURNTABLE_FUZZY_TRACK_MODE)
         return false;
-    track_p.v[0] = p.v[0] * VIDEO_TRACK_FIXED_WIDTH / VIDEO_SHOW_FIXED_WIDTH;
-    track_p.v[1] = p.v[1] * VIDEO_TRACK_FIXED_HEIGH / VIDEO_SHOW_FIXED_HEIGH;
+    xx_float = p.v[0];
+    yy_float = p.v[1];
+
+    xx_float *= xx_factor;
+    yy_float *= yy_factor;
+    track_p.v[0] = (int)xx_float;
+    track_p.v[1] = (int)yy_float;
     //track_p.v[0] -= VIDEO_TRACK_FIXED_WIDTH / 2 ;
     //track_p.v[1] = VIDEO_TRACK_FIXED_HEIGH / 2 - track_p.v[1];
     snprintf(track_buffer, sizeof track_buffer, "%d,%d", track_p.v[0], track_p.v[1]);

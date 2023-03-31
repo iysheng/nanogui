@@ -34,7 +34,9 @@ using MsgUID = unsigned long long;
 #define    POLYM_TURNTABLE_SCAN_MODE_CONFIG_STAY_TIME              18
 #define    POLYM_TURNTABLE_SCAN_MODE_CONFIG_SPEED_LEVEL            19
 
-#define    POLYM_TYPE_MAX                                          20
+#define    POLYM_TURNTABLE_RESET                                   20
+
+#define    POLYM_TYPE_MAX                                          21
 
 /* JSON 文件配置 ID */
 #define    POLYM_BUTTON_CONFIRM  2

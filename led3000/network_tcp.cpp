@@ -11,11 +11,12 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sys/select.h>
 
 using namespace std;
 
 /* 默认设置 socket 为无阻塞模式 */
-#define SOCKET_NO_BLOCK
+//#define SOCKET_NO_BLOCK
 
 NetworkTcp& NetworkTcp::operator=(NetworkTcp& ref) noexcept
 {
@@ -25,6 +26,34 @@ NetworkTcp& NetworkTcp::operator=(NetworkTcp& ref) noexcept
     return *this;
 }
 
+static int check_ready2write(int fd)
+{
+    int ret = 0;
+    fd_set wfds;
+    struct timeval tv;
+
+    FD_ZERO(&wfds);
+    FD_SET(fd, &wfds);
+
+    tv.tv_sec = 0;
+    tv.tv_usec = 500000;
+
+    ret = select(fd + 1, NULL, &wfds, NULL, &tv);
+
+    if (ret == -1)
+    {
+        RedDebug::err("Failed wait2connect,err=%d", errno);
+        return -1;
+    }
+    else if (ret)
+    {
+        return 0;
+    }
+
+    RedDebug::err("OH wait2connect timeout");
+    return -2;
+}
+
 int NetworkTcp::try_to_connect(void)
 {
     if (!m_addrinfo) {
@@ -32,15 +61,15 @@ int NetworkTcp::try_to_connect(void)
         return -1;
     }
 
-    m_socket = socket(m_addrinfo->ai_family, SOCK_STREAM | SOCK_CLOEXEC, IPPROTO_TCP);
+    m_socket = socket(m_addrinfo->ai_family, SOCK_STREAM | SOCK_NONBLOCK, IPPROTO_TCP);
     if (m_socket == -1) {
         RedDebug::err("could not retry create tcp socket\n");
         return -1;
     }
 #ifdef SOCKET_NO_BLOCK
     struct timeval tv;
-    tv.tv_sec = 3;
-    tv.tv_usec = 0;
+    tv.tv_sec = 0;
+    tv.tv_usec = 500000;
     /* 设置接收超时 */
     setsockopt(m_socket, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
 #endif
@@ -48,9 +77,35 @@ int NetworkTcp::try_to_connect(void)
     int r;
     r = connect(m_socket, m_addrinfo->ai_addr, m_addrinfo->ai_addrlen);
     if (r != 0) {
-        close(m_socket);
-        RedDebug::err("could not try to bind TCP socket with port\n");
-        m_socket = 0;
+        if (errno == EINPROGRESS)
+        {
+            /* try to wait connect success */
+            if (check_ready2write(m_socket))
+            {
+                /* just close this socket */
+                close(m_socket);
+                m_socket = 0;
+            }
+            else
+            {
+                /* connect to server success under noblock mode
+                 * fixup r = 0 to indicate connect success
+                 * */
+                r = 0;
+            }
+        }
+        else
+        {
+            close(m_socket);
+            m_socket = 0;
+        }
+
+        if (r)
+        {
+            RedDebug::err("couldn't connect to:%s err=%d socket=%d",
+                inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr),
+                errno, m_socket);
+        }
     }
 
     return m_socket;
@@ -73,7 +128,7 @@ NetworkTcp::NetworkTcp(string dstip, uint16_t dst_port): m_index(0), m_socket(-1
     } else {
         RedDebug::log("tcp socket will connect to:%s", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr));
     }
-    m_socket = socket(m_addrinfo->ai_family, SOCK_STREAM | SOCK_CLOEXEC, IPPROTO_TCP);
+    m_socket = socket(m_addrinfo->ai_family, SOCK_STREAM | SOCK_NONBLOCK , IPPROTO_TCP);
     if (m_socket == -1) {
         RedDebug::err("could not create socket address or port: %s:%u\n", dstip.c_str(), dst_port);
         return;
@@ -111,9 +166,9 @@ NetworkTcp::NetworkTcp(string dstip, uint16_t source_port, uint16_t dst_port): m
     } else {
         RedDebug::log("tcp socket create to:%s success. -------------------------------", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr));
     }
-    m_socket = socket(m_addrinfo->ai_family, SOCK_STREAM | SOCK_CLOEXEC, IPPROTO_TCP);
+    m_socket = socket(m_addrinfo->ai_family, SOCK_STREAM | SOCK_NONBLOCK, IPPROTO_TCP);
     if (m_socket == -1) {
-        freeaddrinfo(m_addrinfo);
+        //freeaddrinfo(m_addrinfo);
         RedDebug::err("could not create socket address or port: %s:%u\n", dstip.c_str(), dst_port);
         return;
     }
@@ -129,16 +184,40 @@ NetworkTcp::NetworkTcp(string dstip, uint16_t source_port, uint16_t dst_port): m
     m_source_sin.sin_family = AF_INET;
     m_source_sin.sin_port = htons(source_port);
     r = connect(m_socket, m_addrinfo->ai_addr, m_addrinfo->ai_addrlen);
+
     if (r != 0) {
-        freeaddrinfo(m_addrinfo);
-        close(m_socket);
-        RedDebug::err("could not connect TCP socket with port:%u\n", source_port);
+        if (errno == EINPROGRESS)
+        {
+            /* try to wait connect success */
+            if (!check_ready2write(m_socket))
+            {
+                r = 0;
+            }
+            else
+            {
+                /* just close this socket */
+                close(m_socket);
+                m_socket = 0;
+            }
+        }
+        else
+        {
+            close(m_socket);
+            m_socket = 0;
+        }
+        if (r)
+        {
+            RedDebug::err("couldn't connect to:%s@%u err=%d", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr), source_port, errno);
+            //freeaddrinfo(m_addrinfo);
+        }
     }
 }
 
 int NetworkTcp::send2server(char *buffer, uint16_t len, int flags)
 {
     int ret;
+
+        RedDebug::err("start send2server #############################");
     if ((m_socket <= 0) && (try_to_connect() <= 0)) {
         RedDebug::err("invalid socket and try to connect server failed");
         return -1;
@@ -152,8 +231,15 @@ int NetworkTcp::send2server(char *buffer, uint16_t len, int flags)
             close(m_socket);
             m_socket = 0;
         }
+        else
+        {
+            /* 其他错误也关闭这个 socket */
+            close(m_socket);
+            m_socket = 0;
+        }
     }
     m_index++;
+        RedDebug::err("end send2server #############################");
 
     return ret;
 }

@@ -126,6 +126,7 @@ NetworkUdp::NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port, in
     if (m_socket > 0) {
         RedDebug::log("use origin socket fd:%d", m_socket);
     } else {
+        /* 默认都是阻塞型的 */
         m_socket = socket(m_addrinfo->ai_family, SOCK_DGRAM | SOCK_CLOEXEC, IPPROTO_UDP);
         if (m_socket == -1) {
             freeaddrinfo(m_addrinfo);
@@ -236,7 +237,7 @@ int NetworkUdp::recv_from_server(char *buffer, uint16_t len, int flags)
     //RedDebug::log("before udp socket recv:%s %p", inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr), m_addrinfo);
     ret = recvfrom(m_socket, buffer, len, flags, NULL, NULL);
     if (-1 == ret) {
-        RedDebug::err("Failed recvfrom server :%d %s %p", errno, inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr), m_addrinfo);
+        RedDebug::log("Failed recvfrom server :%d %s %p", errno, inet_ntoa(((sockaddr_in *)m_addrinfo->ai_addr)->sin_addr), m_addrinfo);
     } else if (ret > 0) {
         RedDebug::hexdump("RECV_FROM_SEREVR", buffer, ret);
     }

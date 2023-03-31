@@ -14,6 +14,7 @@
 #include <PolyM/include/polym/Msg.hpp>
 #include <PolyM/include/polym/Queue.hpp>
 #include <network_tcp.h>
+#include <sched.h>
 
 #include <termios.h>
 #include <unistd.h>
@@ -379,6 +380,17 @@ static void _do_with_turntable_mode_scan_config_speed_level(led_device_t* devp, 
     RedDebug::log("scan config speed level:%s", message.c_str());
 }
 
+/* 复位转台 */
+static void _do_with_turntable_reset(led_device_t* devp, std::string message)
+{
+    uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X00,
+                          0XFF, 0XFF, 0XFF, 0XFF, 0X00 /* 校验和 */, 0XE7};
+
+    buffer[10] = _get_xor(&buffer[2], 8);
+    write(devp->uart.fd, buffer, sizeof(buffer));
+    RedDebug::log("reset turntable");
+}
+
 static void _do_with_turntable_mode_setting(led_device_t* devp, std::string message)
 {
     uint8_t mode = (uint8_t)stoi(message);
@@ -597,8 +609,7 @@ static int _do_analysis_hear_msg(int index, char * buffer, int len)
         to_string(turntable_horizon_speed_float).erase(to_string(turntable_horizon_speed_float).find('.')+3, string::npos)
         + '/' +
         to_string(turntable_vertical_speed_float).erase(to_string(turntable_vertical_speed_float).find('.')+3, string::npos));
-    /* check heart info then send when different */
-    if (s_turntable_horizon_last[index] != turntable_horizon ||
+    /* check heart info then send when different */ if (s_turntable_horizon_last[index] != turntable_horizon ||
         s_turntable_vertical_last[index] != turntable_vertical)
     {
         s_turntable_horizon_last[index] = turntable_horizon;
@@ -646,6 +657,16 @@ static void *heart_msg_entry(void *arg)
     led_device_t * led_devp = (led_device_t *)arg;
     int ret = 0;
 
+    /* 设置线程优先级 */
+    struct sched_param sched;
+    int priority = sched_get_priority_min(SCHED_RR) + 1;
+    bzero((void *)&sched, sizeof(sched));
+    sched.sched_priority = priority;
+    if (0 != pthread_setschedparam(pthread_self(), SCHED_RR, &sched))
+    {
+        RedDebug::err("Failed set heart pthread schedparam err:%d pri=%d", errno, priority);
+    }
+
     while (1) {
         led_devp->uart.offline_counts++;
         /* 尝试读取心跳信息 */
@@ -665,6 +686,16 @@ void *devices_entry(void *arg)
     /* 修改线程名 */
     snprintf(thread_name, sizeof(thread_name), "devices%d", led_devp->uart.index);
 
+    /* 提高线程优先级 */
+    struct sched_param sched;
+    int priority = (sched_get_priority_max(SCHED_RR) + sched_get_priority_min(SCHED_RR)) / 2;
+    bzero((void *)&sched, sizeof(sched));
+    sched.sched_priority = priority;
+    if (0 != pthread_setschedparam(pthread_self(), SCHED_RR, &sched))
+    {
+        RedDebug::err("Failed set schedparam err:%d pri=%d", errno, priority);
+    }
+
     prctl(PR_SET_NAME, thread_name);
     /* TODO init uart */
     if (init_uart_port(&led_devp->uart) != 0) {
@@ -676,15 +707,11 @@ void *devices_entry(void *arg)
     gsDeviceHeartThread.detach();
 
     while (1) {
-        auto m = screen->getDeviceQueue(led_devp->uart.index).get();
+        auto m = screen->getDeviceQueue(led_devp->uart.index).get(0);
         if (m) {
             auto& dm = dynamic_cast<PolyM::DataMsg<std::string>&>(*m);
             msg_id = dm.getMsgId();
             msg_payload = dm.getPayload();
-            RedDebug::log("Device%d thread :%u@%s", led_devp->uart.index, msg_id, msg_payload.c_str());
-            /* 更新状态信息到一体化网络 */
-            extern int update_sysinfo2network(void);
-            update_sysinfo2network();
         }
 
         switch (msg_id) {
@@ -745,10 +772,18 @@ void *devices_entry(void *arg)
         case POLYM_TURNTABLE_SCAN_MODE_CONFIG_SPEED_LEVEL:
             _do_with_turntable_mode_scan_config_speed_level(led_devp, msg_payload);
             break;
+        case POLYM_TURNTABLE_RESET:
+            _do_with_turntable_reset(led_devp, msg_payload);
+            break;
         default:
             RedDebug::log("No support this id:%d", msg_id);
             break;
         }
+
+        /* 更新状态信息到一体化网络 */
+        extern int update_sysinfo2network(void);
+        update_sysinfo2network();
+        usleep(10000);
     }
 }
 
