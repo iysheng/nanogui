@@ -759,7 +759,6 @@ void VideoView::draw(NVGcontext *ctx)
                 m_texture->resize(m_fixed_size);
             }
             m_texture->upload(m_pixels);
-            red_debug_lite("show %p -------------------------------------------", m_pixels);
             ImageView::set_image(m_texture);
             mStatus = R_VIDEO_RUNNING;
         }
@@ -775,9 +774,16 @@ bool VideoView::mouse_button_event(const Vector2i &p, int button, bool down, int
     Vector2i track_p;
     float xx_float, yy_float;
     float xx_factor = 1.0 * VIDEO_TRACK_FIXED_WIDTH;
-    xx_factor /= VIDEO_SHOW_FIXED_WIDTH;
     float yy_factor = 1.0 * VIDEO_TRACK_FIXED_HEIGH;
+
+    xx_factor /= VIDEO_SHOW_FIXED_WIDTH;
     yy_factor /= VIDEO_SHOW_FIXED_HEIGH;
+
+    /* 仅仅在按下时发送数据 */
+    if (true != down)
+    {
+        return false;
+    }
 
     Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(window()->parent());
     if (led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].turntable.mode > TURNTABLE_FUZZY_TRACK_MODE)
@@ -793,10 +799,8 @@ bool VideoView::mouse_button_event(const Vector2i &p, int button, bool down, int
     //track_p.v[1] = VIDEO_TRACK_FIXED_HEIGH / 2 - track_p.v[1];
     snprintf(track_buffer, sizeof track_buffer, "%d,%d", track_p.v[0], track_p.v[1]);
     red_debug_lite("track buffer %s raw:%d,%d", track_buffer, p.v[0], p.v[1]);
-    /* TODO 发送坐标信息进行目标追踪 */
+    /* 发送坐标信息进行目标追踪 */
     led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_TRACK_SETTING, track_buffer));
-    /* 防止发送太快驱动板无法处理 */
-    usleep(100000);
     return true;
 }
 NAMESPACE_END(nanogui)
