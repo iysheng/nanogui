@@ -96,6 +96,8 @@ static int do_with_network_attitude_info(NetworkPackage &net_package)
     info_valid_flags = net_package.payload()[0] << 8 | net_package.payload()[1];
     if (info_valid_flags & 0x01) {
         RedDebug::warn("invalid attitude info");
+        /* 有关船体姿态信息的更新无效界面显示 */
+        gs_screen->update_attitudeinfo4display(0.0, 0.0, 0.0, false);
         return -2;
     }
 
@@ -188,6 +190,8 @@ static int do_with_network_recv_force(NetworkPackage &net_package)
     /* 更新界面显示和授权状态更新 */
     gs_screen->getJsonValue()->devices[dev_num].green_led.auth = 2 - force_control;
     gs_screen->get_dev_auth_label(dev_num)->set_caption((2 - force_control) ? "允许射击" : "禁止射击");
+
+    return 0;
 }
 
 /**

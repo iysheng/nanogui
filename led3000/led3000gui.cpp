@@ -1282,21 +1282,27 @@ void Led3000Window::update_time4display(void)
     }
 }
 
-void Led3000Window::update_attitudeinfo4display(float direction_float, float horizon_float, float vertical_float)
+void Led3000Window::update_attitudeinfo4display(float direction_float, float horizon_float, float vertical_float, bool valid)
 {
-    int direction = 100 * direction_float, horizon = 100 * horizon_float, vertical = 100 * vertical_float;
     if (!m_attitude_info)
         return;
-    char attitude_info_buffer[128] = {0};
 
-    snprintf(attitude_info_buffer, sizeof attitude_info_buffer,
-        "弦角:%4d.%-2d 横摇:%3d.%-2d 纵摇:%3d.%-2d",
-        direction / 100,
-        abs(direction % 100),
-        horizon / 100,
-        abs(horizon % 100),
-        vertical / 100,
-        abs(vertical % 100));
-    m_attitude_info->set_caption(attitude_info_buffer);
+    if (valid == true)
+    {
+        m_attitude_info->set_caption(
+            "舷角:"
+            + std::to_string(direction_float).erase(to_string(direction_float).find('.')+3, string::npos)
+            + ' '
+            + "横摇:"
+            + std::to_string(horizon_float).erase(to_string(horizon_float).find('.')+3, string::npos)
+            + ' '
+            + "纵摇:"
+            + std::to_string(vertical_float).erase(to_string(vertical_float).find('.')+3, string::npos)
+            );
+    }
+    else
+    {
+        m_attitude_info->set_caption("舷角:---.-- 横摇:--.-- 纵摇:--.--");
+    }
 }
 

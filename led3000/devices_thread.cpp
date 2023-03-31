@@ -826,7 +826,6 @@ void *devices_thread(void *arg)
 {
     gs_led_devices[0].screen = (Led3000Window *)arg;
     gs_led_devices[1].screen = (Led3000Window *)arg;
-    RedDebug::log("arg=%p", arg);
 
     std::thread gsDevice0Thread(devices_entry, &gs_led_devices[0]);
     std::thread gsDevice1Thread(devices_entry, &gs_led_devices[1]);

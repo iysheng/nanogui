@@ -122,7 +122,7 @@ public:
     {
     }
     void update_time4display(void);
-    void update_attitudeinfo4display(float direction, float horizon, float vertical);
+    void update_attitudeinfo4display(float direction, float horizon, float vertical, bool valid = true);
     void init_json_file(void);
     virtual bool keyboard_event(int key, int scancode, int action, int modifiers)
     {
