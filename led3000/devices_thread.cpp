@@ -47,6 +47,7 @@ typedef struct {
     Led3000Window *screen;
     NetworkTcp tcp_fd;
     NetworkTcp tcp_fd_debug;
+    bool focal_auto;
 } led_device_t;
 
 static led_device_t gs_led_devices[2] = {
@@ -60,6 +61,7 @@ static led_device_t gs_led_devices[2] = {
             .index = 0,
             .offline_counts = 0,
         },
+        .focal_auto = true,
     },
     {
         .uart = {
@@ -71,6 +73,7 @@ static led_device_t gs_led_devices[2] = {
             .index = 1,
             .offline_counts = 0,
         },
+        .focal_auto = true,
     },
 };
 
@@ -418,15 +421,21 @@ static void _do_with_turntable_track_setting(led_device_t* devp, std::string mes
 {
     int x_pos, y_pos, ret;
     sscanf(message.c_str(), "%d,%d", &x_pos, &y_pos);
-    uint8_t buffer[14] = {0X7E, 0X0A /* 帧长 */, 0X82, 0X11, 1 + devp->uart.index, 0X01 /* 停止手动,目标有效 */,
-        x_pos >> 8, x_pos, y_pos >> 8, y_pos, 0X00 /* 不调焦 */, 0X00/* 不调视场 */, 0X00 /* 校验和 */, 0XE7};
+    uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X03 /* 停止手动,目标有效 */,
+        0XFF, 0XFF, 0XFF, 0XFF, 0X00 /* 校验和 */, 0XE7};
     char tcp_buffer[16] = {0XAA, 0XAA, 0X00, 0X00, 0X00, 0X10, 0XFE /* zuobiaogenzong */,
                            x_pos >> 24, x_pos >> 16, x_pos >> 8, x_pos, y_pos >> 24, y_pos >> 16, y_pos >> 8, y_pos, 0X00 /* 校验和 */
                           };
-    buffer[12] = _get_xor(&buffer[2], 0X0A);
+    /* 切换目标时,需要先停止一下 */
+    uint8_t buffer_stop[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X01 /* 停止手动 */,
+                          0XFF, 0XFF, 0XFF, 0XFF, 0X00 /* 校验和 */, 0XE7
+                         };
 
+    buffer_stop[10] = _get_xor(&buffer_stop[2], 8);
+    write(devp->uart.fd, buffer_stop, sizeof(buffer_stop));
+
+    buffer[10] = _get_xor(&buffer[2], 8);
     tcp_buffer[15] = _get_sum(&tcp_buffer[0], 0X0F);
-
     ret = devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
     if (ret == -1) {
         red_debug_lite("Failed send 2 server with track setting.");
@@ -434,6 +443,8 @@ static void _do_with_turntable_track_setting(led_device_t* devp, std::string mes
         RedDebug::hexdump("TRACK TARGET", (char*)tcp_buffer, sizeof(tcp_buffer));
     }
     devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
+    usleep(10000);
+
     write(devp->uart.fd, buffer, sizeof(buffer));
 }
 
@@ -454,6 +465,115 @@ static void _do_with_turntable_position_setting(led_device_t* devp, std::string 
     RedDebug::log("position_setting:%s direction=%hd elevation=%hd", message.c_str(), direction, elevation);
 }
 
+static void __do_with_focal_oneshot(led_device_t* devp, std::string message)
+{
+    char tcp_buffer[9] = {0XAA, 0XAA, 0X00, 0X00, 0X00, 0X09, 0XEE, 0X1A /* 单次调节焦面 */,
+                          0X5C /* 校验和 */
+                         };
+    tcp_buffer[8] = _get_sum(&tcp_buffer[0], 8);
+    devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
+    devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
+    RedDebug::log("focal oneshot");
+}
+
+/* 自动对焦 */
+static void __do_with_focal_auto(led_device_t* devp, std::string message)
+{
+    char tcp_buffer[9] = {0XAA, 0XAA, 0X00, 0X00, 0X00, 0X09, 0XEE, 0X18 /* 自动调节焦面 */,
+                          0X5C /* 校验和 */
+                         };
+    tcp_buffer[8] = _get_sum(&tcp_buffer[0], 8);
+    devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
+    devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
+    RedDebug::log("focal auto");
+}
+
+/* 手动对焦 */
+static void __do_with_focal_manual(led_device_t* devp, std::string message)
+{
+    char tcp_buffer[9] = {0XAA, 0XAA, 0X00, 0X00, 0X00, 0X09, 0XEE, 0X19 /* 自动调节焦面 */,
+                          0X5C /* 校验和 */
+                         };
+    tcp_buffer[8] = _get_sum(&tcp_buffer[0], 8);
+    devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
+    devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
+    RedDebug::log("focal manual");
+}
+
+static void __do_with_focal_revert(led_device_t* devp, std::string message)
+{
+    if (devp->focal_auto == true)
+    {
+        __do_with_focal_manual(devp, message);
+        devp->focal_auto = false;
+    }
+    else if (devp->focal_auto == false)
+    {
+        __do_with_focal_auto(devp, message);
+        devp->focal_auto = true;
+    }
+}
+
+/* 调焦加 */
+static void __do_with_focal_add(led_device_t* devp, std::string message)
+{
+    char tcp_buffer[9] = {0XAA, 0XAA, 0X00, 0X00, 0X00, 0X09, 0XEE, 0X16 /* 自动调节焦面 */,
+                          0X5C /* 校验和 */
+                         };
+    tcp_buffer[8] = _get_sum(&tcp_buffer[0], 8);
+    devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
+    devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
+    RedDebug::log("focal manual");
+}
+
+/* 调焦减 */
+static void __do_with_focal_dec(led_device_t* devp, std::string message)
+{
+    char tcp_buffer[9] = {0XAA, 0XAA, 0X00, 0X00, 0X00, 0X09, 0XEE, 0X17 /* 自动调节焦面 */,
+                          0X5C /* 校验和 */
+                         };
+    tcp_buffer[8] = _get_sum(&tcp_buffer[0], 8);
+    devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
+    devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
+    RedDebug::log("focal manual");
+}
+
+/* 视场减开始 */
+static void __do_with_fov_start_dec(led_device_t* devp, std::string message)
+{
+    char tcp_buffer[9] = {0XAA, 0XAA, 0X00, 0X00, 0X00, 0X09, 0XEE, 0X27 /* 开始减少视场 */,
+                          0X5C /* 校验和 */
+                         };
+    tcp_buffer[8] = _get_sum(&tcp_buffer[0], 8);
+    devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
+    devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
+    RedDebug::log("fov dec start");
+}
+
+/* 视场加开始 */
+static void __do_with_fov_start_inc(led_device_t* devp, std::string message)
+{
+    char tcp_buffer[9] = {0XAA, 0XAA, 0X00, 0X00, 0X00, 0X09, 0XEE, 0X26/* 开始增加视场 */,
+                          0X5C /* 校验和 */
+                         };
+    tcp_buffer[8] = _get_sum(&tcp_buffer[0], 8);
+    devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
+    devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
+    RedDebug::log("fov inc start");
+}
+
+/* 视场加开始 */
+static void __do_with_fov_end_adj(led_device_t* devp, std::string message)
+{
+    char tcp_buffer[9] = {0XAA, 0XAA, 0X00, 0X00, 0X00, 0X09, 0XEE, 0X00 /* 停止调节视场 */,
+                          0X5C /* 校验和 */
+                         };
+    tcp_buffer[8] = _get_sum(&tcp_buffer[0], 8);
+    devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
+    devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
+    RedDebug::log("fov end adj");
+}
+
 static void _do_with_focal(led_device_t* devp, std::string message)
 {
     char tcp_buffer[8] = {0XAA, 0XAA, 0X00, 0X00, 0X00, 0X08, 0X00 /* 0XFA:up 0XF0:down */,
@@ -463,6 +583,27 @@ static void _do_with_focal(led_device_t* devp, std::string message)
         tcp_buffer[6] = 0XF0;
     } else if ('+' == message.c_str()[0]) {
         tcp_buffer[6] = 0XFA;
+    } else if ('1' == message.c_str()[0]) {
+        /* 单次自动调节焦距 */
+        return __do_with_focal_oneshot(devp, message);
+    } else if ('2' == message.c_str()[0]) {
+        /* 焦距加 */
+        return __do_with_focal_add(devp, message);
+    } else if ('3' == message.c_str()[0]) {
+        /* 焦距减 */
+        return __do_with_focal_dec(devp, message);
+    } else if ('4' == message.c_str()[0]) {
+        /* 焦距调节模式反转 */
+        return __do_with_focal_revert(devp, message);
+    } else if ('D' == message.c_str()[0]) {
+        /* 视场减小开始*/
+        return __do_with_fov_start_dec(devp, message);
+    } else if ('I' == message.c_str()[0]) {
+        /* 视场增加开始 */
+        return __do_with_fov_start_inc(devp, message);
+    } else if ('S' == message.c_str()[0]) {
+        /* 视场调节停止 */
+        return __do_with_fov_end_adj(devp, message);
     }
     tcp_buffer[7] = _get_sum(&tcp_buffer[0], 7);
     devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));

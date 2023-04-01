@@ -141,10 +141,11 @@ bool Button::mouse_button_event(const Vector2i &p, int button, bool down, int mo
             if (m_flags & ToggleButton)
                 m_pushed = !m_pushed;
             else
-                /* 否则是自复位的按钮 */
+                /* 否则是常规的自复位的按钮 */
                 m_pushed = true;
         } else if (m_pushed || (m_flags & MenuButton)) {
             if (contains(p) && m_callback)
+                /* 弹开 */
                 m_callback();
             /* 如果是常规的按钮，执行完回调函数后就标记按键弹出，即鼠标松开 */
             if (m_flags & NormalButton)

@@ -1113,8 +1113,18 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         label->set_position(Vector2i(570, 64));
 
         auto *btn = img_window->add<Button>("", RED_LED3000_ASSETS_DIR"/dec_focal.png");
+#if 0
         btn->set_callback([this]() {
             this->getDeviceQueue(0).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "-"));
+        });
+#endif
+        btn->set_change_callback([this](bool push) {
+            RedDebug::err("debug focal status=%d", push == true ? 1 : 0);
+
+            if (push == true)
+                this->getDeviceQueue(0).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "D"));
+            else
+                this->getDeviceQueue(0).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "S"));
         });
         btn->set_fixed_size({30, 30});
         btn->set_position({560, 240});
@@ -1122,8 +1132,40 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         btn = img_window->add<Button>("", RED_LED3000_ASSETS_DIR"/inc_focal.png");
         btn->set_fixed_size({30, 30});
         btn->set_position({560, 276});
+#if 0
         btn->set_callback([this]() {
             this->getDeviceQueue(0).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "+"));
+        });
+#else
+        btn->set_change_callback([this](bool push) {
+            RedDebug::err("debug focal status=%d", push == true ? 1 : 0);
+
+            if (push == true)
+                this->getDeviceQueue(0).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "I"));
+            else
+                this->getDeviceQueue(0).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "S"));
+        });
+#endif
+
+        btn = img_window->add<Button>("", RED_LED3000_ASSETS_DIR"/focal_revert.png");
+        btn->set_fixed_size({30, 30});
+        btn->set_position({560, 204});
+        btn->set_callback([this]() {
+            this->getDeviceQueue(0).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "4"));
+        });
+
+        btn = img_window->add<Button>("", RED_LED3000_ASSETS_DIR"/focal_big.png");
+        btn->set_fixed_size({30, 30});
+        btn->set_position({560, 168});
+        btn->set_callback([this]() {
+            this->getDeviceQueue(0).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "2"));
+        });
+
+        btn = img_window->add<Button>("", RED_LED3000_ASSETS_DIR"/focal_small.png");
+        btn->set_fixed_size({30, 30});
+        btn->set_position({560, 132});
+        btn->set_callback([this]() {
+            this->getDeviceQueue(0).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "3"));
         });
 
         auto* img2_window = new Window(this, "");
@@ -1159,15 +1201,51 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         btn = img2_window->add<Button>("", RED_LED3000_ASSETS_DIR"/dec_focal.png", 0);
         btn->set_fixed_size({30, 30});
         btn->set_position({560, 240});
+#if 0
         btn->set_callback([this]() {
             this->getDeviceQueue(1).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "-"));
+        });
+#endif
+        btn->set_change_callback([this](bool push) {
+            RedDebug::err("debug focal status=%d", push == true ? 1 : 0);
+
+            if (push == true)
+                this->getDeviceQueue(1).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "D"));
+            else
+                this->getDeviceQueue(1).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "S"));
         });
 
         btn = img2_window->add<Button>("", RED_LED3000_ASSETS_DIR"/inc_focal.png", 0);
         btn->set_fixed_size({30, 30});
         btn->set_position({560, 276});
+        btn->set_change_callback([this](bool push) {
+            RedDebug::err("debug focal status=%d", push == true ? 1 : 0);
+
+            if (push == true)
+                this->getDeviceQueue(1).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "I"));
+            else
+                this->getDeviceQueue(1).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "S"));
+        });
+
+        btn = img2_window->add<Button>("", RED_LED3000_ASSETS_DIR"/focal_revert.png");
+        btn->set_fixed_size({30, 30});
+        btn->set_position({560, 204});
         btn->set_callback([this]() {
-            this->getDeviceQueue(1).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "+"));
+            this->getDeviceQueue(1).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "4"));
+        });
+
+        btn = img2_window->add<Button>("", RED_LED3000_ASSETS_DIR"/focal_big.png");
+        btn->set_fixed_size({30, 30});
+        btn->set_position({560, 168});
+        btn->set_callback([this]() {
+            this->getDeviceQueue(1).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "2"));
+        });
+
+        btn = img2_window->add<Button>("", RED_LED3000_ASSETS_DIR"/focal_small.png");
+        btn->set_fixed_size({30, 30});
+        btn->set_position({560, 132});
+        btn->set_callback([this]() {
+            this->getDeviceQueue(1).put(PolyM::DataMsg<std::string>(POLYM_FOCAL_SETTING, "3"));
         });
 
         /* 在这个 window 上创建一个 img2_window 控件 */

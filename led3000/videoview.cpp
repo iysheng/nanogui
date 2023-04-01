@@ -788,8 +788,14 @@ bool VideoView::mouse_button_event(const Vector2i &p, int button, bool down, int
     Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(window()->parent());
     if (led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].turntable.mode > TURNTABLE_FUZZY_TRACK_MODE)
         return false;
+
     xx_float = p.v[0];
     yy_float = p.v[1];
+
+    if (xx_float  > 40)
+        xx_float -= 40;
+    if (yy_float > 20)
+        yy_float -= 20;
 
     xx_float *= xx_factor;
     yy_float *= yy_factor;
