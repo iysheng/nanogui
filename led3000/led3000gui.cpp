@@ -1068,7 +1068,7 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
      * 弦角:-000.00 横摇:-00.00 纵摇:-00.00
      * */
     {
-        m_attitude_info = new Label(this, "弦角:-000.00 横摇:-00.00 纵摇:-00.00", "sans");
+        m_attitude_info = new Label(this, "弦角:--- 横摇:--- 纵摇:---", "sans");
         m_attitude_info->set_position(Vector2i(1050, 780));
         m_attitude_info->set_font_size(17);
     }
