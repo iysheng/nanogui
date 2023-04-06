@@ -107,7 +107,7 @@ static int do_with_network_attitude_info(NetworkPackage &net_package)
 
     memcpy(&vertical_info, net_package.payload() + 6, sizeof(vertical_info));
     vertical_info = (int)ntohl(vertical_info);
-    vertical_info_float = (int)_do_format_dev_int2float(vertical_info, DIMENSION_90_INT);
+    vertical_info_float = _do_format_dev_int2float(vertical_info, DIMENSION_90_INT);
 
     memcpy(&horizon_info, net_package.payload() + 10, sizeof(horizon_info));
     horizon_info = (int)ntohl(horizon_info);

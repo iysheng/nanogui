@@ -1068,7 +1068,8 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
      * 弦角:-000.00 横摇:-00.00 纵摇:-00.00
      * */
     {
-        m_attitude_info = new Label(this, "弦角:--- 横摇:--- 纵摇:---", "sans");
+        m_attitude_info = new Label(this, "舷角:----.-- 横摇:---.-- 纵摇:---.--", "sans");
+
         m_attitude_info->set_position(Vector2i(1050, 780));
         m_attitude_info->set_font_size(17);
     }
@@ -1360,7 +1361,7 @@ void Led3000Window::update_time4display(void)
     }
 }
 
-void Led3000Window::update_attitudeinfo4display(float direction_float, float horizon_float, float vertical_float, bool valid)
+void Led3000Window::update_attitudeinfo4display(float direction_float, float vertical_float, float horizon_float, bool valid)
 {
     if (!m_attitude_info)
         return;
@@ -1380,7 +1381,7 @@ void Led3000Window::update_attitudeinfo4display(float direction_float, float hor
     }
     else
     {
-        m_attitude_info->set_caption("舷角:---.-- 横摇:--.-- 纵摇:--.--");
+        m_attitude_info->set_caption("舷角:----.-- 横摇:---.-- 纵摇:---.--");
     }
 }
 
