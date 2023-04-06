@@ -116,7 +116,7 @@ static int do_with_network_attitude_info(NetworkPackage &net_package)
     /* Update ship attitude info */
     gs_turntable_attitude[0].update_attitude_info(direction_info_float, vertical_info_float, horizon_info_float);
     gs_turntable_attitude[1].update_attitude_info(direction_info_float, vertical_info_float, horizon_info_float);
-    gs_screen->update_attitudeinfo4display(direction_info_float, vertical_info_float, horizon_info_float);
+    gs_screen->update_attitudeinfo4display(direction_info_float, vertical_info_float, horizon_info_float, true);
 
     return 0;
 }

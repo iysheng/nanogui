@@ -47,6 +47,8 @@
 #include <PolyM/include/polym/Queue.hpp>
 
 #define LED3000_DEVICES_COUNTS    2
+#define FLOAT_KEEP_PRECISON2(f)    ((f < 0) ? (f - 0.005) : (f + 0.005))
+
 
 typedef enum {
     TURNTABLE_TRACK_MODE,
@@ -245,9 +247,9 @@ public:
             return;
 
         m_guide_info_label[dev_num]->set_caption('['
-            + std::to_string(direction_float).erase(to_string(direction_float).find('.')+3, string::npos)
+            + std::to_string(FLOAT_KEEP_PRECISON2(direction_float)).erase(to_string(direction_float).find('.')+3, string::npos)
             + '/'
-            + std::to_string(elevation_float).erase(to_string(elevation_float).find('.')+3, string::npos)
+            + std::to_string(FLOAT_KEEP_PRECISON2(elevation_float)).erase(to_string(elevation_float).find('.')+3, string::npos)
             + ']');
         m_guide_status[dev_num] = info;
         if (mCurrentDevice == dev_num)

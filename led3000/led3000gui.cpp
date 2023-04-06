@@ -930,12 +930,12 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         m_guide_mode_icon[1]->set_position(Vector2i(870, 15));
         m_guide_mode_icon[1]->set_visible(m_guide_status[1]);
 
-        m_guide_info_label[0] = swindow->add<Label>("[-123.456/-12.34]", "sans-bold");
+        m_guide_info_label[0] = swindow->add<Label>("[--------/------]", "sans-bold");
         m_guide_info_label[0]->set_position(Vector2i(920, 40));
         m_guide_info_label[0]->set_font_size(20);
         m_guide_info_label[0]->set_visible(m_guide_status[0]);
 
-        m_guide_info_label[1] = swindow->add<Label>("[-123.456/-12.34]", "sans-bold");
+        m_guide_info_label[1] = swindow->add<Label>("[--------/------]", "sans-bold");
         m_guide_info_label[1]->set_position(Vector2i(920, 40));
         m_guide_info_label[1]->set_font_size(20);
         m_guide_info_label[1]->set_visible(m_guide_status[1]);
@@ -1068,9 +1068,9 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
      * 弦角:-000.00 横摇:-00.00 纵摇:-00.00
      * */
     {
-        m_attitude_info = new Label(this, "舷角:----.-- 横摇:---.-- 纵摇:---.--", "sans");
+        m_attitude_info = new Label(this, "舷角:------- 横摇:------- 纵摇:------ ", "sans");
 
-        m_attitude_info->set_position(Vector2i(1050, 780));
+        m_attitude_info->set_position(Vector2i(1030, 780));
         m_attitude_info->set_font_size(17);
     }
 
@@ -1368,20 +1368,21 @@ void Led3000Window::update_attitudeinfo4display(float direction_float, float ver
 
     if (valid == true)
     {
+        /* 为了保持两位有效小数位 */
         m_attitude_info->set_caption(
             "舷角:"
-            + std::to_string(direction_float).erase(to_string(direction_float).find('.')+3, string::npos)
+            + std::to_string(FLOAT_KEEP_PRECISON2(direction_float)).erase(to_string(direction_float).find('.')+3, string::npos)
             + ' '
             + "横摇:"
-            + std::to_string(horizon_float).erase(to_string(horizon_float).find('.')+3, string::npos)
+            + std::to_string(FLOAT_KEEP_PRECISON2(horizon_float)).erase(to_string(horizon_float).find('.')+3, string::npos)
             + ' '
             + "纵摇:"
-            + std::to_string(vertical_float).erase(to_string(vertical_float).find('.')+3, string::npos)
+            + std::to_string(FLOAT_KEEP_PRECISON2(vertical_float)).erase(to_string(vertical_float).find('.')+3, string::npos)
             );
     }
     else
     {
-        m_attitude_info->set_caption("舷角:----.-- 横摇:---.-- 纵摇:---.--");
+        m_attitude_info->set_caption("舷角:------- 横摇:------- 纵摇:------");
     }
 }
 
