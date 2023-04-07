@@ -954,7 +954,7 @@ void *devices_guard_entry(void *arg)
             if (led_offline_counts[i] == led_devp[i]->uart.offline_counts)
             {
 
-                gs_led_devices[led_devp[i]->uart.index].screen->get_dev_state_label(led_devp[0]->uart.index)->set_caption("离线");
+                gs_led_devices[led_devp[i]->uart.index].screen->get_dev_state_label(led_devp[i]->uart.index)->set_caption("离线");
             }
             led_offline_counts[i] = led_devp[i]->uart.offline_counts;
         }
