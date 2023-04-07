@@ -704,6 +704,12 @@ static void _do_with_white_normal(led_device_t *devp, std::string message)
     write(devp->uart.fd, buffer, sizeof(buffer));
 }
 
+/* 强制刷新数据到串口设备 */
+static void _do_drain_turntable_fd(led_device_t* devp)
+{
+    tcdrain(devp->uart.fd);
+}
+
 static int _do_analysis_hear_msg(int index, char * buffer, int len)
 {
     uint8_t dev_status;
@@ -921,6 +927,8 @@ void *devices_entry(void *arg)
             break;
         }
 
+        /* 保证数据从缓冲区中发送到串口设备 */
+        _do_drain_turntable_fd(led_devp);
         /* 更新状态信息到一体化网络 */
         extern int update_sysinfo2network(void);
         update_sysinfo2network();
