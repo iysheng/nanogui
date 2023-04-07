@@ -17,6 +17,7 @@
 
 time_t NetworkPackage::s_stamp_stand = 0;
 
+extern bool check_time_sync_valid(void);
 void NetworkPackage::init_stamp_stand(void)
 {
     struct tm tm4sync = {0};
@@ -59,7 +60,7 @@ NetworkPackage::NetworkPackage(uint32_t src_ip, uint32_t dst_ip, uint8_t sn, uin
     struct timeval tv;
     time_t t_stamp_ms = 0;
 
-    if (0 == gettimeofday(&tv, NULL)) {
+    if (check_time_sync_valid() && 0 == gettimeofday(&tv, NULL)) {
         t_stamp_ms = tv.tv_sec * 1000 ;
         if (t_stamp_ms > NetworkPackage::s_stamp_stand)
         {
@@ -75,6 +76,10 @@ NetworkPackage::NetworkPackage(uint32_t src_ip, uint32_t dst_ip, uint8_t sn, uin
         {
             m_stamp = 0;
         }
+    }
+    else
+    {
+        m_stamp = 0XFFFFFFFF;
     }
     /* 强制源头地址 */
     m_src_ip_n = ntohl(inet_addr("168.9.0.1"));
@@ -93,7 +98,7 @@ NetworkPackage::NetworkPackage(char index, char id, char len, int stamp, char * 
     struct timeval tv;
     time_t t_stamp_ms = 0;
 
-    if (0 == gettimeofday(&tv, NULL)) {
+    if (check_time_sync_valid() && 0 == gettimeofday(&tv, NULL)) {
         t_stamp_ms = tv.tv_sec * 1000 ;
         if (t_stamp_ms > NetworkPackage::s_stamp_stand)
         {
@@ -109,6 +114,10 @@ NetworkPackage::NetworkPackage(char index, char id, char len, int stamp, char * 
         {
             m_stamp = 0;
         }
+    }
+    else
+    {
+        m_stamp = 0XFFFFFFFF;
     }
     /* net to host */
     m_src_ip_n = ntohl(inet_addr("168.9.0.1"));

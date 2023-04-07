@@ -121,6 +121,50 @@ static int do_with_network_attitude_info(NetworkPackage &net_package)
     return 0;
 }
 
+/* 标记时间戳无效 */
+static int __gs_time_sync_counts = 2;
+/**
+  * @brief 标记时统正常
+  * retval .
+  */
+static int _clear_time_sync_counts(void)
+{
+    __gs_time_sync_counts = 0;
+}
+
+/**
+  * @brief 增加时统计数
+  * retval .
+  */
+static int _add_time_sync_counts(void)
+{
+    __gs_time_sync_counts++;
+}
+
+bool check_time_sync_valid(void)
+{
+    if (__gs_time_sync_counts < 2)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+/*
+ * 作为时统的 GUARD 线程,跟踪是否读取到时统信息
+ * */
+void *time_sync_guard(void)
+{
+    while (1)
+    {
+        _add_time_sync_counts();
+        sleep(30);
+    }
+}
+
 /**
   * @brief 处理时间同步信息
   * retval .
@@ -148,8 +192,10 @@ static int do_with_network_timesync_info(NetworkPackage &net_package)
     tm4sync.tm_mon = BCD2CHAR(net_package.payload()[1] - 1);
     tm4sync.tm_year = (BCD2CHAR(net_package.payload()[3]) - 19) * 100 + BCD2CHAR(net_package.payload()[2]);
 
-    /* TODO 间隔一定时间进行时间同步 */
-    if (1 == s_need_time_sync++ % TIME_SYNC_THREOLD_COUNTS)
+    /* TODO 间隔一定时间进行时间同步
+     * 或者,当检测到时统已经离线很久,那么需要快速重新校时
+     * */
+    if ((1 == s_need_time_sync++ % TIME_SYNC_THREOLD_COUNTS) || __gs_time_sync_counts > 2)
     {
         time4sync.tv_sec = mktime(&tm4sync);
         ret = settimeofday(&time4sync, NULL);
@@ -165,6 +211,7 @@ static int do_with_network_timesync_info(NetworkPackage &net_package)
         NetworkPackage::s_stamp_stand = mktime(&tm4sync);
         NetworkPackage::s_stamp_stand *= 1000;
     }
+    _clear_time_sync_counts();
 
     return 0;
 }

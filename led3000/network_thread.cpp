@@ -57,6 +57,7 @@ void *network_entry(void *arg)
     }
 }
 
+extern void *time_sync_guard(void);
 void *network_thread(void *arg)
 {
     Led3000Window *screen = (Led3000Window *)arg;
@@ -96,9 +97,12 @@ void *network_thread(void *arg)
 
     std::thread gsNetwork0Thread(network_entry, &gs_network_fd[0]);
     std::thread gsNetwork1Thread(network_entry, &gs_network_fd[1]);
+    /* 时统线程,监控是否读取到时统信息 */
+    std::thread gsNetworkTimeSyncGuard(time_sync_guard);
 
     gsNetwork0Thread.detach();
     gsNetwork1Thread.detach();
+    gsNetworkTimeSyncGuard.detach();
 
     while (1) {
         /* 保活临时构造的 NetworkUdp 对象 */
