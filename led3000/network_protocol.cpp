@@ -95,7 +95,7 @@ static int do_with_network_attitude_info(NetworkPackage &net_package)
 
     info_valid_flags = net_package.payload()[0] << 8 | net_package.payload()[1];
     if (info_valid_flags & 0x01) {
-        RedDebug::warn("invalid attitude info");
+        //RedDebug::warn("invalid attitude info");
         /* 有关船体姿态信息的更新无效界面显示 */
         gs_screen->update_attitudeinfo4display(0.0, 0.0, 0.0, false);
         return -2;
