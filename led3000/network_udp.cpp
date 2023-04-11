@@ -87,7 +87,7 @@ int NetworkUdp::try_to_connect(void)
     dstip_in_addr.s_addr = ((sockaddr_in *)(this->addrinfo()->ai_addr))->sin_addr.s_addr;
     struct ip_mreq req = {0};//结构体对象
     req.imr_multiaddr.s_addr = ((sockaddr_in *)(this->addrinfo()->ai_addr))->sin_addr.s_addr;//设置组播地址
-    req.imr_interface.s_addr = INADDR_ANY;//本地地址
+    req.imr_interface.s_addr = inet_addr("168.9.0.1");//本地地址
     ret  = setsockopt(m_socket, IPPROTO_IP, IP_ADD_MEMBERSHIP, &(req), sizeof(req));//IPPROTO_IP通过IP组播，IP_ADD_MEMBERSHIP -> 加入组播组
     if (ret < 0) {
         RedDebug::log("add multi to %s error:%d", inet_ntoa(dstip_in_addr), errno);
@@ -97,6 +97,19 @@ int NetworkUdp::try_to_connect(void)
     } else {
         NetworkUdp::gs_socket_udp_alone_fd = m_socket;
         RedDebug::log("add multi to %s success", inet_ntoa(dstip_in_addr));
+    }
+
+    /* 禁止环回 */
+    uint32_t loop_enable = 0;
+    ret  = setsockopt(m_socket, IPPROTO_IP, IP_MULTICAST_LOOP, &(loop_enable), sizeof(loop_enable));
+    if (ret < 0) {
+        RedDebug::log("disable multi loop_enable %u error:%d", loop_enable, errno);
+        close(m_socket);
+        m_socket = -1;
+        return -6;
+    } else {
+        NetworkUdp::gs_socket_udp_alone_fd = m_socket;
+        RedDebug::log("disable multi loop_enable to %u success", loop_enable);
     }
 
     return m_socket;
@@ -150,8 +163,6 @@ NetworkUdp::NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port, in
             m_socket = -1;
             red_debug_lite("could not bind UDP socket with port when contruct:%u\n", source_port);
             return;
-        } else {
-            red_debug_lite("Create socket success.\n");
         }
         /* 根据对方要求修改 TTL */
         char ttl = 8;
@@ -178,6 +189,19 @@ NetworkUdp::NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port, in
     } else {
         NetworkUdp::gs_socket_udp_alone_fd = m_socket;
         RedDebug::log("add multi to %s success", dstip.c_str());
+    }
+
+    /* 禁止环回 */
+    uint32_t loop_enable = 0;
+    ret  = setsockopt(m_socket, IPPROTO_IP, IP_MULTICAST_LOOP, &(loop_enable), sizeof(loop_enable));
+    if (ret < 0) {
+        RedDebug::log("disable multi loop_enable %u error:%d", loop_enable, errno);
+        close(m_socket);
+        m_socket = -1;
+        return;
+    } else {
+        NetworkUdp::gs_socket_udp_alone_fd = m_socket;
+        RedDebug::log("disable multi loop_enable to %u success", loop_enable);
     }
 }
 
