@@ -770,9 +770,9 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         label->set_position(Vector2i(60, 10));
         label = swindow->add<Label>("设备状态", "sans-bold");
         label->set_position(Vector2i(323, 10));
-        label = swindow->add<Label>("水平|垂直角度(度)", "sans-bold");
+        label = swindow->add<Label>("方位/俯仰角度(°)", "sans-bold");
         label->set_position(Vector2i(516, 10));
-        label = swindow->add<Label>("水平|垂直速度(度/秒)", "sans-bold");
+        label = swindow->add<Label>("方位/俯仰角速度(°/s)", "sans-bold");
         label->set_position(Vector2i(701, 10));
         label = swindow->add<Label>("莫码信息", "sans-bold");
         label->set_position(Vector2i(930, 10));
@@ -907,16 +907,14 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         swindow->set_background_image(RED_LED3000_ASSETS_DIR"/head.png");
 
         /* 创建一个 label 显示软件版本号 */
-        auto *soft_name_label = swindow->add<Label>("眩目拒止设备控制软件", "sans-bold");
+        auto *soft_name_label = swindow->add<Label>("眩目拒止设备显控装置", "sans-bold");
         soft_name_label->set_position(Vector2i(81, 25));
         soft_name_label->set_font_size(15);
 
         auto *ver_label = swindow->add<Label>("V" + to_string(LED3000_VERSION >> 16 & 0XFF) +
                                               "." +
                                               to_string(LED3000_VERSION >> 8 & 0XFF) +
-                                              "." +
-                                              to_string(LED3000_VERSION & 0XFF) +
-                                              + " 中船七一六研究所", "sans-bold");
+                                              + " 中国船舶第七一六研究所", "sans-bold");
         ver_label->set_position(Vector2i(81, 40));
         ver_label->set_font_size(15);
 
@@ -1068,7 +1066,7 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
      * 弦角:-000.00 横摇:-00.00 纵摇:-00.00
      * */
     {
-        m_attitude_info = new Label(this, "艏向角(度):------- 横摇角(度):------- 纵摇角(度):------ ", "sans");
+        m_attitude_info = new Label(this, "艏向角(°):------- 横摇角(°):------- 纵摇角(°):------ ", "sans");
 
         m_attitude_info->set_position(Vector2i(950, 780));
         m_attitude_info->set_font_size(17);
@@ -1370,19 +1368,19 @@ void Led3000Window::update_attitudeinfo4display(float direction_float, float ver
     {
         /* 为了保持两位有效小数位 */
         m_attitude_info->set_caption(
-            "艏向角(度):"
+            "艏向角(°):"
             + std::to_string(FLOAT_KEEP_PRECISON2(direction_float)).erase(to_string(direction_float).find('.')+3, string::npos)
             + ' '
-            + "横摇角(度):"
+            + "横摇角(°):"
             + std::to_string(FLOAT_KEEP_PRECISON2(horizon_float)).erase(to_string(horizon_float).find('.')+3, string::npos)
             + ' '
-            + "纵摇角(度):"
+            + "纵摇角(°):"
             + std::to_string(FLOAT_KEEP_PRECISON2(vertical_float)).erase(to_string(vertical_float).find('.')+3, string::npos)
             );
     }
     else
     {
-        m_attitude_info->set_caption("舷角:------- 横摇:------- 纵摇:------");
+        m_attitude_info->set_caption("艏向角(°):------- 横摇角(°):------- 纵摇角(°):------ ");
     }
 }
 
