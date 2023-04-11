@@ -134,11 +134,11 @@ public:
             /* 取消设备二激光授权,支持自锁按键 */
             if (action == GLFW_PRESS) {
                 mJsonValue.devices[1].green_led.auth = 0;
-                m_dev_auth[1]->set_caption("禁止射击");
+                m_dev_auth[1]->set_caption("禁止发射");
                 RedDebug::log("F1 catched");
             } else if (GLFW_RELEASE == action && mJsonValue.devices[1].green_led.auth == 0) {
                 mJsonValue.devices[1].green_led.auth = 1;
-                m_dev_auth[1]->set_caption("允许射击");
+                m_dev_auth[1]->set_caption("允许发射");
                 RedDebug::log("F1 release");
             }
         }
@@ -147,11 +147,11 @@ public:
             /* 取消设备一激光授权,支持自锁按键 */
             if (action == GLFW_PRESS) {
                 mJsonValue.devices[0].green_led.auth = 0;
-                m_dev_auth[0]->set_caption("禁止射击");
+                m_dev_auth[0]->set_caption("禁止发射");
                 RedDebug::log("F2 catched");
             } else if ((GLFW_RELEASE == action) && (mJsonValue.devices[0].green_led.auth == 0)) {
                 mJsonValue.devices[0].green_led.auth = 1;
-                m_dev_auth[0]->set_caption("允许射击");
+                m_dev_auth[0]->set_caption("允许发射");
                 RedDebug::log("F2 release");
             }
         }
