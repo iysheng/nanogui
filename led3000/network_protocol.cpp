@@ -122,7 +122,7 @@ static int do_with_network_attitude_info(NetworkPackage &net_package)
 }
 
 /* 标记时间戳无效 */
-static int __gs_time_sync_counts = 2;
+static int __gs_time_sync_counts = 3;
 /**
   * @brief 标记时统正常
   * retval .
@@ -143,7 +143,7 @@ static int _add_time_sync_counts(void)
 
 bool check_time_sync_valid(void)
 {
-    if (__gs_time_sync_counts < 2)
+    if (__gs_time_sync_counts < 3)
     {
         return true;
     }
@@ -588,7 +588,7 @@ int do_probe_respon(NetworkPackage &network_package)
             dev_green_status[index] = 1;
         }
 
-        if (gs_screen->get_dev_auth_label(index)->caption() == std::string("禁止射击")) {
+        if (gs_screen->get_dev_auth_label(index)->caption() == std::string("禁止发射")) {
             dev_auth_status[index] = 1;
         }
 #if 0
