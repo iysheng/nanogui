@@ -93,7 +93,7 @@ int NetworkUdp::try_to_connect(void)
     req.imr_interface.s_addr = inet_addr("168.9.0.1");//本地地址
     ret  = setsockopt(m_socket, IPPROTO_IP, IP_ADD_MEMBERSHIP, &(req), sizeof(req));//IPPROTO_IP通过IP组播，IP_ADD_MEMBERSHIP -> 加入组播组
     if (ret < 0) {
-        RedDebug::err("set multi to %s error:%d", inet_ntoa(dstip_in_addr), errno);
+        RedDebug::log("set multi to %s error:%d", inet_ntoa(dstip_in_addr), errno);
         close(m_socket);
         m_socket = -1;
         return -6;
@@ -103,7 +103,7 @@ int NetworkUdp::try_to_connect(void)
     uint32_t loop_enable = 0;
     ret  = setsockopt(m_socket, IPPROTO_IP, IP_MULTICAST_LOOP, &(loop_enable), sizeof(loop_enable));
     if (ret < 0) {
-        RedDebug::err("set multi loop_enable %u error:%d", loop_enable, errno);
+        RedDebug::log("set multi loop_enable %u error:%d", loop_enable, errno);
         close(m_socket);
         m_socket = -1;
         return -7;
