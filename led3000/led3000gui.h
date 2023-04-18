@@ -361,10 +361,42 @@ public:
         }
     }
 
+    void set_turntable_dev_control_btns_status(int mode)
+    {
+        if (!m_track_btn || !m_manual_btn || !m_scan_btn)
+        {
+            return;
+        }
+        switch (mode) {
+        case TURNTABLE_TRACK_MODE:
+            m_track_btn->set_pushed(true);
+            m_manual_btn->set_pushed(false);
+            m_scan_btn->set_pushed(false);
+            break;
+        case TURNTABLE_MANUAL_MODE:
+            m_track_btn->set_pushed(false);
+            m_manual_btn->set_pushed(true);
+            m_scan_btn->set_pushed(false);
+            break;
+        case TURNTABLE_SCAN_MODE:
+            m_track_btn->set_pushed(false);
+            m_manual_btn->set_pushed(false);
+            m_scan_btn->set_pushed(true);
+            break;
+        }
+    }
+
     void set_guide_mode_icon(Label *label, uint8_t dev_num = 0)
     {
         if (dev_num < LED3000_DEVICES_COUNTS)
             m_guide_mode_icon[dev_num] = label;
+    }
+
+    void set_turntable_mode_btns(Button *track, Button *manual, Button *scan)
+    {
+        m_track_btn = track;
+        m_manual_btn = manual;
+        m_scan_btn = scan;
     }
 private:
     /* 设备状态窗口 label 控件 */
@@ -384,6 +416,10 @@ private:
 
     const std::vector<Button *> *m_green_dev_control_btns;
     const std::vector<Button *> *m_white_dev_control_btns;
+
+    Button * m_track_btn;
+    Button * m_manual_btn;
+    Button * m_scan_btn;
 
     ref<Shader> m_shader;
     ref<RenderPass> m_render_pass;

@@ -581,6 +581,7 @@ void do_with_scan_setting(Widget *widget, int choose)
         led3000Window->m4PolyM[POLYM_TURNTABLE_SCAN_MODE_CONFIG_STAY_TIME] = to_string(value_nethost);
         led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_SCAN_MODE_CONFIG_STAY_TIME, led3000Window->m4PolyM[POLYM_TURNTABLE_SCAN_MODE_CONFIG_STAY_TIME]));
 
+        usleep(100000);
         value_nethost = led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].turntable.scan_speed_level;
         led3000Window->m4PolyM[POLYM_TURNTABLE_SCAN_MODE_CONFIG_SPEED_LEVEL] = to_string(value_nethost);
         led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_SCAN_MODE_CONFIG_SPEED_LEVEL, led3000Window->m4PolyM[POLYM_TURNTABLE_SCAN_MODE_CONFIG_SPEED_LEVEL]));
@@ -968,6 +969,7 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
             /* 更新灯光装置终端的状态 */
             this->set_white_dev_control_btns_status(this->getJsonValue()->devices[0].white_led.mode);
             this->set_green_dev_control_btns_status(this->getJsonValue()->devices[0].green_led.mode);
+            this->set_turntable_dev_control_btns_status(this->getJsonValue()->devices[0].turntable.mode);
             this->sync_guide_relate_display(0);
 
         });
@@ -985,6 +987,7 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
             /* 更新灯光装置终端的状态 */
             this->set_white_dev_control_btns_status(this->getJsonValue()->devices[1].white_led.mode);
             this->set_green_dev_control_btns_status(this->getJsonValue()->devices[1].green_led.mode);
+            this->set_turntable_dev_control_btns_status(this->getJsonValue()->devices[1].turntable.mode);
             this->sync_guide_relate_display(1);
         });
 
@@ -1054,6 +1057,7 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         btn_scan->set_flags(Button::RadioButton);
         btn_scan->set_fixed_size({120, 92});
         btn_scan->set_position({270, 48});
+        set_turntable_mode_btns(btn_ai, btn_manual, btn_scan);
         /* 在这里更新 button 的状态,根据系统配置参数更新转台工作在哪种模式 */
         switch (mJsonValue.devices[0].turntable.mode) {
         case TURNTABLE_TRACK_MODE: btn_ai->set_pushed(true); break;
