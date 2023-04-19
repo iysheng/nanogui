@@ -231,12 +231,12 @@ static int do_with_network_recv_force(NetworkPackage &net_package)
     }
     command_word = net_package.payload()[0] << 8 | net_package.payload()[1];
     dev_num = command_word >> 3 & 0x01;
-    /* 1: 允许射击 2：禁止射击 */
+    /* 1: 允许发射 2：禁止发射 */
     force_control = command_word & 0x07;
     RedDebug::log("dev_num:%u force_control:%u", dev_num, force_control);
     /* 更新界面显示和授权状态更新 */
     gs_screen->getJsonValue()->devices[dev_num].green_led.auth = 2 - force_control;
-    gs_screen->get_dev_auth_label(dev_num)->set_caption((2 - force_control) ? "允许射击" : "禁止射击");
+    gs_screen->get_dev_auth_label(dev_num)->set_caption((2 - force_control) ? "允许发射" : "禁止发射");
 
     return 0;
 }
@@ -344,7 +344,7 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
             gs_screen->set_white_dev_control_btns_status(gs_screen->getJsonValue()->devices[dev_num].white_led.mode);
 
     } else if (led_type == NETWORK_PROTOCOL_GREEN_LED_TYPE) {
-        if (gs_screen->get_dev_auth_label(dev_num)->caption() == std::string("禁止射击")) {
+        if (gs_screen->get_dev_auth_label(dev_num)->caption() == std::string("禁止发射")) {
             /* 权限不允许 */
             return -EPERM;
         }
