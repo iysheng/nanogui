@@ -106,7 +106,7 @@ void *network_thread(void *arg)
 
     while (1) {
         /* 保活临时构造的 NetworkUdp 对象 */
-        sleep(1);
+        usleep(100000);
         /* 更新时间显示 */
         screen->update_time4display();
     }
