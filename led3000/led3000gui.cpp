@@ -257,7 +257,7 @@ void do_with_white_light_blink(Widget *widget, int choose)
     if (choose == 1) {
         /* 发送消息控制频闪 */
         led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.mode = LED_BLINK_MODE;
-        led3000Window->m4PolyM[POLYM_WHITE_BLINK_SETTING].assign(to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.blink_freq));
+        led3000Window->m4PolyM[POLYM_WHITE_BLINK_SETTING].assign(to_string(led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].white_led.blink_freq));
         led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_WHITE_BLINK_SETTING, led3000Window->m4PolyM[POLYM_WHITE_BLINK_SETTING]));
         /* 同步消息内容到 json 文件 */
         led3000Window->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
