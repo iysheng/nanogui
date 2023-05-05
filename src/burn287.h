@@ -53,6 +53,8 @@
 
 using namespace nanogui;
 
+extern int open_uart_dev(const char *dev);
+
 class RedBurntool : public Screen {
 public:
     RedBurntool() : Screen(Vector2i(1024, 768), "RedBurntool") {
@@ -61,6 +63,23 @@ public:
         Window *window = new Window(this, "程序烧录窗口");
         window->set_position(Vector2i(15, 15));
         window->set_layout(new GroupLayout());
+
+        Widget *tty_dev_widget = new Widget(window);
+        tty_dev_widget->set_layout(new BoxLayout(Orientation::Horizontal,
+                                       Alignment::Fill, 0, 6));
+        m_tty_dev_widget_cobo =
+            new ComboBox(tty_dev_widget, { "/dev/ttyUSB0", "/dev/ttyUSB1"});
+        Button *tty_btn;
+        tty_btn = new Button(tty_dev_widget, "打开");
+        tty_btn->set_callback([&] {
+            open_uart_dev(m_tty_dev_widget_cobo->items().at(m_tty_dev_widget_cobo->selected_index()).c_str());
+            printf("open device:%s\n", "whoami");
+            printf("open device:%s\n", m_tty_dev_widget_cobo->items().at(m_tty_dev_widget_cobo->selected_index()).c_str());
+        });
+        tty_btn = new Button(tty_dev_widget, "关闭");
+        tty_btn->set_callback([&] {
+            printf("close device:%s\n", m_tty_dev_widget_cobo->items().at(m_tty_dev_widget_cobo->selected_index()).c_str());
+        });
 
         /* No need to store a pointer, the data structure will be automatically
            freed when the parent window is deleted */
@@ -97,6 +116,7 @@ public:
         m_progress = new ProgressBar(window);
 
         new Label(window, "设备日志信息", "sans-bold");
+
         VScrollPanel *vscroll = new VScrollPanel(window);
         //vscroll->set_size(Vector2i(200, 200));
         //vscroll->set_scroll(1.0);
@@ -241,6 +261,7 @@ public:
 private:
     ProgressBar *m_progress;
     TextArea *m_log_text_area;
+    ComboBox *m_tty_dev_widget_cobo;
     ref<Shader> m_shader;
     ref<RenderPass> m_render_pass;
 

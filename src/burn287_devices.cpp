@@ -32,6 +32,7 @@ typedef struct {
     int uart_fd;
     uartport_t uart;
     RedBurntool *screen;
+    pthread_mutex_t uart_mtx;
 } led_device_t;
 
 typedef struct {
@@ -51,6 +52,7 @@ static led_device_t gs_led_devices = {
         .index = 0,
         .offline_counts = 0,
     },
+    .uart_mtx = PTHREAD_MUTEX_INITIALIZER,
 };
 
 int init_uart_port(uartport_t *uart)
@@ -136,9 +138,10 @@ static int do_uboot_upkernel(int uart)
     }
 
     write(uart, SET_UBOOT_ENV, strlen(SET_UBOOT_ENV));
+    tcdrain(uart);
     sleep(1);
     write(uart, RUN_UBOOT_UPKERNEL, strlen(RUN_UBOOT_UPKERNEL));
-
+    tcdrain(uart);
 }
 
 static msg_handler_map gs_uart_handler_maps[] = {
@@ -174,26 +177,50 @@ static int do_with_recv_msg(std::string msg, int fd)
     }
 }
 
+int open_uart_dev(const char *dev)
+{
+    if (0 != pthread_mutex_lock(&gs_led_devices.uart_mtx))
+        return -1;
+    if (gs_led_devices.uart_fd > 0)
+    {
+        close(gs_led_devices.uart_fd);
+        gs_led_devices.uart_fd = -1;
+    }
+
+    memcpy(gs_led_devices.uart.name, dev, strlen(dev) + 1);
+    gs_led_devices.uart_fd = init_uart_port(&gs_led_devices.uart);
+    pthread_mutex_unlock(&gs_led_devices.uart_mtx);
+    if (gs_led_devices.uart_fd > 0)
+        printf("open uart dev:%s success\n", gs_led_devices.uart.name);
+    else
+        printf("open uart dev:%s failed err:%d\n", gs_led_devices.uart.name, errno);
+
+    return gs_led_devices.uart_fd;
+}
+
 void devices_thread(RedBurntool *app)
 {
-    int abc = 0;
     int len = 0;
-    gs_led_devices.uart_fd = init_uart_port(&gs_led_devices.uart);
     char buffer[1024] = {0};
-
-    if (gs_led_devices.uart_fd < 0)
-    {
-        printf("Failed open  %s err=%d\n", gs_led_devices.uart.name, errno);
-    }
 
     while(1)
     {
-        len = read(gs_led_devices.uart_fd, buffer, 1024);
-        if (len > 0)
+        if (0 != pthread_mutex_lock(&gs_led_devices.uart_mtx))
         {
-            do_with_recv_msg(std::string(buffer, len), gs_led_devices.uart_fd);
-            app->append_log_msg(std::string());
+            usleep(10000);
+            continue;
         }
+
+        if (gs_led_devices.uart_fd > 0)
+        {
+            len = read(gs_led_devices.uart_fd, buffer, 1024);
+            if (len > 0)
+            {
+                do_with_recv_msg(std::string(buffer, len), gs_led_devices.uart_fd);
+                app->append_log_msg(std::string());
+            }
+        }
+        pthread_mutex_unlock(&gs_led_devices.uart_mtx);
         sleep(1);
     }
 
