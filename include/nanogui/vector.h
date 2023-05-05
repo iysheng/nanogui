@@ -376,6 +376,7 @@ public:
      * The alpha component of the color, will be divided by ``255.0``.
      */
     Color(int r, int g, int b, int a) : Color(Vector4f((float) r, (float) g, (float) b, (float) a) / 255.f) { }
+    Color(unsigned int rgba) : Color(Vector4f((float) (rgba >> 24 & 0xff), (float) (rgba >> 16 & 0xff), (float) (rgba >> 8 & 0xff), (float) (rgba & 0xff)) / 255.f) { }
 
     /// Return a reference to the red channel
     float &r() { return x(); }
