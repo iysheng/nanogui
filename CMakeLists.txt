@@ -559,7 +559,7 @@ endif()
 
 # Build example application if desired
 if (NANOGUI_BUILD_EXAMPLES)
-  add_executable(burn287       src/burn287.cpp)
+  add_executable(burn287       src/burn287.cpp src/burn287_devices.cpp)
   add_executable(example1      src/example1.cpp)
   add_executable(example2      src/example2.cpp)
   add_executable(example3      src/example3.cpp)
