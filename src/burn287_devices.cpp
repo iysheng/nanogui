@@ -54,7 +54,7 @@ static led_device_t gs_led_devices = {
     },
     .uart_mtx = PTHREAD_MUTEX_INITIALIZER,
 };
-
+static RedBurntool *gs_red_burntool;
 int init_uart_port(uartport_t *uart)
 {
     int ret = 0, fd = -1;
@@ -69,7 +69,7 @@ int init_uart_port(uartport_t *uart)
     /// 添加 O_NONBLOCK 判断离线
     fd = open(uart->name, O_RDWR | O_NOCTTY);
     if (fd <= 0) {
-        //RedDebug::log("Failed open %s err=%d.", uart->name, fd);
+        printf("Failed open %s err=%d.", uart->name, fd);
         return -1;
     }
 
@@ -144,11 +144,36 @@ static int do_uboot_upkernel(int uart)
     return 0;
 }
 
+static int do_kernel_installapp(int uart)
+{
+#define SET_KERNEL_ETH0          "ifconfig eth0 192.168.100.100 netmask 255.255.255.0\n"
+#define SET_KERNEL_CHDIR         "cd /opt\n"
+#if 0
+#define SET_KERNEL_INSTALL_APP0  "pscp red@192.168.100.200:/tmp/burn.sh .\n"
+#define SET_KERNEL_INSTALL_APP1  "pscp red@192.168.100.200:/tmp/assets.tar .\n"
+#define SET_KERNEL_INSTALL_APP2  "./burn.sh\n"
+#define SET_KERNEL_INSTALL_APP3  "./burn.sh\n"
+#endif
+    if (uart < 0)
+    {
+        printf("invalid uart device\n");
+        return -1;
+    }
+
+    write(uart, SET_KERNEL_ETH0, strlen(SET_KERNEL_ETH0));
+    tcdrain(uart);
+    usleep(100000);
+    write(uart, SET_KERNEL_CHDIR, strlen(SET_KERNEL_CHDIR));
+    tcdrain(uart);
+
+    return 0;
+}
+
 static msg_handler_map gs_uart_handler_maps[] = {
     {"zlg/ZLG", "zlg", nullptr},
     {"U-Boot", "", do_uboot_upkernel},
     {"login:", "root\n", nullptr},
-    {"password:", "root\n", nullptr},
+    {"password:", "root\n", do_kernel_installapp},
 
 };
 
@@ -165,7 +190,8 @@ static int do_with_recv_msg(std::string msg, int fd)
             if (strlen(gs_uart_handler_maps[i].respon_words))
             {
                 write(fd, gs_uart_handler_maps[i].respon_words, strlen(gs_uart_handler_maps[i].respon_words));
-                sleep(1);
+                tcdrain(fd);
+                usleep(10000);
             }
             if (nullptr != gs_uart_handler_maps[i].append_hander_func)
             {
@@ -189,6 +215,7 @@ int open_uart_dev(const char *dev)
 
     memcpy(gs_led_devices.uart.name, dev, strlen(dev) + 1);
     gs_led_devices.uart_fd = init_uart_port(&gs_led_devices.uart);
+    gs_red_burntool->set_tty_fd(gs_led_devices.uart_fd);
     pthread_mutex_unlock(&gs_led_devices.uart_mtx);
     if (gs_led_devices.uart_fd > 0)
         printf("open uart dev:%s success\n", gs_led_devices.uart.name);
@@ -198,10 +225,25 @@ int open_uart_dev(const char *dev)
     return gs_led_devices.uart_fd;
 }
 
+/**
+  * @brief 
+  * retval .
+  */
+static int sync_tty_devices(RedBurntool *app)
+{
+    int ret = 0;
+
+    return ret;
+}
+
 void devices_thread(RedBurntool *app)
 {
     int len = 0;
     char buffer[1024] = {0};
+    if(!app)
+        return;
+    else
+        gs_red_burntool = app;
 
     while(1)
     {
@@ -216,12 +258,16 @@ void devices_thread(RedBurntool *app)
             len = read(gs_led_devices.uart_fd, buffer, 1024);
             if (len > 0)
             {
+                printf("recv:%s len:%d do_with_recv_msg begin\n", buffer, len);
                 do_with_recv_msg(std::string(buffer, len), gs_led_devices.uart_fd);
-                app->append_log_msg(std::string());
+                printf("append begin:-------------------------------------------------\n");
+                app->append_log_msg(std::string(buffer, len));
+                printf("append end:-------------------------------------------------\n");
             }
         }
         pthread_mutex_unlock(&gs_led_devices.uart_mtx);
         sleep(1);
+        printf("recv:-------------------------------------------------\n");
     }
 
     close(gs_led_devices.uart_fd);

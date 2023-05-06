@@ -13,6 +13,9 @@
 
 #pragma once
 
+#include <termios.h>
+#include <unistd.h>
+
 #include <nanogui/opengl.h>
 #include <nanogui/screen.h>
 #include <nanogui/window.h>
@@ -59,7 +62,7 @@ extern int open_uart_dev(const char *dev);
 
 class RedBurntool : public Screen {
 public:
-    RedBurntool() : Screen(Vector2i(1024, 768), "RedBurntool") {
+    RedBurntool() : Screen(Vector2i(1024, 768), "RedBurntool"), m_tty_fd(-1) {
         inc_ref();
         Widget *tools;
         Window *window = new Window(this, "程序烧录窗口");
@@ -86,7 +89,9 @@ public:
         /* No need to store a pointer, the data structure will be automatically
            freed when the parent window is deleted */
         Button *b = new Button(window, "zlg");
-        b->set_callback([] { std::cout << "pushed!" << std::endl; });
+        b->set_callback([this] {
+            this->write_tty_msg("zlg\n");
+        });
         b->set_tooltip("zlg 暂停 U-Boot");
 
         /* Alternative construction notation using variadic template */
@@ -95,8 +100,20 @@ public:
         b->set_callback([] { std::cout << "pushed!" << std::endl; });
         b->set_tooltip("在U-Boot下修改IP,为更新内核做准备");
 
+        b = new Button(window, "fix_db");
+        b->set_callback([this] {
+            /* 首先发送 crtl + c */
+            this->write_tty_msg("\x03\n");
+            sleep(1);
+            this->write_tty_msg("cd /opt\n");
+            usleep(100000);
+            this->write_tty_msg("./burn_fix.sh\n");
+        });
+
+        b->set_tooltip("fix db 配置文件");
+
         window = new Window(this, "监控窗口");
-        window->set_position(Vector2i(200, 15));
+        window->set_position(Vector2i(300, 15));
         window->set_layout(new GroupLayout());
 
         new Label(window, "File dialog", "sans-bold");
@@ -226,6 +243,35 @@ public:
         m_log_text_area->append(msg);
     }
 
+    void set_tty_fd(int fd)
+    {
+        m_tty_fd = fd;
+    }
+
+    int write_tty_msg(char *msg)
+    {
+        int len = 0;
+        if (!msg)
+            return -EINVAL;
+        len = write(m_tty_fd, msg, strlen(msg));
+        if (-1 != len)
+            tcdrain(m_tty_fd);
+
+        return len;
+    }
+
+    int write_tty_msg(char *msg, int msg_len)
+    {
+        int len = 0;
+        if (!msg)
+            return -EINVAL;
+        len = write(m_tty_fd, msg, msg_len);
+        if (-1 != len)
+            tcdrain(m_tty_fd);
+
+        return len;
+    }
+
     virtual bool keyboard_event(int key, int scancode, int action, int modifiers) {
         if (Screen::keyboard_event(key, scancode, action, modifiers))
             return true;
@@ -270,4 +316,5 @@ private:
     using ImageHolder = std::unique_ptr<uint8_t[], void(*)(void*)>;
     std::vector<std::pair<ref<Texture>, ImageHolder>> m_images;
     int m_current_image;
+    int m_tty_fd;
 };
