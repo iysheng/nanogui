@@ -62,7 +62,9 @@ extern int open_uart_dev(const char *dev);
 
 class RedBurntool : public Screen {
 public:
-    RedBurntool() : Screen(Vector2i(1024, 768), "RedBurntool"), m_tty_fd(-1) {
+    RedBurntool() : Screen(Vector2i(1024, 768), "RedBurntool"), m_tty_fd(-1),
+    m_upkernel_checkbox(nullptr)
+    {
         inc_ref();
         Widget *tools;
         Window *window = new Window(this, "程序烧录窗口");
@@ -82,10 +84,13 @@ public:
             printf("open device:%s\n", m_tty_dev_widget_cobo->items().at(m_tty_dev_widget_cobo->selected_index()).c_str());
         });
         tty_btn = new Button(tty_dev_widget, "关闭");
-        tty_btn->set_callback([&] {
+        tty_btn->set_callback([this] {
             printf("close device:%s\n", m_tty_dev_widget_cobo->items().at(m_tty_dev_widget_cobo->selected_index()).c_str());
+            close(this->tty_fd());
         });
 
+        m_upkernel_checkbox = new CheckBox(window, "更新内核");
+        m_download_app_checkbox = new CheckBox(window, "下载应用");
         /* No need to store a pointer, the data structure will be automatically
            freed when the parent window is deleted */
         Button *b = new Button(window, "zlg");
@@ -100,16 +105,31 @@ public:
         b->set_callback([] { std::cout << "pushed!" << std::endl; });
         b->set_tooltip("在U-Boot下修改IP,为更新内核做准备");
 
+        b = new Button(window, "下载文件");
+
+        extern int do_kernel_download_app(int uart);
+        b->set_callback([this] {
+            do_kernel_download_app(this->tty_fd());
+        });
+        b->set_tooltip("tftp 下载相关镜像文件");
+
+        b = new Button(window, "安装程序");
+
+        extern int do_kernel_install_app(int uart);
+        b->set_callback([this] {
+            do_kernel_install_app(this->tty_fd());
+        });
+        b->set_tooltip("安装相关镜像文件");
+
         b = new Button(window, "fix_db");
         b->set_callback([this] {
             /* 首先发送 crtl + c */
-            this->write_tty_msg("\x03\n");
-            sleep(1);
+            this->write_tty_msg("\x03");
+            usleep(100000);
             this->write_tty_msg("cd /opt\n");
             usleep(100000);
-            this->write_tty_msg("./burn_fix.sh\n");
+            this->write_tty_msg("sh /opt/burn_jledsrv_fix.sh\n");
         });
-
         b->set_tooltip("fix db 配置文件");
 
         window = new Window(this, "监控窗口");
@@ -242,6 +262,10 @@ public:
     void append_log_msg(std::string msg){
         m_log_text_area->append(msg);
     }
+    bool upkernel_checkbox() {return m_upkernel_checkbox->checked();}
+    bool download_app_checkbox() {return m_download_app_checkbox->checked();}
+
+    int tty_fd() {return m_tty_fd;};
 
     void set_tty_fd(int fd)
     {
@@ -310,6 +334,8 @@ private:
     ProgressBar *m_progress;
     TextArea *m_log_text_area;
     ComboBox *m_tty_dev_widget_cobo;
+    CheckBox *m_upkernel_checkbox;
+    CheckBox *m_download_app_checkbox;
     ref<Shader> m_shader;
     ref<RenderPass> m_render_pass;
 

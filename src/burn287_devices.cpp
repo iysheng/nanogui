@@ -1,8 +1,8 @@
 /******************************************************************************
 * File:             burn287_devices.cpp
 *
-* Author:           yangyongsheng819@163.com  
-* Created:          05/05/23 
+* Author:           yangyongsheng819@163.com
+* Created:          05/05/23
 * Description:      设备访问线程
 *****************************************************************************/
 
@@ -44,7 +44,7 @@ typedef struct {
 static led_device_t gs_led_devices = {
     .uart_fd = -1,
     .uart = {
-        {.name = "/dev/ttyUSB0"}, /* C++ 要这样初始化，否则会报编译错误 */
+        .name = "/dev/ttyUSB0", /* C++ 要这样初始化，否则会报编译错误 */
         .baud = B115200,
         .data_bit = CS8,
         .stop_bit = 1, /* 一个停止位 */
@@ -54,6 +54,8 @@ static led_device_t gs_led_devices = {
     },
     .uart_mtx = PTHREAD_MUTEX_INITIALIZER,
 };
+
+static bool gs_tftp_done = false;
 static RedBurntool *gs_red_burntool;
 int init_uart_port(uartport_t *uart)
 {
@@ -125,34 +127,76 @@ end:
     return fd;
 }
 
+static int do_in_kernel(int uart)
+{
+#define RUN_BOOT_KERNEL    "run bootcmd\n"
+    if (uart < 0)
+    {
+        printf("invalid uart device\n");
+        return -1;
+    }
+    gs_tftp_done = true;
+    printf("done------------------------------------------------------------\n");
+    write(uart, RUN_BOOT_KERNEL, strlen(RUN_BOOT_KERNEL));
+    tcdrain(uart);
+    usleep(100000);
+
+    return 0;
+}
+
 static int do_uboot_upkernel(int uart)
 {
 #define SET_UBOOT_ENV         "setenv ipaddr 192.168.100.100;setenv serverip 192.168.100.200\n"
-#define RUN_UBOOT_UPKERNEL    "run upkernel"
+#define RUN_UBOOT_UPKERNEL    "run upkernel\n"
     if (uart < 0)
     {
         printf("invalid uart device\n");
         return -1;
     }
 
+    if (gs_tftp_done == true)
+        return 0;
+    else
+        printf("oh no cann't be true\n");
     write(uart, SET_UBOOT_ENV, strlen(SET_UBOOT_ENV));
     tcdrain(uart);
-    sleep(1);
+    usleep(100000);
     write(uart, RUN_UBOOT_UPKERNEL, strlen(RUN_UBOOT_UPKERNEL));
     tcdrain(uart);
+
 
     return 0;
 }
 
-static int do_kernel_installapp(int uart)
+int do_kernel_install_app(int uart)
+{
+#define SET_KERNEL_CHDIR         "cd /opt\n"
+#define DO_INSTALL_SCRIPT        "sh /opt/burn_jledsrv.sh\n"
+    if (uart < 0)
+    {
+        printf("invalid uart device\n");
+        return -1;
+    }
+
+    write(uart, SET_KERNEL_CHDIR, strlen(SET_KERNEL_CHDIR));
+    tcdrain(uart);
+    usleep(100000);
+    write(uart, DO_INSTALL_SCRIPT, strlen(DO_INSTALL_SCRIPT));
+    tcdrain(uart);
+    usleep(100000);
+
+    return 0;
+}
+
+int do_kernel_download_app(int uart)
 {
 #define SET_KERNEL_ETH0          "ifconfig eth0 192.168.100.100 netmask 255.255.255.0\n"
 #define SET_KERNEL_CHDIR         "cd /opt\n"
-#if 0
-#define SET_KERNEL_INSTALL_APP0  "pscp red@192.168.100.200:/tmp/burn.sh .\n"
-#define SET_KERNEL_INSTALL_APP1  "pscp red@192.168.100.200:/tmp/assets.tar .\n"
-#define SET_KERNEL_INSTALL_APP2  "./burn.sh\n"
-#define SET_KERNEL_INSTALL_APP3  "./burn.sh\n"
+#if 1
+#define SET_KERNEL_INSTALL_APP0  "tftp -g -l burn_prepare.sh -r burn_prepare.sh 192.168.100.200;sh /opt/burn_prepare.sh;\n"
+#define SET_KERNEL_INSTALL_APP1  "tftp -g -l burn_jledsrv_fix.sh -r burn_jledsrv_fix.sh 192.168.100.200;\n"
+#define SET_KERNEL_INSTALL_APP2  "tftp -g -l burn_with_lora_qinzhou.tar -r burn_with_lora_qinzhou.tar 192.168.100.200;\n"
+#define SET_KERNEL_INSTALL_APP3  "sh /opt/burn_prepare.sh\n"
 #endif
     if (uart < 0)
     {
@@ -160,21 +204,41 @@ static int do_kernel_installapp(int uart)
         return -1;
     }
 
+    if (false == gs_red_burntool->download_app_checkbox())
+        return 0;
     write(uart, SET_KERNEL_ETH0, strlen(SET_KERNEL_ETH0));
     tcdrain(uart);
     usleep(100000);
     write(uart, SET_KERNEL_CHDIR, strlen(SET_KERNEL_CHDIR));
     tcdrain(uart);
+    usleep(100000);
+    write(uart, SET_KERNEL_INSTALL_APP0, strlen(SET_KERNEL_INSTALL_APP0));
+    tcdrain(uart);
+    usleep(1000000);
+#if 0
+    write(uart, SET_KERNEL_INSTALL_APP3, strlen(SET_KERNEL_INSTALL_APP3));
+    tcdrain(uart);
+    usleep(100000);
+    usleep(1000000);
+    write(uart, SET_KERNEL_INSTALL_APP1, strlen(SET_KERNEL_INSTALL_APP1));
+    tcdrain(uart);
+    usleep(100000);
+    write(uart, SET_KERNEL_INSTALL_APP2, strlen(SET_KERNEL_INSTALL_APP2));
+    tcdrain(uart);
+    usleep(100000);
+    write(uart, SET_KERNEL_INSTALL_APP3, strlen(SET_KERNEL_INSTALL_APP3));
+    tcdrain(uart);
+#endif
 
     return 0;
 }
 
 static msg_handler_map gs_uart_handler_maps[] = {
     {"zlg/ZLG", "zlg", nullptr},
+    {"written: OK", "", do_in_kernel},
     {"U-Boot", "", do_uboot_upkernel},
     {"login:", "root\n", nullptr},
-    {"password:", "root\n", do_kernel_installapp},
-
+    {"Password:", "root\n", do_kernel_download_app},
 };
 
 static int do_with_recv_msg(std::string msg, int fd)
@@ -187,6 +251,14 @@ static int do_with_recv_msg(std::string msg, int fd)
         /* 如果没有找到对应的关键词 */
         if (msg.find(gs_uart_handler_maps[i].key_words) != string::npos)
         {
+#if 1
+            printf("found match words:%s respon words:%s raw=%s\n", gs_uart_handler_maps[i].key_words,
+                gs_uart_handler_maps[i].respon_words, msg.c_str());
+#endif
+            if ((i == 0) && false == gs_red_burntool->upkernel_checkbox())
+                continue;
+
+
             if (strlen(gs_uart_handler_maps[i].respon_words))
             {
                 write(fd, gs_uart_handler_maps[i].respon_words, strlen(gs_uart_handler_maps[i].respon_words));
@@ -226,7 +298,7 @@ int open_uart_dev(const char *dev)
 }
 
 /**
-  * @brief 
+  * @brief
   * retval .
   */
 static int sync_tty_devices(RedBurntool *app)
@@ -239,7 +311,7 @@ static int sync_tty_devices(RedBurntool *app)
 void devices_thread(RedBurntool *app)
 {
     int len = 0;
-    char buffer[1024] = {0};
+    char buffer[64] = {0};
     if(!app)
         return;
     else
@@ -249,25 +321,22 @@ void devices_thread(RedBurntool *app)
     {
         if (0 != pthread_mutex_lock(&gs_led_devices.uart_mtx))
         {
-            usleep(10000);
+            usleep(100);
             continue;
         }
 
         if (gs_led_devices.uart_fd > 0)
         {
-            len = read(gs_led_devices.uart_fd, buffer, 1024);
+            len = read(gs_led_devices.uart_fd, buffer, sizeof buffer);
             if (len > 0)
             {
-                printf("recv:%s len:%d do_with_recv_msg begin\n", buffer, len);
                 do_with_recv_msg(std::string(buffer, len), gs_led_devices.uart_fd);
-                printf("append begin:-------------------------------------------------\n");
                 app->append_log_msg(std::string(buffer, len));
-                printf("append end:-------------------------------------------------\n");
             }
         }
         pthread_mutex_unlock(&gs_led_devices.uart_mtx);
-        sleep(1);
-        printf("recv:-------------------------------------------------\n");
+        usleep(10000);
+        printf("recv:-------------------------------------------------len=%d\n", len);
     }
 
     close(gs_led_devices.uart_fd);
