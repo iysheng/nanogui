@@ -53,6 +53,8 @@
 
 using namespace nanogui;
 
+#define ARRAY_SIZE(x)    (sizeof(x) / sizeof(x[0]))
+
 extern int open_uart_dev(const char *dev);
 
 class RedBurntool : public Screen {
@@ -68,12 +70,12 @@ public:
         tty_dev_widget->set_layout(new BoxLayout(Orientation::Horizontal,
                                        Alignment::Fill, 0, 6));
         m_tty_dev_widget_cobo =
-            new ComboBox(tty_dev_widget, { "/dev/ttyUSB0", "/dev/ttyUSB1"});
+            new ComboBox(tty_dev_widget, {"/dev/ttyUSB0"});
+
         Button *tty_btn;
         tty_btn = new Button(tty_dev_widget, "打开");
         tty_btn->set_callback([&] {
             open_uart_dev(m_tty_dev_widget_cobo->items().at(m_tty_dev_widget_cobo->selected_index()).c_str());
-            printf("open device:%s\n", "whoami");
             printf("open device:%s\n", m_tty_dev_widget_cobo->items().at(m_tty_dev_widget_cobo->selected_index()).c_str());
         });
         tty_btn = new Button(tty_dev_widget, "关闭");

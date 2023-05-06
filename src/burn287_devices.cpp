@@ -120,11 +120,9 @@ int init_uart_port(uartport_t *uart)
     }
 
     uart->fd = fd;
-    ret = 0;
 
-    //write(fd, "RED", sizeof("RED"));
 end:
-    return ret;
+    return fd;
 }
 
 static int do_uboot_upkernel(int uart)
@@ -142,6 +140,8 @@ static int do_uboot_upkernel(int uart)
     sleep(1);
     write(uart, RUN_UBOOT_UPKERNEL, strlen(RUN_UBOOT_UPKERNEL));
     tcdrain(uart);
+
+    return 0;
 }
 
 static msg_handler_map gs_uart_handler_maps[] = {
@@ -154,12 +154,10 @@ static msg_handler_map gs_uart_handler_maps[] = {
 
 static int do_with_recv_msg(std::string msg, int fd)
 {
-    int i = 0;
-
     if (fd < 0)
         return -EINVAL;
 
-    for (; i < sizeof(gs_uart_handler_maps) / sizeof(gs_uart_handler_maps[0]); i++)
+    for (int i = 0; i < ARRAY_SIZE(gs_uart_handler_maps); i++)
     {
         /* 如果没有找到对应的关键词 */
         if (msg.find(gs_uart_handler_maps[i].key_words) != string::npos)
@@ -169,12 +167,14 @@ static int do_with_recv_msg(std::string msg, int fd)
                 write(fd, gs_uart_handler_maps[i].respon_words, strlen(gs_uart_handler_maps[i].respon_words));
                 sleep(1);
             }
-            if (gs_uart_handler_maps[i].append_hander_func)
+            if (nullptr != gs_uart_handler_maps[i].append_hander_func)
             {
                 gs_uart_handler_maps[i].append_hander_func(fd);
             }
         }
     }
+
+    return 0;
 }
 
 int open_uart_dev(const char *dev)

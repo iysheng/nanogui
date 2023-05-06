@@ -59,6 +59,13 @@ public:
     /// The short descriptions associated with this ComboBox.
     const std::vector<std::string> &items_short() const { return m_items_short; }
 
+    /// Sets the items for this ComboBox.
+    void append_items(const std::string &item)
+    {
+        m_items.push_back(item);
+        set_items(m_items, m_items);
+    }
+
     /// Handles mouse scrolling events for this ComboBox.
     virtual bool scroll_event(const Vector2i &p, const Vector2f &rel) override;
 protected:

@@ -73,6 +73,9 @@ public:
     /// Return the amount of padding that is added around the text
     int padding() const { return m_padding; }
 
+    /// Set max_size
+    void set_max_size(int size) { m_max_size = size; }
+
     /// Set whether the text can be selected using the mouse
     void set_selectable(int selectable) { m_selectable = selectable; }
 
