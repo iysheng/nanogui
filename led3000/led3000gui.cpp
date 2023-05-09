@@ -483,6 +483,11 @@ void do_with_green_light_mocode(Widget *widget, int choose)
     Led3000Window * window = dynamic_cast<Led3000Window *>(widget->screen());
     const std::vector<Button *> * green_dev_btns = window->get_green_dev_control_btns();
     Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
+
+    if (!led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.auth) {
+        return;
+    }
+
     if (choose == 1) {
         led3000Window->getJsonValue()->devices[led3000Window->getCurrentDevice()].green_led.mode = LED_MOCODE_MODE;
         /* 发送消息控制莫码 */
