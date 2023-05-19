@@ -102,6 +102,15 @@ public:
         window->set_position(Vector2i(300, 15));
         window->set_layout(new GroupLayout());
 
+        Widget *widget_bts = new Widget(window);
+        widget_bts->set_layout(new BoxLayout(Orientation::Horizontal,
+            Alignment::Fill, 0, 6));
+        Button *clear_bt = new Button(widget_bts, "清除");
+        clear_bt->set_callback([this]{
+             if (this->m_log_text_area)
+                this->m_log_text_area->clear();
+        });
+
         VScrollPanel *vscroll = new VScrollPanel(window);
         m_log_text_area = new TextArea(vscroll);
         /* 和字体大小保持一致 */
