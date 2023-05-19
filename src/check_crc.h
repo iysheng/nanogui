@@ -64,7 +64,7 @@ using namespace nanogui;
 
 class RedBurntool : public Screen {
 public:
-    RedBurntool() : Screen(Vector2i(1024, 768), "CheckCRC"), m_tty_fd(-1)
+    RedBurntool() : Screen(Vector2i(1024, 768), "CheckCRC@Red")
     {
         inc_ref();
         Widget *tools;
@@ -76,7 +76,7 @@ public:
         tty_dev_widget->set_layout(new BoxLayout(Orientation::Horizontal,
                                        Alignment::Fill, 0, 6));
         Button *b = new Button(window, "CRC-16/MODBUS");
-        b->set_tooltip("16 	8005 	FFFF 	0000 	true 	true");
+        b->set_tooltip("16 8005 FFFF 0000 true true");
         b->set_callback([this] {
             std::string ans = this->raw_data_src();
             unsigned char data[32] = {0X31, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X39};
@@ -90,6 +90,27 @@ public:
             crc16_modebus = std::for_each( data, data + data_len, crc16_modebus );
             printf("%s 的结果是 %#X\n", ans.c_str(), crc16_modebus());
             snprintf(crc_ans_buffer, sizeof(crc_ans_buffer), "%02X %02X", htons(crc16_modebus()) >> 8 & 0XFF, htons(crc16_modebus()) & 0XFF);
+            this->append_log_msg(data, data_len);
+            /* 需要添加一个额外的空格,不然不能正常显示换行 */
+            this->append_log_msg(crc_ans_buffer);
+            this->append_log_msg(" \n");
+        });
+
+        b = new Button(window, "CRC-8");
+        b->set_tooltip("8 07 00 00 false false");
+        b->set_callback([this] {
+            std::string ans = this->raw_data_src();
+            unsigned char data[32] = {0X31, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X39};
+            int data_len;
+            char crc_ans_buffer[32] = {0};
+
+            boost::crc_optimal<8, 0X07, 0X00, 0X00, false, false> crc8;
+            data_len = extract_with_delimiter(ans, ' ', data);
+            if (!data_len)
+                return;
+            crc8 = std::for_each( data, data + data_len, crc8 );
+            printf("%s 的结果是 %#X\n", ans.c_str(), crc8());
+            snprintf(crc_ans_buffer, sizeof(crc_ans_buffer), "%02X", crc8());
             this->append_log_msg(data, data_len);
             /* 需要添加一个额外的空格,不然不能正常显示换行 */
             this->append_log_msg(crc_ans_buffer);
@@ -123,8 +144,6 @@ public:
         m_text_box_src = new TextBox(window, "");
         m_text_box_src->set_editable(true);
         m_text_box_src->set_alignment(TextBox::Alignment::Left);
-
-        new Label(window, "数据结束行", "sans-bold");
 
         perform_layout();
 
