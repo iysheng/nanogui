@@ -700,19 +700,19 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
 
             device_config_template.AddMember("camera_url", "rtsp://192.168.100.64", allocator);
             /* 默认为关灯模式 */
-            white_led_config.AddMember("mode", 3, allocator);
+            white_led_config.AddMember("mode", LED_NORMAL_MODE_OFF, allocator);
             white_led_config.AddMember("normal_status", 0, allocator);
             white_led_config.AddMember("blink_freq", 1, allocator);
             white_led_config.AddMember("mocode", "", allocator);
 
             /* 默认为禁止射击并且关灯模式 */
             green_led_config.AddMember("auth", 0, allocator);
-            green_led_config.AddMember("mode", 3, allocator);
+            green_led_config.AddMember("mode", LED_NORMAL_MODE_OFF, allocator);
             green_led_config.AddMember("normal_status", 0, allocator);
             green_led_config.AddMember("blink_freq", 1, allocator);
             green_led_config.AddMember("mocode", "", allocator);
 
-            turntable_config.AddMember("mode", 1, allocator);
+            turntable_config.AddMember("mode", TURNTABLE_MANUAL_MODE, allocator);
             turntable_config.AddMember("target_pos_x", 0, allocator);
             turntable_config.AddMember("target_pos_y", 0, allocator);
             turntable_config.AddMember("scan_stay_time", 10, allocator);
@@ -822,6 +822,10 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         m_dev_auth[1]->set_position(Vector2i(1135, 125));
     }
 
+    {
+        m_dev_auth_light_fd[0] = open("/sys/devices/platform/leds/leds/auth0/brightness", O_RDWR);
+        m_dev_auth_light_fd[1] = open("/sys/devices/platform/leds/leds/auth1/brightness", O_RDWR);
+    }
     /* 设备控制窗口 */
     {
         auto* cwindow = new Window(this, "");
@@ -1065,9 +1069,11 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         set_turntable_mode_btns(btn_ai, btn_manual, btn_scan);
         /* 在这里更新 button 的状态,根据系统配置参数更新转台工作在哪种模式 */
         switch (mJsonValue.devices[0].turntable.mode) {
-        case TURNTABLE_TRACK_MODE: btn_ai->set_pushed(true); break;
+        case TURNTABLE_TRACK_MODE:
+        case TURNTABLE_FUZZY_TRACK_MODE: btn_ai->set_pushed(true); break;
         case TURNTABLE_MANUAL_MODE: btn_manual->set_pushed(true); break;
         case TURNTABLE_SCAN_MODE: btn_scan->set_pushed(true); break;
+        default:break;
         }
     }
 

@@ -129,16 +129,22 @@ public:
     virtual bool keyboard_event(int key, int scancode, int action, int modifiers)
     {
         RedDebug::log("key=%d action=%d", key, action);
+        const char value_off = 0;
+        const char value_on = 1;
         switch (key) {
         case GLFW_KEY_F1: {
             /* 取消设备二激光授权,支持自锁按键 */
             if (action == GLFW_PRESS) {
                 mJsonValue.devices[1].green_led.auth = 0;
                 m_dev_auth[1]->set_caption("禁止发射");
+                if (m_dev_auth_light_fd[1])
+                    write(m_dev_auth_light_fd[1], &value_off, 1);
                 RedDebug::log("F1 catched");
             } else if (GLFW_RELEASE == action && mJsonValue.devices[1].green_led.auth == 0) {
                 mJsonValue.devices[1].green_led.auth = 1;
                 m_dev_auth[1]->set_caption("允许发射");
+                if (m_dev_auth_light_fd[1])
+                    write(m_dev_auth_light_fd[1], &value_on, 1);
                 RedDebug::log("F1 release");
             }
         }
@@ -148,10 +154,14 @@ public:
             if (action == GLFW_PRESS) {
                 mJsonValue.devices[0].green_led.auth = 0;
                 m_dev_auth[0]->set_caption("禁止发射");
+                if (m_dev_auth_light_fd[0])
+                    write(m_dev_auth_light_fd[0], &value_off, 1);
                 RedDebug::log("F2 catched");
             } else if ((GLFW_RELEASE == action) && (mJsonValue.devices[0].green_led.auth == 0)) {
                 mJsonValue.devices[0].green_led.auth = 1;
                 m_dev_auth[0]->set_caption("允许发射");
+                if (m_dev_auth_light_fd[0])
+                    write(m_dev_auth_light_fd[0], &value_on, 1);
                 RedDebug::log("F2 release");
             }
         }
@@ -369,6 +379,7 @@ public:
         }
         switch (mode) {
         case TURNTABLE_TRACK_MODE:
+        case TURNTABLE_FUZZY_TRACK_MODE:
             m_track_btn->set_pushed(true);
             m_manual_btn->set_pushed(false);
             m_scan_btn->set_pushed(false);
@@ -382,6 +393,8 @@ public:
             m_track_btn->set_pushed(false);
             m_manual_btn->set_pushed(false);
             m_scan_btn->set_pushed(true);
+            break;
+        default:
             break;
         }
     }
@@ -413,6 +426,7 @@ private:
     bool   m_guide_status[LED3000_DEVICES_COUNTS];
     Label *m_time4dispaly;  /* 显示时统时间 */
     Label *m_attitude_info; /* 显示姿态信息 */
+    int m_dev_auth_light_fd[LED3000_DEVICES_COUNTS];
 
     const std::vector<Button *> *m_green_dev_control_btns;
     const std::vector<Button *> *m_white_dev_control_btns;
