@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.13..3.18)
-set(CMAKE_OSX_DEPLOYMENT_TARGET 10.13)
+set(CMAKE_OSX_DEPLOYMENT_TARGET 10.14)
 
 # Extract project version from source
 file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/include/nanogui/common.h"
@@ -80,7 +80,8 @@ endif()
 
 if (MSVC)
   set(NANOGUI_NATIVE_FLAGS_DEFAULT "")
-elseif (APPLE AND CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
+elseif (APPLE AND ((CMAKE_OSX_ARCHITECTURES MATCHES "arm64") OR
+                   (CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "arm64")))
   # Apple M1 compatibility
   set(NANOGUI_NATIVE_FLAGS_DEFAULT "-mcpu=apple-a12")
 else()
@@ -207,7 +208,10 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND NOT CMAKE_CXX_FLAGS MATCHES "-stdl
       set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -stdlib=libc++ -lc++abi")
       message(STATUS "NanoGUI: using libc++ and libc++abi.")
     else()
-      message(FATAL_ERROR "When Clang is used to compile NanoGUI, libc++ must be available -- GCC's libstdc++ is not supported! (please insteall the libc++ development headers, provided e.g. by the packages 'libc++-dev' and 'libc++abi-dev' on Debian/Ubuntu).")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libstdc++")
+      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libstdc++")
+      set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -stdlib=libstdc++")
+      message(STATUS "NanoGUI: using libstdc++.")
     endif()
   endif()
 endif()
@@ -486,7 +490,8 @@ endif()
 
 if (NANOGUI_BUILD_SHARED)
   target_link_libraries(nanogui PRIVATE ${NANOGUI_LIBS})
-  set_property(TARGET nanogui PROPERTY INTERPROCEDURAL_OPTIMIZATION ON)
+  set_property(TARGET nanogui PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
+  set_property(TARGET nanogui PROPERTY INTERPROCEDURAL_OPTIMIZATION_MINSIZEREL ON)
   set_property(TARGET nanogui PROPERTY DEFINE_SYMBOL "")
 else()
   target_link_libraries(nanogui PUBLIC ${NANOGUI_LIBS})
@@ -498,6 +503,9 @@ if (EXISTS /opt/vc/include)
 endif()
 
 if (NANOGUI_INSTALL)
+  include(GNUInstallDirs)
+  include(CMakePackageConfigHelpers)
+
   install(TARGETS nanogui
           LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
           ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
@@ -569,28 +577,33 @@ endif()
 
 if (NANOGUI_BUILD_PYTHON)
   message(STATUS "NanoGUI: building the Python plugin.")
-  if (NOT TARGET pybind11::module)
+  if (NOT TARGET nanobind::module)
     if (SKBUILD)
+      # Constrain FindPython to find the Python version used by scikit-build
+      set(Python_VERSION "${PYTHON_VERSION_STRING}")
+
+      find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
+
       execute_process(
         COMMAND
-        "${PYTHON_EXECUTABLE}" -c
-        "import pybind11; print(pybind11.get_cmake_dir())"
+        "${PYTHON_EXECUTABLE}" -c "import nanobind; print(nanobind.cmake_dir())"
         OUTPUT_VARIABLE _tmp_dir
-        OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ECHO STDOUT)
-        list(APPEND CMAKE_PREFIX_PATH "${_tmp_dir}")
-      find_package(pybind11 CONFIG REQUIRED)
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+      list(APPEND CMAKE_PREFIX_PATH "${_tmp_dir}")
+
+      find_package(nanobind CONFIG REQUIRED)
     else()
-      find_package(Python COMPONENTS Interpreter Development REQUIRED)
+      find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
 
-      # Allow overriding the pybind11 library used to compile NanoGUI
-      set(NANOGUI_PYBIND11_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/pybind11"
-        CACHE STRING "Path containing the 'pybind11' library used to compile nanogui.")
+      # Allow overriding the nanobind library used to compile NanoGUI
+      set(NANOGUI_NANOBIND_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/nanobind"
+        CACHE STRING "Path containing the 'nanobind' library used to compile nanogui.")
 
-      add_subdirectory(${NANOGUI_PYBIND11_DIR} ext/pybind11)
+      add_subdirectory(${NANOGUI_NANOBIND_DIR} ext/nanobind)
       mark_as_advanced(
-        USE_PYTHON_INCLUDE_DIR PYBIND11_INSTALL PYBIND11_TEST PYBIND11_NOPYTHON
-        PYBIND11_FINDPYTHON PYBIND11_PYTHON_VERSION PYBIND11_WERROR
-        NANOGUI_PYBIND11_DIR)
+        USE_PYTHON_INCLUDE_DIR NANOBIND_INSTALL NANOBIND_TEST NANOBIND_NOPYTHON
+        NANOBIND_FINDPYTHON NANOBIND_PYTHON_VERSION NANOBIND_WERROR
+        NANOGUI_NANOBIND_DIR)
     endif()
   endif()
   add_subdirectory(src/python)

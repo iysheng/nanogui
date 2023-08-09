@@ -1,16 +1,120 @@
 #ifdef NANOGUI_PYTHON
 
 #include "python.h"
+#include <nanobind/make_iterator.h>
 
 DECLARE_WIDGET(Widget);
 DECLARE_SCREEN(Screen);
 DECLARE_WIDGET(Window);
 
-void register_widget(py::module &m) {
-    py::class_<Object, ref<Object>>(m, "Object", D(Object));
+/// Cyclic GC support: find all callback getter functions and traverse them recursively
+int widget_tp_traverse_base(PyObject *self, visitproc visit, void *arg, PyTypeObject *tp) {
+    PyObject *dict = tp->tp_dict;
+    PyObject *key, *value;
+    Py_ssize_t pos = 0;
 
-    py::class_<Widget, Object, ref<Widget>, PyWidget>(m, "Widget", D(Widget))
-        .def(py::init<Widget *>(), D(Widget, Widget))
+    const char *suffix = "callback";
+    size_t suffix_len = strlen(suffix);
+
+    while (PyDict_Next(dict, &pos, &key, &value)) {
+        if (!PyUnicode_Check(key))
+            continue;
+
+        const char *name = PyUnicode_AsUTF8AndSize(key, nullptr);
+        size_t name_len = strlen(name);
+
+        if (suffix_len > name_len)
+            continue;
+
+        if (strncmp(name, "set_", 4) == 0 ||
+            strcmp(name + name_len - suffix_len, suffix) != 0)
+            continue;
+
+
+#if PY_VERSION_HEX < 0x03090000
+        PyObject *func = PyObject_GetAttr(self, key),
+                 *result = nullptr;
+        if (func) {
+            result = _PyObject_Vectorcall(func, nullptr, 0, nullptr);
+            Py_DECREF(func);
+        }
+#else
+        PyObject *args[] = { self };
+        PyObject *result = PyObject_VectorcallMethod(
+            key, args, 1 | PY_VECTORCALL_ARGUMENTS_OFFSET, nullptr);
+#endif
+
+        if (!result) {
+            PyErr_Clear();
+            continue;
+        }
+
+        Py_VISIT(result);
+        Py_DECREF(result);
+    }
+
+    if (strcmp(tp->tp_name, "nanogui.Widget") != 0) {
+        PyTypeObject *base = (PyTypeObject *) PyType_GetSlot(tp, Py_tp_base);
+        if (base) {
+            int rv = widget_tp_traverse_base(self, visit, arg, base);
+            if (rv)
+                return rv;
+        }
+    }
+
+    return 0;
+}
+
+// Main widget traversal method that may be invoked by Python's cyclic GC
+int widget_tp_traverse(PyObject *self, visitproc visit, void *arg) {
+
+    Widget *w = nb::inst_ptr<Widget>(self);
+
+    // Visit nested children
+    for (Widget *wc : w->children()) {
+        PyObject *o = wc->self_py();
+        Py_VISIT(o);
+    }
+
+    // Visit callback functions (which can also produce reference cycles)
+    return widget_tp_traverse_base(self, visit, arg, Py_TYPE(self));
+}
+
+int widget_tp_clear(PyObject *self) {
+    Widget *w = nb::inst_ptr<Widget>(self);
+
+    int count = w->child_count();
+    for (int i = 0; i < count; ++i)
+        w->remove_child_at(count - 1 - i);
+
+    return 0;
+}
+
+void register_widget(nb::module_ &m) {
+    object_init_py(
+        [](PyObject *o) noexcept {
+            nb::gil_scoped_acquire guard;
+            Py_INCREF(o);
+        },
+        [](PyObject *o) noexcept {
+            nb::gil_scoped_acquire guard;
+            Py_DECREF(o);
+        });
+
+    nb::class_<Object>(
+        m, "Object",
+        nb::intrusive_ptr<Object>(
+            [](Object *o, PyObject *po) noexcept { o->set_self_py(po); }));
+
+    PyType_Slot widget_type_slots[] = {
+        { Py_tp_traverse, (void *) widget_tp_traverse },
+        { Py_tp_clear, (void *) widget_tp_clear },
+        { 0, nullptr }
+    };
+
+    nb::class_<Widget, Object, PyWidget>(
+        m, "Widget", D(Widget), nb::type_slots(widget_type_slots))
+        .def(nb::init<Widget *>(), D(Widget, Widget))
         .def("parent", (Widget *(Widget::*)(void)) &Widget::parent, D(Widget, parent))
         .def("set_parent", &Widget::set_parent, D(Widget, set_parent))
         .def("layout", (Layout *(Widget::*)(void)) &Widget::layout, D(Widget, layout))
@@ -36,14 +140,14 @@ void register_widget(py::module &m) {
         .def("set_visible", &Widget::set_visible, D(Widget, set_visible))
         .def("visible_recursive", &Widget::visible_recursive, D(Widget, visible_recursive))
         .def("children", (const std::vector<Widget *>&(Widget::*)(void)) &Widget::children,
-             D(Widget, children), py::return_value_policy::reference)
+             D(Widget, children), nb::rv_policy::reference)
         .def("add_child", (void (Widget::*) (int, Widget *)) &Widget::add_child, D(Widget, add_child))
         .def("add_child", (void (Widget::*) (Widget *)) &Widget::add_child, D(Widget, add_child, 2))
         .def("child_count", &Widget::child_count, D(Widget, child_count))
         .def("__len__", &Widget::child_count, D(Widget, child_count))
         .def("__iter__", [](const Widget &w) {
-                return py::make_iterator(w.children().begin(), w.children().end());
-            }, py::keep_alive<0, 1>())
+                return nb::make_iterator(nb::type<Widget>(), "iterator", w.children().begin(), w.children().end());
+            }, nb::keep_alive<0, 1>())
         .def("child_index", &Widget::child_index, D(Widget, child_index))
         .def("__getitem__", (Widget* (Widget::*)(int)) &Widget::child_at, D(Widget, child_at))
         .def("remove_child_at", &Widget::remove_child_at, D(Widget, remove_child_at))
@@ -80,12 +184,12 @@ void register_widget(py::module &m) {
              D(Widget, keyboard_character_event))
         .def("preferred_size", &Widget::preferred_size, D(Widget, preferred_size))
         .def("perform_layout", &Widget::perform_layout, D(Widget, perform_layout))
-        .def("screen", py::overload_cast<>(&Widget::screen, py::const_), D(Widget, screen))
-        .def("window", py::overload_cast<>(&Widget::window, py::const_), D(Widget, window))
+        .def("screen", nb::overload_cast<>(&Widget::screen, nb::const_), D(Widget, screen))
+        .def("window", nb::overload_cast<>(&Widget::window, nb::const_), D(Widget, window))
         .def("draw", &Widget::draw, D(Widget, draw));
 
-    py::class_<Window, Widget, ref<Window>, PyWindow>(m, "Window", D(Window))
-        .def(py::init<Widget *, const std::string>(), "parent"_a,
+    nb::class_<Window, Widget, PyWindow>(m, "Window", D(Window))
+        .def(nb::init<Widget *, const std::string>(), "parent"_a,
              "title"_a = std::string("Untitled"), D(Window, Window))
         .def("title", &Window::title, D(Window, title))
         .def("set_title", &Window::set_title, D(Window, set_title))
@@ -95,8 +199,8 @@ void register_widget(py::module &m) {
         .def("button_panel", &Window::button_panel, D(Window, button_panel))
         .def("center", &Window::center, D(Window, center));
 
-    py::class_<Screen, Widget, ref<Screen>, PyScreen>(m, "Screen", D(Screen))
-        .def(py::init<const Vector2i &, const std::string &, bool, bool, bool,
+    nb::class_<Screen, Widget, PyScreen>(m, "Screen", D(Screen))
+        .def(nb::init<const Vector2i &, const std::string &, bool, bool, bool,
                       bool, bool, unsigned int, unsigned int>(),
             "size"_a, "caption"_a = "Unnamed", "resizable"_a = true, "fullscreen"_a = false,
             "depth_buffer"_a = true, "stencil_buffer"_a = true,
@@ -123,9 +227,9 @@ void register_widget(py::module &m) {
         .def("has_stencil_buffer", &Screen::has_stencil_buffer, D(Screen, has_stencil_buffer))
         .def("has_float_buffer", &Screen::has_float_buffer, D(Screen, has_float_buffer))
         .def("glfw_window", &Screen::glfw_window, D(Screen, glfw_window),
-                py::return_value_policy::reference)
+                nb::rv_policy::reference)
         .def("nvg_context", &Screen::nvg_context, D(Screen, nvg_context),
-                py::return_value_policy::reference)
+                nb::rv_policy::reference)
         .def("pixel_format", &Screen::pixel_format, D(Screen, pixel_format))
         .def("component_format", &Screen::component_format, D(Screen, component_format))
         .def("nvg_flush", &Screen::nvg_flush, D(Screen, nvg_flush))

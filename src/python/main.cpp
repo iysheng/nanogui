@@ -4,9 +4,9 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include <nanobind/stl/pair.h>
 
 #if defined(__APPLE__) || defined(__linux__)
-#  include <coro.h>
 #  include <signal.h>
 #endif
 
@@ -37,73 +37,23 @@ namespace {
 }
 #endif
 
-extern void register_vector(py::module &m);
-extern void register_glfw(py::module &m);
-extern void register_entypo(py::module &m);
-extern void register_eigen(py::module &m);
-extern void register_widget(py::module &m);
-extern void register_layout(py::module &m);
-extern void register_basics(py::module &m);
-extern void register_button(py::module &m);
-extern void register_tabs(py::module &m);
-extern void register_textbox(py::module &m);
-extern void register_textarea(py::module &m);
-extern void register_theme(py::module &m);
-extern void register_canvas(py::module &m);
-extern void register_formhelper(py::module &m);
-extern void register_misc(py::module &m);
-extern void register_nanovg(py::module &m);
-extern void register_render(py::module &m);
-
-class MainloopHandle;
-static MainloopHandle *handle = nullptr;
-
-class MainloopHandle {
-public:
-    bool active = false;
-    bool detached = false;
-    float refresh = 0;
-    std::thread thread;
-
-    #if defined(__APPLE__) || defined(__linux__)
-        coro_context ctx_helper, ctx_main, ctx_thread;
-        coro_stack stack;
-        semaphore sema;
-    #endif
-
-    ~MainloopHandle() {
-        join();
-        handle = nullptr;
-    }
-
-    void join() {
-        if (!detached)
-            return;
-
-#if defined(__APPLE__) || defined(__linux__)
-        /* Release GIL and disassociate from thread state (which was originally
-           associated with the main Python thread) */
-        py::gil_scoped_release thread_state(true);
-
-        coro_transfer(&ctx_main, &ctx_thread);
-        coro_stack_free(&stack);
-
-        /* Destroy the thread state that was created in mainloop() */
-        {
-            py::gil_scoped_acquire acquire;
-            acquire.dec_ref();
-        }
-#endif
-
-        thread.join();
-        detached = false;
-
-        #if defined(__APPLE__) || defined(__linux__)
-            /* Reacquire GIL and reassociate with thread state
-               [via RAII destructor in 'thread_state'] */
-        #endif
-    }
-};
+extern void register_vector(nb::module_ &m);
+extern void register_glfw(nb::module_ &m);
+extern void register_entypo(nb::module_ &m);
+extern void register_eigen(nb::module_ &m);
+extern void register_widget(nb::module_ &m);
+extern void register_layout(nb::module_ &m);
+extern void register_basics(nb::module_ &m);
+extern void register_button(nb::module_ &m);
+extern void register_tabs(nb::module_ &m);
+extern void register_textbox(nb::module_ &m);
+extern void register_textarea(nb::module_ &m);
+extern void register_theme(nb::module_ &m);
+extern void register_canvas(nb::module_ &m);
+extern void register_formhelper(nb::module_ &m);
+extern void register_misc(nb::module_ &m);
+extern void register_nanovg(nb::module_ &m);
+extern void register_render(nb::module_ &m);
 
 #if defined(__APPLE__) || defined(__linux__)
 static void (*sigint_handler_prev)(int) = nullptr;
@@ -114,9 +64,9 @@ static void sigint_handler(int sig) {
 }
 #endif
 
-PYBIND11_MODULE(nanogui_ext, m_) {
+NB_MODULE(nanogui_ext, m_) {
     (void) m_;
-    py::module_ m = py::module::import("nanogui");
+    nb::module_ m = nb::module_::import_("nanogui");
     m.attr("__doc__") = "NanoGUI plugin";
 
 #if defined(NANOGUI_USE_OPENGL)
@@ -129,112 +79,45 @@ PYBIND11_MODULE(nanogui_ext, m_) {
     m.attr("api") = "metal";
 #endif
 
-    py::class_<MainloopHandle>(m, "MainloopHandle")
-        .def("join", &MainloopHandle::join);
-
     m.def("init", &nanogui::init, D(init));
     m.def("shutdown", &nanogui::shutdown, D(shutdown));
 
-    m.def("mainloop", [](float refresh, py::object detach) -> MainloopHandle* {
-        if (!detach.is(py::none())) {
-            if (handle)
-                throw std::runtime_error("Main loop is already running!");
+    m.def("mainloop", [](float refresh) {
+        nb::gil_scoped_release release;
 
-            handle = new MainloopHandle();
-            handle->detached = true;
-            handle->refresh = refresh;
+        #if defined(__APPLE__) || defined(__linux__)
+            sigint_handler_prev = signal(SIGINT, sigint_handler);
+        #endif
 
-            #if defined(__APPLE__) || defined(__linux__)
-                /* Release GIL and completely disassociate the calling thread
-                   from its associated Python thread state data structure */
-                py::gil_scoped_release thread_state(true);
+        mainloop(refresh);
 
-                /* Create a new thread state for the nanogui main loop
-                   and reference it once (to keep it from being constructed and
-                   destructed at every callback invocation) */
-                {
-                    py::gil_scoped_acquire acquire;
-                    acquire.inc_ref();
-                }
-
-                handle->thread = std::thread([]{
-                    /* Handshake 1: wait for signal from detach_helper */
-                    handle->sema.wait();
-
-                    /* Swap context with main thread */
-                    coro_transfer(&handle->ctx_thread, &handle->ctx_main);
-
-                    /* Handshake 2: wait for signal from detach_helper */
-                    handle->sema.notify();
-                });
-
-                void (*detach_helper)(void *) = [](void *ptr) -> void {
-                    MainloopHandle *handle = (MainloopHandle *) ptr;
-
-                    /* Handshake 1: Send signal to new thread  */
-                    handle->sema.notify();
-
-                    /* Enter main loop */
-                    sigint_handler_prev = signal(SIGINT, sigint_handler);
-                    mainloop(handle->refresh);
-                    signal(SIGINT, sigint_handler_prev);
-
-                    /* Handshake 2: Wait for signal from new thread */
-                    handle->sema.wait();
-
-                    /* Return back to Python */
-                    coro_transfer(&handle->ctx_helper, &handle->ctx_main);
-                };
-
-                /* Allocate an 8MB stack and transfer context to the
-                   detach_helper function */
-                coro_stack_alloc(&handle->stack, 8 * 1024 * 1024);
-                coro_create(&handle->ctx_helper, detach_helper, handle,
-                            handle->stack.sptr, handle->stack.ssze);
-                coro_transfer(&handle->ctx_main, &handle->ctx_helper);
-            #else
-                handle->thread = std::thread([]{
-                    mainloop(handle->refresh);
-                });
-            #endif
-
-            #if defined(__APPLE__) || defined(__linux__)
-                /* Reacquire GIL and reassociate with thread state on newly
-                   created thread [via RAII destructor in 'thread_state'] */
-            #endif
-
-            return handle;
-        } else {
-            py::gil_scoped_release release;
-
-            #if defined(__APPLE__) || defined(__linux__)
-                sigint_handler_prev = signal(SIGINT, sigint_handler);
-            #endif
-
-            mainloop(refresh);
-
-            #if defined(__APPLE__) || defined(__linux__)
-                signal(SIGINT, sigint_handler_prev);
-            #endif
-
-            return nullptr;
-        }
-    }, "refresh"_a = -1, "detach"_a = py::none(),
-       D(mainloop), py::keep_alive<0, 2>());
+        #if defined(__APPLE__) || defined(__linux__)
+            signal(SIGINT, sigint_handler_prev);
+        #endif
+    }, "refresh"_a = -1, D(mainloop));
 
     m.def("async", &nanogui::async, D(async));
     m.def("leave", &nanogui::leave, D(leave));
     m.def("test_10bit_edr_support", &test_10bit_edr_support, D(test_10bit_edr_support));
     m.def("active", &nanogui::active, D(active));
-    m.def("file_dialog", (std::string(*)(const std::vector<std::pair<std::string, std::string>> &, bool)) &nanogui::file_dialog, D(file_dialog));
-    m.def("file_dialog", (std::vector<std::string>(*)(const std::vector<std::pair<std::string, std::string>> &, bool, bool)) &nanogui::file_dialog, D(file_dialog, 2));
-    #if defined(__APPLE__)
+    m.def("file_dialog",
+          (std::string(*)(
+              const std::vector<std::pair<std::string, std::string>> &, bool)) &
+              nanogui::file_dialog,
+          D(file_dialog));
+    m.def("file_dialog",
+          (std::vector<std::string>(*)(
+              const std::vector<std::pair<std::string, std::string>> &, bool,
+              bool)) &
+              nanogui::file_dialog,
+          D(file_dialog, 2));
+#if defined(__APPLE__)
         m.def("chdir_to_bundle_parent", &nanogui::chdir_to_bundle_parent);
     #endif
     m.def("utf8", [](int c) { return std::string(utf8(c).data()); }, D(utf8));
     m.def("load_image_directory", &nanogui::load_image_directory, D(load_image_directory));
 
-    py::enum_<Cursor>(m, "Cursor", D(Cursor))
+    nb::enum_<Cursor>(m, "Cursor", D(Cursor))
         .value("Arrow", Cursor::Arrow)
         .value("IBeam", Cursor::IBeam)
         .value("Crosshair", Cursor::Crosshair)
@@ -242,13 +125,13 @@ PYBIND11_MODULE(nanogui_ext, m_) {
         .value("HResize", Cursor::HResize)
         .value("VResize", Cursor::VResize);
 
-    py::enum_<Alignment>(m, "Alignment", D(Alignment))
+    nb::enum_<Alignment>(m, "Alignment", D(Alignment))
         .value("Minimum", Alignment::Minimum)
         .value("Middle", Alignment::Middle)
         .value("Maximum", Alignment::Maximum)
         .value("Fill", Alignment::Fill);
 
-    py::enum_<Orientation>(m, "Orientation", D(Orientation))
+    nb::enum_<Orientation>(m, "Orientation", D(Orientation))
         .value("Horizontal", Orientation::Horizontal)
         .value("Vertical", Orientation::Vertical);
 

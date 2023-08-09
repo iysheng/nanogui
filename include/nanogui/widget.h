@@ -35,6 +35,9 @@ public:
     /// Construct a new widget with the given parent widget
     Widget(Widget *parent);
 
+    /// Free all resources used by the widget and any children
+    virtual ~Widget();
+
     /// Return the parent widget
     Widget *parent() { return m_parent; }
     /// Return the parent widget
@@ -255,9 +258,6 @@ public:
     virtual void draw(NVGcontext *ctx);
 
 protected:
-    /// Free all resources used by the widget and any children
-    virtual ~Widget();
-
     /**
      * Convenience definition for subclasses to get the full icon scale for this
      * class of Widget.  It simple returns the value
@@ -276,6 +276,7 @@ protected:
     ref<Layout> m_layout;
     Vector2i m_pos, m_size, m_fixed_size;
     std::vector<Widget *> m_children;
+
     /**
      * Whether or not this Widget is currently visible.  When a Widget is not
      * currently visible, no time is wasted executing its drawing method.
