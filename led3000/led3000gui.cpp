@@ -825,6 +825,12 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
     {
         m_dev_auth_light_fd[0] = open("/sys/devices/platform/leds/leds/auth0/brightness", O_RDWR);
         m_dev_auth_light_fd[1] = open("/sys/devices/platform/leds/leds/auth1/brightness", O_RDWR);
+        /* 上电默认是未授权 */
+        const char value_off = 0x30;
+        if (m_dev_auth_light_fd[0])
+            write(m_dev_auth_light_fd[0], &value_off, 1);
+        if (m_dev_auth_light_fd[1])
+            write(m_dev_auth_light_fd[1], &value_off, 1);
     }
     /* 设备控制窗口 */
     {

@@ -129,8 +129,9 @@ public:
     virtual bool keyboard_event(int key, int scancode, int action, int modifiers)
     {
         RedDebug::log("key=%d action=%d", key, action);
-        const char value_off = 0;
-        const char value_on = 1;
+        const char value_off = 0x30;
+        const char value_on = 0x31;
+
         switch (key) {
         case GLFW_KEY_F1: {
             /* 取消设备二激光授权,支持自锁按键 */

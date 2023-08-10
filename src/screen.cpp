@@ -348,7 +348,7 @@ Screen::Screen(const Vector2i &size, const std::string &caption, bool resizable,
         }
     );
 
-    /* 设置按键的回调函数
+    /* 设置物理按键的回调函数
      * 表示真实的物理按键
      * */
     glfwSetKeyCallback(m_glfw_window,
