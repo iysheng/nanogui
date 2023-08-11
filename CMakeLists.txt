@@ -570,13 +570,17 @@ endif()
 if (NANOGUI_BUILD_EXAMPLES)
   add_executable(example1      src/example1.cpp)
   add_executable(example2      src/example2.cpp)
+  if (NANOGUI_BACKEND STREQUAL "OpenGL")
   add_executable(example3      src/example3.cpp)
+  endif()
   add_executable(example4      src/example4.cpp)
   add_executable(example_icons src/example_icons.cpp)
 
   target_link_libraries(example1      nanogui)
   target_link_libraries(example2      nanogui)
+  if (NANOGUI_BACKEND STREQUAL "OpenGL")
   target_link_libraries(example3      nanogui ${NANOGUI_LIBS}) # For OpenGL
+  endif()
   target_link_libraries(example4      nanogui)
   target_link_libraries(example_icons nanogui)
 
