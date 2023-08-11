@@ -1,6 +1,7 @@
 cmake_minimum_required (VERSION 3.13..3.18)
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.14)
 
+SET(CMAKE_BUILD_TYPE "Debug")
 # Extract project version from source
 file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/include/nanogui/common.h"
   nanogui_version_defines REGEX "#define NANOGUI_VERSION_(MAJOR|MINOR|PATCH) ")
@@ -56,7 +57,7 @@ else()
 endif()
 
 set(NANOGUI_BUILD_SHARED_DEFAULT ON)
-set(NANOGUI_BUILD_PYTHON_DEFAULT ON)
+set(NANOGUI_BUILD_PYTHON_DEFAULT OFF)
 set(NANOGUI_BUILD_GLFW_DEFAULT ON)
 
 if (CMAKE_CXX_COMPILER MATCHES "/em\\+\\+(-[a-zA-Z0-9.])?$")
@@ -78,6 +79,7 @@ endif()
 # default. You may want to set MTS_NATIVE_FLAGS to "-march=native" to use all
 # instructions available on a particular machine.
 
+if (NOT CMAKE_SYSTEM_PROCESSOR)
 if (MSVC)
   set(NANOGUI_NATIVE_FLAGS_DEFAULT "")
 elseif (APPLE AND ((CMAKE_OSX_ARCHITECTURES MATCHES "arm64") OR
@@ -85,7 +87,9 @@ elseif (APPLE AND ((CMAKE_OSX_ARCHITECTURES MATCHES "arm64") OR
   # Apple M1 compatibility
   set(NANOGUI_NATIVE_FLAGS_DEFAULT "-mcpu=apple-a12")
 else()
+  # 这个是 intel 的处理器
   set(NANOGUI_NATIVE_FLAGS_DEFAULT "-march=nehalem")
+endif()
 endif()
 
 option(NANOGUI_BUILD_EXAMPLES            "Build NanoGUI example application?" ON)
@@ -218,11 +222,12 @@ endif()
 
 # Compile GLFW
 if (NANOGUI_BUILD_GLFW)
-  set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL " " FORCE)
-  set(GLFW_BUILD_TESTS OFF CACHE BOOL " " FORCE)
+  set(GLFW_BUILD_EXAMPLES ON CACHE BOOL " " FORCE)
+  set(GLFW_BUILD_TESTS ON CACHE BOOL " " FORCE)
   set(GLFW_BUILD_DOCS OFF CACHE BOOL " " FORCE)
   set(GLFW_BUILD_INSTALL OFF CACHE BOOL " " FORCE)
   set(GLFW_INSTALL OFF CACHE BOOL " " FORCE)
+  set(GLFW_USE_WAYLAND ON CACHE BOOL " " FORCE)
   set(GLFW_USE_CHDIR OFF CACHE BOOL " " FORCE)
   set(BUILD_SHARED_LIBS ${NANOGUI_BUILD_SHARED} CACHE BOOL " " FORCE)
 
@@ -303,7 +308,11 @@ elseif (APPLE)
   list(APPEND NANOGUI_EXTRA src/darwin.mm src/autorelease.mm)
   set_property(SOURCE src/autorelease.mm PROPERTY COMPILE_FLAGS -fno-objc-arc)
 elseif (CMAKE_SYSTEM MATCHES "Linux" OR CMAKE_SYSTEM_NAME MATCHES "BSD")
-  list(APPEND NANOGUI_LIBS X11 pthread)
+  if (NOT CMAKE_SYSTEM_PROCESSOR)
+    list(APPEND NANOGUI_LIBS X11 pthread)
+  else()
+    list(APPEND NANOGUI_LIBS pthread)
+  endif()
   if (NANOGUI_BACKEND STREQUAL "OpenGL")
     list(APPEND NANOGUI_LIBS GL)
   elseif (NANOGUI_BACKEND STREQUAL "GLES 2")
@@ -381,7 +390,7 @@ if (APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 if (NANOGUI_BUILD_GLFW)
-  list(APPEND NANOGUI_EXTRA $<TARGET_OBJECTS:glfw_objects>)
+  list(APPEND NANOGUI_EXTRA $<TARGET_OBJECTS:glfw>)
 endif()
 
 # Compile main NanoGUI library
