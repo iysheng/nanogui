@@ -280,6 +280,14 @@ elseif(UNIX)
   set(NANOGUI_ORIGIN "$ORIGIN")
 endif()
 
+find_library(avformat_library avformat REQUIRED)
+find_library(avcodec_library avcodec REQUIRED)
+find_library(avutil_library avutil REQUIRED)
+find_library(avfilter_library avfilter REQUIRED)
+find_library(avdevice_library avdevice REQUIRED)
+
+list(APPEND NANOGUI_LIBS ${avformat_library} ${avcodec_library} ${avutil_library} ${avfilter_library} ${avdevice_library})
+
 # Required core libraries on various platforms
 if (${CMAKE_CXX_COMPILER_ID} MATCHES "Emscripten")
   # No dependencies
@@ -432,6 +440,7 @@ add_library(nanogui ${NANOGUI_LIBRARY_TYPE}
   include/nanogui/shader.h src/shader.cpp
   include/nanogui/imageview.h src/imageview.cpp
   include/nanogui/traits.h src/traits.cpp
+  include/nanogui/videoview.h src/videoview.cpp
   include/nanogui/renderpass.h
   include/nanogui/formhelper.h
   include/nanogui/icons.h
@@ -496,6 +505,8 @@ if (NANOGUI_BUILD_GLFW)
   target_include_directories(nanogui PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw/include>)
 endif()
+
+message(STATUS "red--" ${NANOGUI_LIBS})
 
 if (NANOGUI_BUILD_SHARED)
   target_link_libraries(nanogui PRIVATE ${NANOGUI_LIBS})
@@ -576,8 +587,8 @@ if (NANOGUI_BUILD_EXAMPLES)
   add_executable(example4      src/example4.cpp)
   add_executable(example_icons src/example_icons.cpp)
 
-  target_link_libraries(example1      nanogui)
-  target_link_libraries(example2      nanogui)
+  target_link_libraries(example1      nanogui ${NANOGUI_LIBS})
+  target_link_libraries(example2      nanogui ${NANOGUI_LIBS})
   if (NANOGUI_BACKEND STREQUAL "OpenGL")
   target_link_libraries(example3      nanogui ${NANOGUI_LIBS}) # For OpenGL
   endif()
