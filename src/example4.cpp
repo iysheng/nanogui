@@ -18,6 +18,7 @@
 #include <nanogui/canvas.h>
 #include <nanogui/shader.h>
 #include <nanogui/renderpass.h>
+#define GLFW_INCLUDE_ES2
 #include <GLFW/glfw3.h>
 #include <iostream>
 
