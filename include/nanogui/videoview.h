@@ -13,20 +13,23 @@
 
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libavutil/dict.h>
 #include <libavutil/imgutils.h>
 #include <libavutil/pixfmt.h>
 #include <libswscale/swscale.h>
+#ifdef __cplusplus
+}
+#endif
 #include <nanogui/widget.h>
 #include <nanogui/imageview.h>
-#include <functional>
 #include <thread>
 
 NAMESPACE_BEGIN(nanogui)
-
-using namespace std;
 
 enum VideoViewStatus {
     R_VIDEO_UNINITLED,

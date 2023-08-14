@@ -286,6 +286,8 @@ find_library(avutil_library avutil REQUIRED)
 find_library(avfilter_library avfilter REQUIRED)
 find_library(avdevice_library avdevice REQUIRED)
 
+find_path(ffmpeg_inc libavcodec/avcodec.h REQUIRED)
+
 list(APPEND NANOGUI_LIBS ${avformat_library} ${avcodec_library} ${avutil_library} ${avfilter_library} ${avdevice_library})
 
 # Required core libraries on various platforms
