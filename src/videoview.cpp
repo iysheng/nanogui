@@ -203,21 +203,19 @@ re_open:
 	/* 格式转换，返回一个格式转换的上下文，错误的话返回为空 */
     img_convert_ctx = sws_getContext(p_avcodec_context->width, p_avcodec_context->height,
             p_avcodec_context->pix_fmt, VIDEO_SHOW_FIXED_WIDTH, VIDEO_SHOW_FIXED_HEIGH,
-            AV_PIX_FMT_RGB32, SWS_BICUBIC, NULL, NULL, NULL);
+            AV_PIX_FMT_BGR32, SWS_BICUBIC, NULL, NULL, NULL);
 
-    Vector2i top_left = Vector2i(p_video_obj->pixel_to_pos(Vector2f(0.f, 0.f))),
-             size     = Vector2i(p_video_obj->pixel_to_pos(Vector2f(p_video_obj->size())) - Vector2f(top_left));
     if (!p_video_obj->m_pixels)
-        p_video_obj->m_pixels = (uint8_t *)malloc(5 * VIDEO_SHOW_FIXED_WIDTH * VIDEO_SHOW_FIXED_HEIGH * 8);
+        p_video_obj->m_pixels = (uint8_t *)malloc(4 * VIDEO_SHOW_FIXED_WIDTH * VIDEO_SHOW_FIXED_HEIGH * 8);
 
     if (!p_video_obj->m_pixels) {
         printf("Failed malloc memory for mpp\n");
         return -12;
     } else {
-        printf("malloc memory 4 mpp size=%.1f\n", 5 * VIDEO_SHOW_FIXED_WIDTH * VIDEO_SHOW_FIXED_HEIGH * 8);
+        printf("malloc memory 4 mpp size=%.1f\n", 4 * VIDEO_SHOW_FIXED_WIDTH * VIDEO_SHOW_FIXED_HEIGH * 8);
     }
 
-    avpicture_fill((AVPicture *)p_frame_rgb, p_video_obj->m_pixels, AV_PIX_FMT_RGB32,
+    avpicture_fill((AVPicture *)p_frame_rgb, p_video_obj->m_pixels, AV_PIX_FMT_BGR32,
             VIDEO_SHOW_FIXED_WIDTH, VIDEO_SHOW_FIXED_HEIGH);
 
 just_draw:
