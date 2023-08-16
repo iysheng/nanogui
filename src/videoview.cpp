@@ -91,10 +91,13 @@ int VideoView::video_draw_handler(void *object)
     AVCodecContext *p_avcodec_context = NULL;
     const AVCodec *p_avcodec = NULL;
     AVDictionary* options = NULL;
-    int options_need_set = 1;
+    int options_need_set = 0;
+	int got_picture = 0;
+	 static struct SwsContext *img_convert_ctx;
 
     AVPacket packet;
     AVFrame* p_frame = NULL;
+    AVFrame* p_frame_rgb = NULL;
     int video_stream_index;
     int value;
     int ret;
@@ -107,7 +110,7 @@ int VideoView::video_draw_handler(void *object)
     }
 
     char errbuf[128];
-    printf("src_file=%s\n", p_video_obj->mSrcUrl);
+    printf("red say src_file=%s\n", p_video_obj->mSrcUrl);
 re_open:
     if (options_need_set) {
         value = av_dict_set(&options, "rtsp_transport", "tcp", 0);
@@ -121,8 +124,14 @@ re_open:
         options_need_set = 0;
     }
 
+	avformat_network_init();
+	av_register_all();
+
     if (!p_avformat_context)
+	{
         p_avformat_context = avformat_alloc_context();
+		printf("alloc context success\n");
+	}
     if (!p_avformat_context) {
         printf("Failed avformat_alloc_context\n");
         return -1;
@@ -132,7 +141,7 @@ re_open:
 
     if (value) {
         av_strerror(value, errbuf, sizeof(errbuf));
-        printf("Failed open av input:%d  %s src=%s\n", value, errbuf, p_video_obj->mSrcUrl);
+        printf("Red Failed open av input:%d  %s src=%s\n", value, errbuf, p_video_obj->mSrcUrl);
         sleep(1);
         goto re_open;
         //return -3;
@@ -159,6 +168,7 @@ re_open:
     }
 
     p_avcodec_parameter = p_avformat_context->streams[video_stream_index]->codecpar;
+	/* decoder */
     p_avcodec = avcodec_find_decoder(p_avcodec_parameter->codec_id);
     if (!p_avcodec) {
         printf("Failed get avcodec format\n");
@@ -183,11 +193,17 @@ re_open:
     av_dump_format(p_avformat_context, 0, p_video_obj->mSrcUrl, 0);
 
     p_frame = av_frame_alloc();
+    p_frame_rgb = av_frame_alloc();
 
     if (!p_frame) {
         printf("Failed alloc AVFrame\n");
         return -7;
     }
+
+	/* 格式转换，返回一个格式转换的上下文，错误的话返回为空 */
+    img_convert_ctx = sws_getContext(p_avcodec_context->width, p_avcodec_context->height,
+            p_avcodec_context->pix_fmt, VIDEO_SHOW_FIXED_WIDTH, VIDEO_SHOW_FIXED_HEIGH,
+            AV_PIX_FMT_RGB32, SWS_BICUBIC, NULL, NULL, NULL);
 
     Vector2i top_left = Vector2i(p_video_obj->pixel_to_pos(Vector2f(0.f, 0.f))),
              size     = Vector2i(p_video_obj->pixel_to_pos(Vector2f(p_video_obj->size())) - Vector2f(top_left));
@@ -200,6 +216,9 @@ re_open:
     } else {
         printf("malloc memory 4 mpp size=%.1f\n", 5 * VIDEO_SHOW_FIXED_WIDTH * VIDEO_SHOW_FIXED_HEIGH * 8);
     }
+
+    avpicture_fill((AVPicture *)p_frame_rgb, p_video_obj->m_pixels, AV_PIX_FMT_RGB32,
+            VIDEO_SHOW_FIXED_WIDTH, VIDEO_SHOW_FIXED_HEIGH);
 
 just_draw:
     while (1) {
@@ -234,6 +253,20 @@ just_draw:
             p_video_obj->m_no_frame_counts = 0;
             if (p_video_obj->mStatus != R_VIDEO_RUNNING)
                 p_video_obj->mStatus = R_VIDEO_INITLED;
+
+            ret = avcodec_decode_video2(p_avcodec_context, p_frame, &got_picture, &packet);
+
+            if (ret < 0) {
+                printf("decode error.\n");
+                continue;
+            }
+
+            if (got_picture) {
+                sws_scale(img_convert_ctx,
+                        (uint8_t const * const *) p_frame->data,
+                        p_frame->linesize, 0, p_avcodec_context->height, p_frame_rgb->data,
+                        p_frame_rgb->linesize);
+            }
         }
         av_packet_unref(&packet);
     }
@@ -263,7 +296,7 @@ exit:
 }
 
 VideoView::VideoView(Widget* parent): ImageView(parent), m_texture(nullptr), m_pixels(nullptr), m_crop4h265(nullptr),
-    m_thread(nullptr), mSrcUrl("rtsp://admin:jariled123@192.168.100.64"), m_no_frame_counts(0)
+    m_thread(nullptr), mSrcUrl("rtsp://admin:jariled123@192.168.91.150"), m_no_frame_counts(0)
 {
     Window * wnd = parent->window();
     Screen* screen = dynamic_cast<Screen*>(wnd->parent());
