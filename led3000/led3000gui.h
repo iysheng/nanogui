@@ -248,6 +248,10 @@ public:
     {
         return m_turntable_dev;
     }
+    bool get_dev_guide_leave_mode(uint8_t dev_num = 0)
+    {
+        return m_guide_leave_status[dev_num];
+    }
 
     void set_guide_info(bool info, float direction_float = 0.0,
         float elevation_float = 0.0, uint8_t dev_num = 0)
@@ -280,6 +284,20 @@ public:
         if (mCurrentDevice == dev_num)
         {
             m_guide_mode_icon[dev_num]->set_visible(m_guide_status[dev_num]);
+        }
+    }
+
+    void set_guide_leave(bool mode, uint8_t dev_num = 0)
+    {
+        if (dev_num > LED3000_DEVICES_COUNTS - 1)
+            return;
+        else if (nullptr == m_guide_leave_icon[dev_num])
+            return;
+
+        m_guide_leave_status[dev_num] = mode;
+        if (mCurrentDevice == dev_num)
+        {
+            m_guide_leave_icon[dev_num]->set_visible(m_guide_leave_status[dev_num]);
         }
     }
 
@@ -352,6 +370,11 @@ public:
     void set_green_dev_control_btns_status(int mode)
     {
         switch (mode) {
+        case LED_NORMAL_MODE_OFF:
+            m_green_dev_control_btns->at(0)->set_pushed(false);
+            m_green_dev_control_btns->at(1)->set_pushed(false);
+            m_green_dev_control_btns->at(2)->set_pushed(false);
+            break;
         case LED_NORMAL_MODE:
             m_green_dev_control_btns->at(0)->set_pushed(true);
             m_green_dev_control_btns->at(1)->set_pushed(false);
@@ -423,8 +446,10 @@ private:
     Label *m_white_dev;
     Label *m_turntable_dev;
     Label *m_guide_mode_icon[LED3000_DEVICES_COUNTS];
+    Label *m_guide_leave_icon[LED3000_DEVICES_COUNTS];
     Label *m_guide_info_label[LED3000_DEVICES_COUNTS];
     bool   m_guide_status[LED3000_DEVICES_COUNTS];
+    bool   m_guide_leave_status[LED3000_DEVICES_COUNTS];
     Label *m_time4dispaly;  /* 显示时统时间 */
     Label *m_attitude_info; /* 显示姿态信息 */
     int m_dev_auth_light_fd[LED3000_DEVICES_COUNTS];

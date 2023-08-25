@@ -599,6 +599,21 @@ void do_with_scan_setting(Widget *widget, int choose)
     }
 }
 
+void do_with_guide_leave(Widget *widget, int choose)
+{
+    Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
+    /* 需要对该数据在发送端转换为大端发送出去 */
+    red_debug_lite("left guide now:%u", choose);
+    if (choose == 1) {
+        /* TODO 脱离引导 */
+        led3000Window->set_guide_leave(true, led3000Window->getCurrentDevice());
+        return;
+    }
+    else {
+        led3000Window->set_guide_leave(false, led3000Window->getCurrentDevice());
+    }
+}
+
 void do_with_turntable_reset(Widget *widget, int choose)
 {
     Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
@@ -620,6 +635,11 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
     m_guide_info_label[1] = nullptr;
     m_guide_status[0] = false;
     m_guide_status[1] = false;
+    /* 默认非屏蔽指挥 */
+    m_guide_leave_status[0] = false;
+    m_guide_leave_status[1] = false;
+    m_guide_leave_icon[0] = nullptr;
+    m_guide_leave_icon[1] = nullptr;
 
     /* 系统配置参数初始化 */
     {
@@ -944,6 +964,16 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         m_guide_mode_icon[1]->set_position(Vector2i(870, 15));
         m_guide_mode_icon[1]->set_visible(m_guide_status[1]);
 
+        m_guide_leave_icon[0] = swindow->add<Label>("", "sans-bold");
+        m_guide_leave_icon[0]->set_icon(RED_LED3000_ASSETS_DIR"/guide_leave.png");
+        m_guide_leave_icon[0]->set_position(Vector2i(360, 15));
+        m_guide_leave_icon[0]->set_visible(m_guide_leave_status[0]);
+
+        m_guide_leave_icon[1] = swindow->add<Label>("", "sans-bold");
+        m_guide_leave_icon[1]->set_icon(RED_LED3000_ASSETS_DIR"/guide_leave.png");
+        m_guide_leave_icon[1]->set_position(Vector2i(360, 15));
+        m_guide_leave_icon[1]->set_visible(m_guide_leave_status[1]);
+
         m_guide_info_label[0] = swindow->add<Label>("[--------/------]", "sans-bold");
         m_guide_info_label[0]->set_position(Vector2i(920, 40));
         m_guide_info_label[0]->set_font_size(20);
@@ -1022,6 +1052,19 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
 
         m_turntable_dev = turntableWindow->add<Label>("灯光装置终端一 转台");
         m_turntable_dev->set_position({39, 9});
+
+        /* 屏蔽引导信息 */
+        Button *guide_leave_btn = turntableWindow->add<Button>("", RED_LED3000_ASSETS_DIR"/leave.png", 0);
+        guide_leave_btn->set_flags(Button::ToggleButton);
+        guide_leave_btn->set_position({215, 4});
+        guide_leave_btn->set_fixed_size({32, 32});
+#if 1
+        guide_leave_btn->set_change_callback([guide_leave_btn](bool state) { std::cout << "Toggle button state: " << state << std::endl; do_with_guide_leave(guide_leave_btn, state);});
+#else
+        guide_leave_btn->set_callback([this]() {
+            new MessageDialog(this, MessageDialog::Type::Warning, "", "确认要脱离引导么?", "确认", "取消", "", do_with_guide_leave);
+        });
+#endif
 
         /* 转台复位按键 */
         Button *turntable_reset_btn = turntableWindow->add<Button>("", RED_LED3000_ASSETS_DIR"/turntable_reset.png", 0);

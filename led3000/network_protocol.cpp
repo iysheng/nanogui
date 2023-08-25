@@ -323,6 +323,13 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
     RedDebug::log("control_word:%hx batch_number:%hx distance:%x direction:%.2f elevation:%.2f",
             control_word, target_batch_number,
             target_distance, target_direction, target_elevation);
+
+    /* TODO 判断当前是否在引导模式 */
+    if (gs_screen->get_dev_guide_leave_mode(dev_num))
+    {
+        return -EACCES;
+    }
+
     /* 发送消息控制转台转动到指定角度 */
     gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_POSITION_SETTING, string(target_position_buffer)));
     if (led_type == NETWORK_PROTOCOL_WHITE_LED_TYPE) {
