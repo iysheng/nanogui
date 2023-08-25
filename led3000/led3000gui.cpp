@@ -602,10 +602,8 @@ void do_with_scan_setting(Widget *widget, int choose)
 void do_with_guide_leave(Widget *widget, int choose)
 {
     Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
-    /* 需要对该数据在发送端转换为大端发送出去 */
-    red_debug_lite("left guide now:%u", choose);
     if (choose == 1) {
-        /* TODO 脱离引导 */
+        /* 脱离引导 */
         led3000Window->set_guide_leave(true, led3000Window->getCurrentDevice());
         return;
     }
