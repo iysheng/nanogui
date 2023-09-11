@@ -234,8 +234,8 @@ static int do_with_network_recv_force(NetworkPackage &net_package)
     /* 1: 允许发射 2：禁止发射 */
     force_control = command_word & 0x07;
     RedDebug::log("dev_num:%u force_control:%u", dev_num, force_control);
-    /* 更新界面显示和授权状态更新 */
-    gs_screen->getJsonValue()->devices[dev_num].green_led.auth = 2 - force_control;
+    /* 更新界面显示和指控禁允射状态更新 */
+    gs_screen->set_dev_guide_shoot_mode(dev_num, 2 - force_control);
     gs_screen->get_dev_auth_label(dev_num)->set_caption((2 - force_control) ? "允许发射" : "禁止发射");
 
     return 0;
@@ -324,7 +324,7 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
             control_word, target_batch_number,
             target_distance, target_direction, target_elevation);
 
-    /* TODO 判断当前是否在引导模式 */
+    /* 判断当前是否在屏蔽引导模式 */
     if (gs_screen->get_dev_guide_leave_mode(dev_num))
     {
         return -EACCES;
@@ -351,7 +351,7 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
             gs_screen->set_white_dev_control_btns_status(gs_screen->getJsonValue()->devices[dev_num].white_led.mode);
 
     } else if (led_type == NETWORK_PROTOCOL_GREEN_LED_TYPE) {
-        if (gs_screen->get_dev_auth_label(dev_num)->caption() == std::string("禁止发射")) {
+        if (gs_screen->getJsonValue()->devices[dev_num].green_led.auth == 0) {
             /* 权限不允许 */
             return -EPERM;
         }
@@ -412,12 +412,14 @@ int _do_report_msg2net(NetworkUdp &net_fd, NetworkPackage &network_package, stru
   * @brief 上报设备状态到指控
   * retval Linux/errno.
   */
-int do_report_dev_status(NetworkPackage &net_package, char dev1_status, char dev1_green_status, char dev1_white_status, char dev1_auth,
-                         char dev2_status, char dev2_green_status, char dev2_white_status, char dev2_auth)
+static int do_report_dev_status(NetworkPackage &net_package, char dev1_status, char dev1_green_status, char dev1_white_status, char dev1_auth,
+                         char dev2_status, char dev2_green_status, char dev2_white_status, char dev2_auth, char dev1_guide_status = 0,
+                         char dev2_guide_status = 0)
 {
     short raw_status = (short)dev1_status << 14 | (short)dev1_green_status << 12 | (short)dev1_white_status << 10 |
                        (short)dev1_auth << 9 | (short)dev2_status << 7 | (short)dev2_green_status << 5 |
-                       (short)dev2_white_status << 3 | (short)dev2_auth << 2;
+                       (short)dev2_white_status << 3 | (short)dev2_auth << 2 | (short)dev1_guide_status << 1 |
+                       (short)dev2_guide_status;
 
     if (gs_network_udp[NETWORK_PROTOCOL_TYPE_SEND_GUIDE_BROADCAST].get_socket() <= 0) {
         RedDebug::log("Novalid socket for network udp");
@@ -566,6 +568,7 @@ int do_probe_respon(NetworkPackage &network_package)
 {
     char dev_status[2] = {0, 0}; char dev_green_status[2] = {0, 0}; char dev_white_status[2] = {0, 0};
     char dev_auth_status[2] = {0, 0};
+    char dev_guide_auth_status[2] = {0, 0};
 
     float direction[2], elevation[2];
     std::string dev_info_str, direction_str, elevation_str;
@@ -595,8 +598,12 @@ int do_probe_respon(NetworkPackage &network_package)
             dev_green_status[index] = 1;
         }
 
-        if (gs_screen->get_dev_auth_label(index)->caption() == std::string("禁止发射")) {
+        if (gs_screen->getJsonValue()->devices[index].green_led.auth == 0) {
             dev_auth_status[index] = 1;
+        }
+
+        if (gs_screen->get_dev_guide_shoot_mode(index) == false) {
+            dev_guide_auth_status[index] = 1;
         }
 #if 0
         RedDebug::log("%d: status:%d green_status:%d white_status=%d auth:%d",
@@ -618,8 +625,8 @@ int do_probe_respon(NetworkPackage &network_package)
         sscanf(direction_str.c_str(), "%f", &direction[index]);
         sscanf(elevation_str.c_str(), "%f", &elevation[index]);
     }
-    do_report_dev_status(network_package, dev_status[0], dev_green_status[0], dev_white_status[0], dev_auth_status[0],
-                         dev_status[1], dev_green_status[1], dev_white_status[1], dev_auth_status[1]);
+                         dev_status[1], dev_green_status[1], dev_white_status[1], dev_guide_auth_status[1], dev_auth_status[0],
+                         dev_auth_status[1]);
     do_report_dev_info(network_package, direction[0], elevation[0], direction[1], elevation[1]);
 }
 

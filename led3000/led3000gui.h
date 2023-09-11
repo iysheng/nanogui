@@ -129,23 +129,29 @@ public:
     virtual bool keyboard_event(int key, int scancode, int action, int modifiers)
     {
         RedDebug::log("key=%d action=%d", key, action);
+#if 0
         const char value_off = 0x30;
         const char value_on = 0x31;
+#endif
 
         switch (key) {
         case GLFW_KEY_F1: {
             /* 取消设备二激光授权,支持自锁按键 */
             if (action == GLFW_PRESS) {
                 mJsonValue.devices[1].green_led.auth = 0;
-                m_dev_auth[1]->set_caption("禁止发射");
+                //m_dev_auth[1]->set_caption("禁止发射");
+#if 0
                 if (m_dev_auth_light_fd[1])
                     write(m_dev_auth_light_fd[1], &value_off, 1);
+#endif
                 RedDebug::log("F1 catched");
             } else if (GLFW_RELEASE == action && mJsonValue.devices[1].green_led.auth == 0) {
                 mJsonValue.devices[1].green_led.auth = 1;
-                m_dev_auth[1]->set_caption("允许发射");
+                //m_dev_auth[1]->set_caption("允许发射");
+#if 0
                 if (m_dev_auth_light_fd[1])
                     write(m_dev_auth_light_fd[1], &value_on, 1);
+#endif
                 RedDebug::log("F1 release");
             }
         }
@@ -154,15 +160,19 @@ public:
             /* 取消设备一激光授权,支持自锁按键 */
             if (action == GLFW_PRESS) {
                 mJsonValue.devices[0].green_led.auth = 0;
-                m_dev_auth[0]->set_caption("禁止发射");
+                //m_dev_auth[0]->set_caption("禁止发射");
+#if 0
                 if (m_dev_auth_light_fd[0])
                     write(m_dev_auth_light_fd[0], &value_off, 1);
+#endif
                 RedDebug::log("F2 catched");
             } else if ((GLFW_RELEASE == action) && (mJsonValue.devices[0].green_led.auth == 0)) {
                 mJsonValue.devices[0].green_led.auth = 1;
-                m_dev_auth[0]->set_caption("允许发射");
+                //m_dev_auth[0]->set_caption("允许发射");
+#if 0
                 if (m_dev_auth_light_fd[0])
                     write(m_dev_auth_light_fd[0], &value_on, 1);
+#endif
                 RedDebug::log("F2 release");
             }
         }
@@ -251,6 +261,14 @@ public:
     bool get_dev_guide_leave_mode(uint8_t dev_num = 0)
     {
         return m_guide_leave_status[dev_num];
+    }
+    bool get_dev_guide_shoot_mode(uint8_t dev_num = 0)
+    {
+        return m_guide_shoot_status[dev_num];
+    }
+    void set_dev_guide_shoot_mode(uint8_t dev_num = 0, bool mode = false)
+    {
+        m_guide_shoot_status[dev_num] = mode;
     }
 
     void set_guide_info(bool info, float direction_float = 0.0,
@@ -450,6 +468,7 @@ private:
     Label *m_guide_info_label[LED3000_DEVICES_COUNTS];
     bool   m_guide_status[LED3000_DEVICES_COUNTS];
     bool   m_guide_leave_status[LED3000_DEVICES_COUNTS];
+    bool   m_guide_shoot_status[LED3000_DEVICES_COUNTS]; /* 标记指控是否允许射击 */
     Label *m_time4dispaly;  /* 显示时统时间 */
     Label *m_attitude_info; /* 显示姿态信息 */
     int m_dev_auth_light_fd[LED3000_DEVICES_COUNTS];

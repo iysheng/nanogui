@@ -638,6 +638,9 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
     m_guide_leave_status[1] = false;
     m_guide_leave_icon[0] = nullptr;
     m_guide_leave_icon[1] = nullptr;
+    /* 默认指控禁止射击 */
+    m_guide_shoot_status[0] = false;
+    m_guide_shoot_status[1] = false;
 
     /* 系统配置参数初始化 */
     {
@@ -757,6 +760,7 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
                 mJsonValue.devices[i].white_led.blink_freq = (unsigned char)devices[i]["white_led"]["blink_freq"].GetUint();
                 memcpy(mJsonValue.devices[i].white_led.mocode, devices[i]["white_led"]["mocode"].GetString(), strlen(devices[i]["white_led"]["mocode"].GetString()) + 1);
 
+                /* 更新 auth 状态 */
                 mJsonValue.devices[i].green_led.auth = (unsigned char)devices[i]["green_led"]["auth"].GetUint();
                 mJsonValue.devices[i].green_led.mode = (unsigned char)devices[i]["green_led"]["mode"].GetUint();
                 mJsonValue.devices[i].green_led.normal_status = (unsigned char)devices[i]["green_led"]["normal_status"].GetUint();
@@ -818,7 +822,7 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         m_dev_morse_code[0]->set_position(Vector2i(930, 46));
         m_dev_morse_code[0]->set_fixed_size(Vector2i(200, 50));
         m_dev_auth[0] = new Label(swindow, "", "sans");
-        m_dev_auth[0]->set_caption_merge((mJsonValue.devices[0].green_led.auth ? "允许" : "禁止"), "发射", '\0');
+        m_dev_auth[0]->set_caption("禁止发射");
         m_dev_auth[0]->set_position(Vector2i(1135, 62));
 
         label = swindow->add<Label>("灯光装置终端二", "sans-bold");
@@ -836,10 +840,11 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         m_dev_morse_code[1]->set_position(Vector2i(930, 109));
         m_dev_morse_code[1]->set_fixed_size(Vector2i(200, 50));
         m_dev_auth[1] = new Label(swindow, "", "sans");
-        m_dev_auth[1]->set_caption_merge((mJsonValue.devices[1].green_led.auth ? "允许" : "禁止"), "发射", '\0');
+        m_dev_auth[1]->set_caption("禁止发射");
         m_dev_auth[1]->set_position(Vector2i(1135, 125));
     }
 
+#if 0
     {
         m_dev_auth_light_fd[0] = open("/sys/devices/platform/leds/leds/auth0/brightness", O_RDWR);
         m_dev_auth_light_fd[1] = open("/sys/devices/platform/leds/leds/auth1/brightness", O_RDWR);
@@ -850,6 +855,7 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         if (m_dev_auth_light_fd[1])
             write(m_dev_auth_light_fd[1], &value_off, 1);
     }
+#endif
     /* 设备控制窗口 */
     {
         auto* cwindow = new Window(this, "");
