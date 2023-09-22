@@ -44,14 +44,15 @@ enum VideoViewStatus {
 class NANOGUI_EXPORT VideoView : public ImageView
 {
 public:
-    VideoView(Widget* parent);
-    VideoView(Widget* parent, const char *srcurl): VideoView(parent)
+    VideoView(Widget* parent, int index);
+    VideoView(Widget* parent, const char *srcurl, int index): VideoView(parent, index)
     {
         memcpy(mSrcUrl, srcurl, strlen(srcurl) + 1);
     };
     ~VideoView();
 
     void draw(NVGcontext *ctx);
+    int index(void){return mIndex;};
 
     virtual bool mouse_button_event(const Vector2i &p, int button, bool down, int modifiers) override;
     static int video_draw_handler(void *object);
@@ -61,6 +62,7 @@ public:
 
 protected:
     char mSrcUrl[SRCURL_MAX];
+    char mIndex;
     std::thread *m_thread;
     VideoViewStatus mStatus;
     uint8_t * m_pixels;

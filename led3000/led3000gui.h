@@ -325,15 +325,19 @@ public:
         {
             m_guide_info_label[1]->set_visible(false);
             m_guide_mode_icon[1]->set_visible(false);
+            m_guide_leave_icon[1]->set_visible(false);
             m_guide_info_label[0]->set_visible(m_guide_status[0]);
             m_guide_mode_icon[0]->set_visible(m_guide_status[0]);
+            m_guide_leave_icon[0]->set_visible(m_guide_leave_status[0]);
         }
         else if (1 == dev_num)
         {
             m_guide_info_label[0]->set_visible(false);
             m_guide_mode_icon[0]->set_visible(false);
+            m_guide_leave_icon[0]->set_visible(false);
             m_guide_info_label[1]->set_visible(m_guide_status[1]);
             m_guide_mode_icon[1]->set_visible(m_guide_status[1]);
+            m_guide_leave_icon[1]->set_visible(m_guide_leave_status[1]);
         }
     }
 

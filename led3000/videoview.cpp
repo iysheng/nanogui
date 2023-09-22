@@ -728,8 +728,8 @@ exit:
     return 0;
 }
 
-VideoView::VideoView(Widget* parent): ImageView(parent), m_texture(nullptr), m_pixels(nullptr), m_crop4h265(nullptr),
-    m_thread(nullptr), mSrcUrl("rtsp://admin:jariled123@192.168.100.64"), m_no_frame_counts(0)
+VideoView::VideoView(Widget* parent, int index = 0): ImageView(parent), m_texture(nullptr), m_pixels(nullptr), m_crop4h265(nullptr),
+    m_thread(nullptr), mSrcUrl("rtsp://admin:jariled123@192.168.100.64"), m_no_frame_counts(0), mIndex(index)
 {
     Window * wnd = parent->window();
     Screen* screen = dynamic_cast<Screen*>(wnd->parent());
@@ -806,7 +806,7 @@ bool VideoView::mouse_button_event(const Vector2i &p, int button, bool down, int
     snprintf(track_buffer, sizeof track_buffer, "%d,%d", track_p.v[0], track_p.v[1]);
     red_debug_lite("track buffer %s raw:%d,%d", track_buffer, p.v[0], p.v[1]);
     /* 发送坐标信息进行目标追踪 */
-    led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_TRACK_SETTING, track_buffer));
+    led3000Window->getDeviceQueue(this->index()).put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_TRACK_SETTING, track_buffer));
     return true;
 }
 NAMESPACE_END(nanogui)

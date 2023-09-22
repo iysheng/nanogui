@@ -262,7 +262,7 @@ static int do_with_network_recv_probe(NetworkPackage &net_package)
 static int do_with_network_recv_guide(NetworkPackage &net_package)
 {
     short control_word, target_batch_number /* 目标批号 */;
-    int target_distance /* 目标距离 */;
+    int target_distance /* 目标距离,单位:m */;
     float target_direction /* 方位角 */, target_elevation /* 仰角 */;
     char target_position_buffer[32] = {0};
 
@@ -315,7 +315,7 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
 
     /* TODO correct target info with attitude */
     /* WAITING TEST [U]SHORT2FLOAT JUST IGNORE THIS NOW */
-    gs_turntable_attitude[dev_num].correct_target_info(target_direction, target_elevation);
+    gs_turntable_attitude[dev_num].correct_target_info(target_direction, target_elevation, target_distance);
 
     /* 方向,俯仰 */
     snprintf(target_position_buffer, sizeof(target_position_buffer), "%.2f,%.2f", target_direction, target_elevation);
@@ -564,46 +564,94 @@ int do_force_respon(NetworkPackage &net_package)
   * @brief 针对探测报文的应答
   * retval Linux/errno.
   */
-int do_probe_respon(NetworkPackage &network_package)
+int do_probe_respon(NetworkPackage &network_package, network_protocol_respon_type_E respon_type = NETWORK_PROTOCOL_RESPON_FULL)
 {
-    char dev_status[2] = {0, 0}; char dev_green_status[2] = {0, 0}; char dev_white_status[2] = {0, 0};
-    char dev_auth_status[2] = {0, 0};
-    char dev_guide_auth_status[2] = {0, 0};
+    static char dev_status[2]            = {0XFF, 0XFF};
+    static char dev_green_status[2]      = {0XFF, 0XFF};
+    static char dev_white_status[2]      = {0XFF, 0XFF};
+    static char dev_auth_status[2]       = {0XFF, 0XFF};
+    static char dev_guide_auth_status[2] = {0XFF, 0XFF};
 
-    float direction[2], elevation[2];
+    static float direction[2] = {1000.0, 1000.0}, elevation[2] = {1000.0, 1000.0};
+    float direction_tmp[2] = {-1000.0, -1000.0}, elevation_tmp[2] = {-1000.0, -1000.0};
+
+    bool respon_dev_status = false, respon_dev_info = false;
+
     std::string dev_info_str, direction_str, elevation_str;
     std::size_t split_index = 0;
     const led3000_config_t *json_value_ptr = gs_screen->getJsonValue();
     int index = 0;
 
     for (; index < 2; index++) {
-        if (gs_screen->get_dev_state_label(index)->caption() == std::string("故障"))
+        if (gs_screen->get_dev_state_label(index)->caption() == std::string("故障") && \
+            dev_status[index] != 1)
+        {
             dev_status[index] = 1;
-        else if (gs_screen->get_dev_state_label(index)->caption() == std::string("离线"))
+            respon_dev_status = true;
+        }
+        else if (gs_screen->get_dev_state_label(index)->caption() == std::string("离线") && \
+            dev_status[index] != 2)
+        {
             dev_status[index] = 2;
+            respon_dev_status = true;
+        }
+        else if (gs_screen->get_dev_state_label(index)->caption() == std::string("正常") && \
+            dev_status[index] != 0)
+        {
+            dev_status[index] = 0;
+            respon_dev_status = true;
+        }
 
-        if (json_value_ptr->devices[index].white_led.mode == LED_NORMAL_MODE_OFF) {
+        if (json_value_ptr->devices[index].white_led.mode == LED_NORMAL_MODE_OFF && \
+            dev_white_status[index] != 3) {
             dev_white_status[index] = 3;
-        } else if (json_value_ptr->devices[index].white_led.mode == LED_MOCODE_MODE) {
+            respon_dev_status = true;
+        } else if (json_value_ptr->devices[index].white_led.mode == LED_MOCODE_MODE && \
+            dev_white_status[index] != 2) {
             dev_white_status[index] = 2;
-        } else if (json_value_ptr->devices[index].white_led.mode == LED_BLINK_MODE) {
+            respon_dev_status = true;
+        } else if (json_value_ptr->devices[index].white_led.mode == LED_BLINK_MODE && \
+            dev_white_status[index] != 1) {
             dev_white_status[index] = 1;
+            respon_dev_status = true;
+        } else if (json_value_ptr->devices[index].white_led.mode == LED_NORMAL_MODE && \
+            dev_white_status[index] != 0) {
+            dev_white_status[index] = 0;
+            respon_dev_status = true;
         }
 
-        if (json_value_ptr->devices[index].green_led.mode == LED_NORMAL_MODE_OFF) {
+        if (json_value_ptr->devices[index].green_led.mode == LED_NORMAL_MODE_OFF && \
+            dev_green_status[index] != 3) {
             dev_green_status[index] = 3;
-        } else if (json_value_ptr->devices[index].green_led.mode == LED_MOCODE_MODE) {
+            respon_dev_status = true;
+        } else if (json_value_ptr->devices[index].green_led.mode == LED_MOCODE_MODE && \
+            dev_green_status[index] != 2) {
             dev_green_status[index] = 2;
-        } else if (json_value_ptr->devices[index].green_led.mode == LED_BLINK_MODE) {
+            respon_dev_status = true;
+        } else if (json_value_ptr->devices[index].green_led.mode == LED_BLINK_MODE && \
+            dev_green_status[index] != 1) {
             dev_green_status[index] = 1;
+            respon_dev_status = true;
+        } else if (json_value_ptr->devices[index].green_led.mode == LED_NORMAL_MODE && \
+            dev_green_status[index] != 0) {
+            dev_green_status[index] = 0;
+            respon_dev_status = true;
         }
 
-        if (gs_screen->getJsonValue()->devices[index].green_led.auth == 0) {
+        if (json_value_ptr->devices[index].green_led.auth == 0 && dev_auth_status[index] != 1) {
             dev_auth_status[index] = 1;
+            respon_dev_status = true;
+        } else if (json_value_ptr->devices[index].green_led.auth == 1 && dev_auth_status[index] != 0) {
+            dev_auth_status[index] = 0;
+            respon_dev_status = true;
         }
 
-        if (gs_screen->get_dev_guide_shoot_mode(index) == false) {
+        if (gs_screen->get_dev_guide_shoot_mode(index) == false && dev_guide_auth_status[index] != 1) {
             dev_guide_auth_status[index] = 1;
+            respon_dev_status = true;
+        } else if (gs_screen->get_dev_guide_shoot_mode(index) == true && dev_guide_auth_status[index] != 0) {
+            dev_guide_auth_status[index] = 0;
+            respon_dev_status = true;
         }
 #if 0
         RedDebug::log("%d: status:%d green_status:%d white_status=%d auth:%d",
@@ -622,12 +670,30 @@ int do_probe_respon(NetworkPackage &network_package)
         RedDebug::log("gre:%s dire:%s elevation:%s whole:%s", gs_screen->get_dev_auth_label(index)->caption().c_str(),
                       direction_str.c_str(), elevation_str.c_str(), dev_info_str.c_str());
 #endif
-        sscanf(direction_str.c_str(), "%f", &direction[index]);
-        sscanf(elevation_str.c_str(), "%f", &elevation[index]);
+        sscanf(direction_str.c_str(), "%f", &direction_tmp[index]);
+        sscanf(elevation_str.c_str(), "%f", &elevation_tmp[index]);
+        if (direction_tmp[index] != direction[index])
+        {
+            direction[index] = direction_tmp[index];
+            respon_dev_info = true;
+        }
+        if (elevation_tmp[index] != elevation[index])
+        {
+            elevation[index] = elevation_tmp[index];
+            respon_dev_info = true;
+        }
     }
-                         dev_status[1], dev_green_status[1], dev_white_status[1], dev_guide_auth_status[1], dev_auth_status[0],
-                         dev_auth_status[1]);
-    do_report_dev_info(network_package, direction[0], elevation[0], direction[1], elevation[1]);
+
+    if (respon_dev_status == true || respon_type == NETWORK_PROTOCOL_RESPON_FULL)
+    {
+        do_report_dev_status(network_package, dev_status[0], dev_green_status[0], dev_white_status[0], dev_guide_auth_status[0],
+                             dev_status[1], dev_green_status[1], dev_white_status[1], dev_guide_auth_status[1], dev_auth_status[0],
+                             dev_auth_status[1]);
+    }
+    if (respon_dev_info == true || respon_type == NETWORK_PROTOCOL_RESPON_FULL)
+    {
+        do_report_dev_info(network_package, direction[0], elevation[0], direction[1], elevation[1]);
+    }
 }
 
 /**
@@ -753,7 +819,7 @@ int handle_with_network_buffer(char *buffer, int size)
 int update_sysinfo2network(void)
 {
     NetworkPackage network_package;
-    do_probe_respon(network_package);
+    do_probe_respon(network_package, NETWORK_PROTOCOL_RESPON_AUTO);
     return 0;
 }
 

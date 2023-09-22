@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <math.h>
+
 /********************  指控主动发送的命令集合  ******************************/
 /* 指控问询开机指令 */
 #define NETWORK_RECV_PROBE    0XE3
@@ -49,6 +51,11 @@ typedef enum {
     NETWORK_PROTOCOL_LED_MODE_COUNTS,
 } network_protocol_led_mode_E;
 
+typedef enum {
+    NETWORK_PROTOCOL_RESPON_AUTO , /* 智能推送转台状态和设备状态，仅在不一致时推送 */
+    NETWORK_PROTOCOL_RESPON_FULL , /* 强制推送转台状态和设备状态 */
+} network_protocol_respon_type_E;
+
 /*
  *       |    send         |  recv  |
  * probe | guide_controler | group 1|
@@ -70,8 +77,9 @@ class TurntableAttitude
 {
 #define VERCTICAL_INFO_ANGLE_MAX    30
 public:
-    TurntableAttitude(): m_direction_info(0), m_vertical_info(0), m_horizon_info(0), m_delta_info(0) {};
-    TurntableAttitude(int delta_info): m_direction_info(0), m_vertical_info(0), m_horizon_info(0), m_delta_info(delta_info) {};
+    TurntableAttitude(): m_direction_info(0), m_vertical_info(0), m_horizon_info(0), m_delta_info(0),
+         m_direction_distance(0), m_horizon_distance(0), m_vertical_distance(0){};
+    TurntableAttitude(int delta_info): m_direction_info(0), m_vertical_info(0), m_horizon_info(0), m_delta_info(delta_info),m_direction_distance(0), m_horizon_distance(0), m_vertical_distance(0) {};
     void set_delta_info(int delta_info) {m_delta_info = delta_info;};
     void update_attitude_info(float direction_info, float vertical_info, float horizon_info)
     {
@@ -87,8 +95,14 @@ public:
         m_vertical_info = vertical_info;
         m_horizon_info = horizon_info;
     }
-    void correct_target_info(float &direction_info, float &vertical_info)
+    void correct_target_info(float &direction_info, float &vertical_info, int distance = 0)
     {
+#define PI 3.1415926
+#define CONVERT_ANGLE2PI(x) (x * PI / 180)
+#define CONVERT_PI2ANGLE(x) (x * 180 / PI)
+        float distance_float = distance * 1.0;
+        float direction_info_final, vertical_info_final;
+
         /* TODO use shipinfo correct target info */
         direction_info -= m_direction_info;
         if (direction_info > 180) {
@@ -103,6 +117,23 @@ public:
         } else if (vertical_info < -VERCTICAL_INFO_ANGLE_MAX) {
             vertical_info = -VERCTICAL_INFO_ANGLE_MAX;
         }
+
+        /* TODO fix these angles with algorithm */
+        if (!distance)
+            return;
+
+        direction_info_final =
+            atan((distance_float * sin(CONVERT_ANGLE2PI(direction_info)) - m_horizon_distance) / (distance_float * cos(CONVERT_ANGLE2PI(direction_info)) - m_direction_distance));
+
+        float distance_tmp_float = sqrt(distance_float * distance_float * cos(CONVERT_ANGLE2PI(vertical_info)) * cos(CONVERT_ANGLE2PI(vertical_info)) + m_horizon_distance * m_horizon_distance + m_direction_distance * m_direction_distance - 2 * distance_float  * cos(CONVERT_ANGLE2PI(vertical_info)) * m_horizon_distance * sin(CONVERT_ANGLE2PI(direction_info)) - 2 * distance_float  * cos(CONVERT_ANGLE2PI(vertical_info)) * m_direction_distance * cos(CONVERT_ANGLE2PI(direction_info)));
+        vertical_info_final =
+            atan((distance_float * sin(CONVERT_ANGLE2PI(vertical_info)) - m_vertical_distance) / distance_tmp_float);
+
+        /* TODO replace final angle to origin angle */
+        direction_info_final = CONVERT_PI2ANGLE(direction_info_final);
+        vertical_info_final = CONVERT_PI2ANGLE(vertical_info_final);
+
+       // RedDebug::err("direction_info_final=%f vertical_info_final=%f", direction_info_final, vertical_info_final);
     }
 
 
@@ -114,6 +145,11 @@ private:
     /* 纵摇角 */
     float m_horizon_info;
     float m_delta_info;
+
+    /* 安装位置相对雷达前后(x),水平(z)和垂直(y)的偏移,单位 m */
+    float m_direction_distance;
+    float m_horizon_distance;
+    float m_vertical_distance;
 };
 
 /**
