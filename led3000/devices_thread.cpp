@@ -647,6 +647,8 @@ static void _do_with_green_blink(led_device_t* devp, std::string message)
 static void _do_with_green_normal(led_device_t *devp, std::string message)
 {
     uint8_t level = (uint8_t)stoi(message);
+    // 亮度等级发送过来为 1 ~ 10, 进行修正到 10 ~ 100
+    level *= 10;
     uint8_t buffer[13] = {0X7E, 0X09 /* 帧长 */, 0X81, 0X11, 1 + devp->uart.index, 0XFF,
                           0X01, 0XFF, 0X00, 0X01, level, 0X00 /* 校验和 */, 0XE7
                          };
@@ -695,6 +697,7 @@ static void _do_with_white_mocode(led_device_t* devp, std::string message)
 static void _do_with_white_normal(led_device_t *devp, std::string message)
 {
     uint8_t level = (uint8_t)stoi(message);
+    level *= 10;
     uint8_t buffer[13] = {0X7E, 0X09 /* 帧长 */, 0X81, 0X11, 1 + devp->uart.index, 0X00,
                           0X01, level, 0XFF, 0X01, 0XFF, 0X00 /* 校验和 */, 0XE7
                          };

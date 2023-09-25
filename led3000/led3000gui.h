@@ -128,7 +128,7 @@ public:
     void init_json_file(void);
     virtual bool keyboard_event(int key, int scancode, int action, int modifiers)
     {
-        RedDebug::log("key=%d action=%d", key, action);
+        //RedDebug::err("key=%d action=%d", key, action);
 #if 0
         const char value_off = 0x30;
         const char value_on = 0x31;
@@ -138,16 +138,17 @@ public:
         case GLFW_KEY_F1: {
             /* 取消设备二激光授权,支持自锁按键 */
             if (action == GLFW_PRESS) {
-                mJsonValue.devices[1].green_led.auth = 0;
-                //m_dev_auth[1]->set_caption("禁止发射");
+                mJsonValue.devices[0].green_led.auth = 1;
+                //m_dev_auth[1]->set_caption("允许发射");
 #if 0
                 if (m_dev_auth_light_fd[1])
                     write(m_dev_auth_light_fd[1], &value_off, 1);
 #endif
                 RedDebug::log("F1 catched");
-            } else if (GLFW_RELEASE == action && mJsonValue.devices[1].green_led.auth == 0) {
-                mJsonValue.devices[1].green_led.auth = 1;
-                //m_dev_auth[1]->set_caption("允许发射");
+                // 禁止档位
+            } else if (GLFW_RELEASE == action && mJsonValue.devices[0].green_led.auth == 1) {
+                mJsonValue.devices[0].green_led.auth = 0;
+                //m_dev_auth[1]->set_caption("禁止发射");
 #if 0
                 if (m_dev_auth_light_fd[1])
                     write(m_dev_auth_light_fd[1], &value_on, 1);
@@ -159,16 +160,16 @@ public:
         case GLFW_KEY_F2: {
             /* 取消设备一激光授权,支持自锁按键 */
             if (action == GLFW_PRESS) {
-                mJsonValue.devices[0].green_led.auth = 0;
-                //m_dev_auth[0]->set_caption("禁止发射");
+                mJsonValue.devices[1].green_led.auth = 1;
+                //m_dev_auth[0]->set_caption("允许发射");
 #if 0
                 if (m_dev_auth_light_fd[0])
                     write(m_dev_auth_light_fd[0], &value_off, 1);
 #endif
                 RedDebug::log("F2 catched");
-            } else if ((GLFW_RELEASE == action) && (mJsonValue.devices[0].green_led.auth == 0)) {
-                mJsonValue.devices[0].green_led.auth = 1;
-                //m_dev_auth[0]->set_caption("允许发射");
+            } else if ((GLFW_RELEASE == action) && (mJsonValue.devices[1].green_led.auth == 1)) {
+                mJsonValue.devices[1].green_led.auth = 0;
+                //m_dev_auth[0]->set_caption("禁止发射");
 #if 0
                 if (m_dev_auth_light_fd[0])
                     write(m_dev_auth_light_fd[0], &value_on, 1);
