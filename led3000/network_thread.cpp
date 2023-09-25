@@ -72,12 +72,11 @@ void *network_thread(void *arg)
     gs_network_fd[0].screen = screen;
     gs_network_fd[1].screen = screen;
     NetworkUdp udp_client("224.100.100.101", screen->getJsonValue()->server.port, screen->getJsonValue()->server.port);
-    //NetworkUdp udp_client("10.20.52.35", screen->getJsonValue()->server.port, screen->getJsonValue()->server.port);
+    //NetworkUdp udp_client("168.22.0.211", screen->getJsonValue()->server.port, screen->getJsonValue()->server.port);
     gs_network_fd[0].udp = udp_client;
     /* 创建和指控通信的句柄 */
     NetworkUdp udp_broadcast_client("224.100.100.102", screen->getJsonValue()->server.port, screen->getJsonValue()->server.port, udp_client.get_socket());
     gs_network_fd[1].udp = udp_broadcast_client;
-    screen_window_register(screen);
 
     if (gs_network_fd[0].udp.get_socket() > 0) {
         if (network_protocol_registe(NETWORK_PROTOCOL_TYPE_SEND_GUIDE, gs_network_fd[0].udp) < 0) {

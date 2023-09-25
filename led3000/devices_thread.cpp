@@ -881,6 +881,8 @@ void *devices_entry(void *arg)
             auto& dm = dynamic_cast<PolyM::DataMsg<std::string>&>(*m);
             msg_id = dm.getMsgId();
             msg_payload = dm.getPayload();
+        } else {
+            goto next;
         }
 
         switch (msg_id) {
@@ -957,6 +959,7 @@ void *devices_entry(void *arg)
         /* 更新状态信息到一体化网络 */
         extern int update_sysinfo2network(void);
         update_sysinfo2network();
+next:
         usleep(10000);
     }
 }

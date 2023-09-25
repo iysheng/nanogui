@@ -171,6 +171,9 @@ int main(int /* argc */, char ** /* argv */)
         /* scoped variables */ {
             /* 赋值的时候，会执行 ref 类模板的符号重载，然后会增加这个引用计数 */
             nanogui::ref<Led3000Window> app = new Led3000Window();
+            // 提前注册网络线程用的句柄
+            extern int screen_window_register(void *window);
+            screen_window_register(app);
 
             std::thread s_json_thread(json_thread, app);
             s_json_thread.detach();
