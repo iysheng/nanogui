@@ -715,7 +715,7 @@ static void _do_drain_turntable_fd(led_device_t* devp)
 
 static int _do_analysis_hear_msg(int index, char * buffer, int len)
 {
-    uint8_t dev_status;
+    uint8_t dev_status, auto_shake;
     uint8_t white_mode, white_mode_param;
     uint8_t green_mode, green_mode_param;
     uint8_t turntable_mode;
@@ -727,7 +727,8 @@ static int _do_analysis_hear_msg(int index, char * buffer, int len)
     int16_t turntable_horizon_speed, turntable_vertical_speed;
     uint16_t camera_falcon; /* 摄像头焦距 */
 
-    dev_status = buffer[2];
+    dev_status = buffer[2] & 0X01;
+    auto_shake = buffer[2] & 0X80;
     white_mode = buffer[3];
     white_mode_param = buffer[4];
     green_mode = buffer[5];
