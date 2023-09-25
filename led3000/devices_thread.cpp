@@ -48,6 +48,7 @@ typedef struct {
     NetworkTcp tcp_fd;
     NetworkTcp tcp_fd_debug;
     bool focal_auto;
+    bool shake_auto; /* 隔震开关 1 开启， 0 关闭 */
 } led_device_t;
 
 static led_device_t gs_led_devices[2] = {
@@ -394,6 +395,20 @@ static void _do_with_turntable_reset(led_device_t* devp, std::string message)
     RedDebug::log("reset turntable");
 }
 
+/* 设置转台参数 */
+static void _do_with_turntable_sys_config(led_device_t* devp, std::string message)
+{
+    uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X0F,
+                          0XFF, 0XFF, 0XFF, 0XFF, 0X00 /* 校验和 */, 0XE7};
+
+    // TODO check message MAGIC value
+    gs_led_devices[devp->uart.index].shake_auto = gs_led_devices[devp->uart.index].shake_auto ? false : true;
+    buffer[5] = gs_led_devices[devp->uart.index].shake_auto ? 0X8F : 0X0F;
+    buffer[10] = _get_xor(&buffer[2], 8);
+    write(devp->uart.fd, buffer, sizeof(buffer));
+    RedDebug::log("sys config turntable");
+}
+
 static void _do_with_turntable_mode_setting(led_device_t* devp, std::string message)
 {
     uint8_t mode = (uint8_t)stoi(message);
@@ -729,6 +744,7 @@ static int _do_analysis_hear_msg(int index, char * buffer, int len)
 
     dev_status = buffer[2] & 0X01;
     auto_shake = buffer[2] & 0X80;
+
     white_mode = buffer[3];
     white_mode_param = buffer[4];
     green_mode = buffer[5];
@@ -751,7 +767,9 @@ static int _do_analysis_hear_msg(int index, char * buffer, int len)
         gs_led_devices[index].screen->get_dev_state_label(index)->set_caption("故障");
     else
 #endif
-    gs_led_devices[index].screen->get_dev_state_label(index)->set_caption(dev_status ? "故障" : "正常");
+    gs_led_devices[index].shake_auto = auto_shake ? true : false;
+    gs_led_devices[index].screen->get_dev_state_label(index)->set_caption_merge(dev_status ? "故障" : "正常", auto_shake ? "隔震开" : "隔震关", ':');
+
     gs_led_devices[index].screen->get_dev_angle_label(index)->set_caption(
         to_string(turntable_horizon_float).erase(to_string(turntable_horizon_float).find('.')+3, string::npos)
         + '/' +
@@ -925,6 +943,9 @@ void *devices_entry(void *arg)
             break;
         case POLYM_TURNTABLE_RESET:
             _do_with_turntable_reset(led_devp, msg_payload);
+            break;
+        case POLYM_TURNTABLE_AUTO_SHAKE_SETTING:
+            _do_with_turntable_sys_config(led_devp, msg_payload);
             break;
         default:
             RedDebug::log("No support this id:%d", msg_id);

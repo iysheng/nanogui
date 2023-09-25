@@ -665,6 +665,14 @@ void do_with_turntable_reset(Widget *widget, int choose)
     }
 }
 
+void do_with_turntable_auto_shake(Widget *widget, int choose)
+{
+    Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(widget->window()->parent());
+    /* 发送切换转台隔震消息 */
+    led3000Window->getCurrentDeviceQueue().put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_AUTO_SHAKE_SETTING, ""));
+    return;
+}
+
 Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", false, true),
     mFileName("/opt/led3000.json"), mFp(nullptr), m_attitude_info(nullptr),
     m_time4dispaly(nullptr)
@@ -851,7 +859,7 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
 
         label = swindow->add<Label>("灯光装置终端二", "sans-bold");
         label->set_position(Vector2i(40, 62));
-        m_dev_state[0] = new Label(swindow, "离线", "sans");
+        m_dev_state[0] = new Label(swindow, "离线:隔震关", "sans");
         m_dev_state[0]->set_position(Vector2i(323, 62));
         m_dev_angle[0] = new Label(swindow, "-/-", "sans");
         m_dev_angle[0]->set_position(Vector2i(516, 62));
@@ -869,7 +877,7 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
 
         label = swindow->add<Label>("灯光装置终端一", "sans-bold");
         label->set_position(Vector2i(40, 125));
-        m_dev_state[1] = new Label(swindow, "离线", "sans");
+        m_dev_state[1] = new Label(swindow, "离线:隔震关", "sans");
         m_dev_state[1]->set_position(Vector2i(323, 125));
         m_dev_angle[1] = new Label(swindow, "-/-", "sans");
         m_dev_angle[1]->set_position(Vector2i(516, 125));
@@ -1102,7 +1110,7 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         /* 屏蔽引导信息 */
         Button *guide_leave_btn = turntableWindow->add<Button>("", RED_LED3000_ASSETS_DIR"/leave.png", 0);
         guide_leave_btn->set_flags(Button::ToggleButton);
-        guide_leave_btn->set_position({230, 4});
+        guide_leave_btn->set_position({220, 4});
         guide_leave_btn->set_fixed_size({32, 32});
 #if 1
         guide_leave_btn->set_change_callback([guide_leave_btn](bool state) { std::cout << "Toggle button state: " << state << std::endl; do_with_guide_leave(guide_leave_btn, state);});
@@ -1114,15 +1122,22 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
 
         /* 转台复位按键 */
         Button *turntable_reset_btn = turntableWindow->add<Button>("", RED_LED3000_ASSETS_DIR"/turntable_reset.png", 0);
-        turntable_reset_btn->set_position({285, 4});
+        turntable_reset_btn->set_position({265, 4});
         turntable_reset_btn->set_fixed_size({32, 32});
         turntable_reset_btn->set_callback([this]() {
             new MessageDialog(this, MessageDialog::Type::Warning, "", "确认要复位当前转台么?", "确认", "取消", "", do_with_turntable_reset);
         });
 
+        /* 切换转台隔震状态 */
+        Button *turntable_shake_config_btn = turntableWindow->add<Button>("", RED_LED3000_ASSETS_DIR"/shake.png", 0);
+        turntable_shake_config_btn->set_flags(Button::ToggleButton);
+        turntable_shake_config_btn->set_position({310, 4});
+        turntable_shake_config_btn->set_fixed_size({32, 32});
+        turntable_shake_config_btn->set_change_callback([turntable_shake_config_btn](bool state) { std::cout << "Toggle button state: " << state << std::endl; do_with_turntable_auto_shake(turntable_shake_config_btn, state);});
+
         /* 扫海参数配置按键 */
         Button *scan_setting_btn = turntableWindow->add<Button>("", RED_LED3000_ASSETS_DIR"/setting_scan.png", 0);
-        scan_setting_btn->set_position({345, 4});
+        scan_setting_btn->set_position({355, 4});
         scan_setting_btn->set_fixed_size({32, 32});
         scan_setting_btn->set_callback([this]() {
             new MessageDialog(this, MessageDialog::Type::Question, "", "设置扫海参数", "确认", "取消", "", do_with_scan_setting, do_paint_scan_setting);
