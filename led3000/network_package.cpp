@@ -83,7 +83,7 @@ NetworkPackage::NetworkPackage(uint32_t src_ip, uint32_t dst_ip, uint8_t sn, uin
     }
     /* 强制源头地址 */
     m_src_ip_n = ntohl(inet_addr("168.9.0.1"));
-    if (len - CSSMXP_MSG_PREFIX > CSSMXP_PACKAGE_PREFIX) {
+    if (len - CSSMXP_MSG_PREFIX >= CSSMXP_PACKAGE_PREFIX) {
         m_payload_len = MK_PAYLOAD_LEN(len - CSSMXP_MSG_PREFIX);
         memcpy(m_payload, payload, m_payload_len);
     } else {
