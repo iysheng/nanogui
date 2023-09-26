@@ -583,19 +583,19 @@ int do_probe_respon(NetworkPackage &network_package, network_protocol_respon_typ
     int index = 0;
 
     for (; index < 2; index++) {
-        if (gs_screen->get_dev_state_label(index)->caption().find("故障") && \
+        if (string::npos != gs_screen->get_dev_state_label(index)->caption().find("故障") && \
             dev_status[index] != 1)
         {
             dev_status[index] = 1;
             respon_dev_status = true;
         }
-        else if (gs_screen->get_dev_state_label(index)->caption().find("离线") && \
+        else if (string::npos != gs_screen->get_dev_state_label(index)->caption().find("离线") && \
             dev_status[index] != 2)
         {
             dev_status[index] = 2;
             respon_dev_status = true;
         }
-        else if (gs_screen->get_dev_state_label(index)->caption().find("正常") && \
+        else if (string::npos != gs_screen->get_dev_state_label(index)->caption().find("正常") && \
             dev_status[index] != 0)
         {
             dev_status[index] = 0;
