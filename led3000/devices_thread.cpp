@@ -24,6 +24,11 @@
 #include <thread>
 #include <fcntl.h>
 
+// 1号船需要修正
+// 右舷：-90,270 -> -180, 180
+// 左舷：-270,90 -> -180, 180
+#define NEED_FIX_DIRECTION_90270
+
 using std::cout;
 using std::cerr;
 using std::endl;
@@ -463,11 +468,85 @@ static void _do_with_turntable_track_setting(led_device_t* devp, std::string mes
     write(devp->uart.fd, buffer, sizeof(buffer));
 }
 
+#ifdef NEED_FIX_DIRECTION_90270
+static inline float __fix_guide_direction_right(float raw_direction)
+{
+    if (raw_direction >= -180.0 && raw_direction < -90.0)
+    {
+        raw_direction += 360.0;
+    }
+
+    return raw_direction;
+}
+
+static inline float __fix_guide_direction_left(float raw_direction)
+{
+    if (raw_direction > 90.0 && raw_direction <= 180.0)
+    {
+        raw_direction -= 360.0;
+    }
+
+    return raw_direction;
+}
+
+// 修正指控转换完的 180180 -> 90270
+static float __fix_guide_direction_90270(int index, float raw_direction)
+{
+    // 如果是左舷
+    if (index == 0)
+    {
+        return __fix_guide_direction_left(raw_direction);
+    }
+    // 如果是右舷
+    else if (index == 1)
+    {
+        return __fix_guide_direction_right(raw_direction);
+    }
+}
+//////////////////////////////////////////////////////////////////////////////
+static inline float __fix_heart_direction_right(float raw_direction)
+{
+    if (raw_direction > 180.0 && raw_direction <= 360)
+    {
+        raw_direction -= 360.0;
+    }
+
+    return raw_direction;
+}
+
+static inline float __fix_heart_direction_left(float raw_direction)
+{
+    if (raw_direction >= -360.0 && raw_direction < -180.0)
+    {
+        raw_direction += 360.0;
+    }
+
+    return raw_direction;
+}
+// 修正心跳上报的 90290 -> 180180
+static float __fix_heart_direction_90270(int index, float raw_direction)
+{
+    // 如果是左舷
+    if (index == 0)
+    {
+        return __fix_heart_direction_left(raw_direction);
+    }
+    // 如果是右舷
+    else if (index == 1)
+    {
+        return __fix_heart_direction_right(raw_direction);
+    }
+}
+#endif
+
 static void _do_with_turntable_position_setting(led_device_t* devp, std::string message)
 {
     float direction_float, elevation_float;
     short direction, elevation;
     sscanf(message.c_str(), "%f,%f", &direction_float, &elevation_float);
+#ifdef NEED_FIX_DIRECTION_90270
+    direction_float = __fix_guide_direction_90270(devp->uart.index, direction_float);
+#endif
     direction = direction_float * 100;
     elevation = elevation_float * 100;
 
@@ -755,6 +834,9 @@ static int _do_analysis_hear_msg(int index, char * buffer, int len)
     turntable_horizon_float = (float)turntable_horizon / 100;
     turntable_vertical_float = (float)turntable_vertical / 100;
 
+#ifdef NEED_FIX_DIRECTION_90270
+    turntable_horizon_float = __fix_heart_direction_90270(index, turntable_horizon_float);
+#endif
     turntable_horizon_speed = buffer[12] << 8 | buffer[13];
     turntable_vertical_speed = buffer[14] << 8 | buffer[15];
 
