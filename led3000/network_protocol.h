@@ -108,6 +108,8 @@ public:
         if (direction_info > 180) {
             /* correct direction info with -180 ~ 0 */
             direction_info -= 360;
+        } else if (direction_info < -180) {
+            direction_info += 360;
         }
 
         vertical_info -= m_vertical_info;

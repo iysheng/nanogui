@@ -931,7 +931,7 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
             new MessageDialog(this, MessageDialog::Type::Warning, "", "", "确认", "取消", "", do_with_green_light_normal, do_paint_green_light_normal);
         });
 
-        Button *btn_green_blink = new Button(cwindow, "绿闪");
+        Button *btn_green_blink = new Button(cwindow, "爆闪绿");
         btn_green_blink->set_fixed_size({120, 92});
         btn_green_blink->set_position({140, 48});
         btn_green_blink->set_callback([&] {
@@ -964,7 +964,7 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         btn_white_led->set_callback([&] {
             new MessageDialog(this, MessageDialog::Type::Warning, "", "", "确认", "取消", "", do_with_white_light_normal, do_paint_white_light_normal);
         });
-        auto * btn_white_blink = new Button(cwindow, "白闪");
+        auto * btn_white_blink = new Button(cwindow, "爆闪白");
         btn_white_blink->set_position({140, 48});
         btn_white_blink->set_fixed_size({120, 92});
         btn_white_blink->set_callback([&] {
