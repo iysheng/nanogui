@@ -47,8 +47,8 @@ Widget::~Widget() {
 }
 
 void Widget::set_theme(Theme *theme) {
-    if (m_theme.get() == theme)
-        return;
+    // if (m_theme.get() == theme)
+        // return;
     m_theme = theme;
     for (auto child : m_children)
         child->set_theme(theme);

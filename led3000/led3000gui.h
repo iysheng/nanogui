@@ -481,6 +481,7 @@ private:
     const std::vector<Button *> *m_green_dev_control_btns;
     const std::vector<Button *> *m_white_dev_control_btns;
 
+    Button * m_disply_mode_btn; /* 切换日间和夜间模式 */
     Button * m_track_btn;
     Button * m_manual_btn;
     Button * m_scan_btn;

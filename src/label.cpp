@@ -28,7 +28,8 @@ Label::Label(Widget *parent, const std::string &caption, const std::string &font
 void Label::set_theme(Theme *theme) {
     Widget::set_theme(theme);
     if (m_theme) {
-        m_font_size = m_theme->m_standard_font_size;
+        // m_font_size = m_theme->m_standard_font_size;
+        /* 修改字体颜色 */
         m_color = m_theme->m_text_color;
     }
 }

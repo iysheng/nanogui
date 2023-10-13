@@ -1042,6 +1042,28 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         m_time4dispaly->set_position(Vector2i(1120, 30));
         m_time4dispaly->set_font_size(20);
 
+        // 显示夜间/日间模式切换按键
+        m_disply_mode_btn = swindow->add<Button>("", RED_LED3000_ASSETS_DIR"/display_mode.png", 0);
+        m_disply_mode_btn->set_position({1060, 13});
+        m_disply_mode_btn->set_fixed_size({50, 50});
+        m_disply_mode_btn->set_callback([=](){
+            static bool dark_mode = false;
+            Led3000Window * led3000Window = dynamic_cast<Led3000Window *>(m_disply_mode_btn->window()->parent());
+            Theme *raw_theme = led3000Window->theme();
+            if (!dark_mode)
+            {
+                raw_theme->m_text_color = Color(0x8b, 0x75, 0x00, 0xff);
+                led3000Window->set_theme(raw_theme);
+                dark_mode = true;
+            }
+            else
+            {
+                raw_theme->m_text_color = Color(0xfa, 0xfc, 0xff, 0xff);
+                led3000Window->set_theme(raw_theme);
+                dark_mode = false;
+            }
+        });
+
         sysconfig_btn = swindow->add<Button>("", RED_LED3000_ASSETS_DIR"/power.png", 0);
         sysconfig_btn->set_position({1219, 15});
         sysconfig_btn->set_fixed_size({46, 46});
