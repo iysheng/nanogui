@@ -611,6 +611,7 @@ target_include_directories(nanogui
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    /home/red/.local/m3568-sdk-v1.0.0-ga/host/aarch64-buildroot-linux-gnu/sysroot/usr/include
 
   PRIVATE
     ext/nanovg/src
@@ -745,12 +746,14 @@ if (NANOGUI_BUILD_EXAMPLES)
 
   add_custom_command(
     TARGET example1 POST_BUILD
-    COMMAND cp -frv example1 /var/lib/nfs -frv
+    #COMMAND cp -frv example1 /var/lib/nfs -frv
     VERBATIM)
 
   add_custom_command(
     TARGET ledmain POST_BUILD
-    COMMAND cp -frv ledmain /var/lib/nfs -frv
+    COMMAND cp -frv ledmain ledmain_no_strip
+    COMMAND aarch64-linux-strip ledmain
+    # COMMAND cp -frv ledmain /var/lib/nfs -frv
     VERBATIM)
 
 endif()
