@@ -1053,12 +1053,14 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
             if (!dark_mode)
             {
                 raw_theme->m_text_color = Color(0x8b, 0x75, 0x00, 0xff);
+                raw_theme->m_assets_suffix = ".dark";
                 led3000Window->set_theme(raw_theme);
                 dark_mode = true;
             }
             else
             {
                 raw_theme->m_text_color = Color(0xfa, 0xfc, 0xff, 0xff);
+                raw_theme->m_assets_suffix = "";
                 led3000Window->set_theme(raw_theme);
                 dark_mode = false;
             }

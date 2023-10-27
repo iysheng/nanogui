@@ -88,6 +88,7 @@ void Window::draw(NVGcontext *ctx) {
     nvgSave(ctx);
     nvgBeginPath(ctx);
     nvgRoundedRect(ctx, m_pos.x(), m_pos.y(), m_size.x(), m_size.y(), cr);
+    sync_background_image();
     if (m_background_image)
     {
         NVGpaint img_paint = nvgImagePattern(ctx, m_pos.x(), m_pos.y(), m_size.x(),
@@ -224,11 +225,24 @@ void Window::refresh_relative_placement() {
 void Window::set_background_image(const std::string &BackgroundImage)
 {
     NVGcontext *ctx = screen()->nvg_context();
+    m_background_image_name = BackgroundImage;
+    m_background_image_suffix_name  = m_theme->m_assets_suffix;
     if (m_background_image)
     {
         nvgDeleteImage(ctx, m_background_image);
     }
-    m_background_image = nvgCreateImage(ctx, BackgroundImage.c_str(), 0);
+    m_background_image = nvgCreateImage(ctx, (m_background_image_name + m_background_image_suffix_name).c_str(), 0);
+}
+
+void Window::sync_background_image(void)
+{
+    NVGcontext *ctx = screen()->nvg_context();
+    if (m_background_image_suffix_name != m_theme->m_assets_suffix)
+    {
+        nvgDeleteImage(ctx, m_background_image);
+        m_background_image_suffix_name =  m_theme->m_assets_suffix;
+        m_background_image = nvgCreateImage(ctx, (m_background_image_name + m_background_image_suffix_name).c_str(), 0);
+    }
 }
 
 NAMESPACE_END(nanogui)

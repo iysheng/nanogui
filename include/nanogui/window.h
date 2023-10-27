@@ -35,6 +35,8 @@ public:
     /// Set the background image
     void set_background_image(const std::string &BackgroundImage);
 
+    /// 同步背景图片
+    void sync_background_image(void);
     /// Is this a model dialog?
     bool modal() const { return m_modal; }
     /// Set whether or not this is a modal dialog
@@ -68,6 +70,8 @@ protected:
     virtual void refresh_relative_placement();
 protected:
     std::string m_title;
+    std::string m_background_image_name;
+    std::string m_background_image_suffix_name;
     Widget *m_button_panel;
     bool m_modal;
     bool m_drag;
