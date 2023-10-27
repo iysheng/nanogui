@@ -274,13 +274,6 @@ static void _do_with_turntable_stop(led_device_t* devp, std::string message)
 static void _do_with_turntable_mode_track(led_device_t* devp, std::string message)
 {
     int ret = 0;
-    uint8_t buffer[12] = {0X7E, 0X08 /* 帧长 */, 0X80, 0X11, 1 + devp->uart.index, 0X03 /* 追踪模式 */,
-                          0XFF, 0XFF, 0XFF, 0XFF, 0X00 /* 校验和 */, 0XE7
-                         };
-
-    buffer[10] = _get_xor(&buffer[2], 8);
-    write(devp->uart.fd, buffer, sizeof(buffer));
-
     char tcp_buffer[9] = {0XAA, 0XAA, 0X00, 0X00, 0X00, 0X09, 0XFD /* setting track enable */,
                           0X01, 0X5B /* 校验和 */
                          };

@@ -131,8 +131,10 @@ static int do_with_xy_bias(int x_bias, int y_bias)
     return 0;
 }
 
-
-
+static int x_turn_bais_last = INT_MAX, y_turn_bais_last = INT_MAX;
+// x 和 y 均在停止范围连续时间统计，防止错误发送停止指令,目前暂定 1.5 s 检测连续零点才会发送停止指令
+// 1.5 对应连续 150 次
+static int x_y_bias_zero_continue_times = 0;
 
 /**
   * @brief 对坐标信息进处理
@@ -141,7 +143,6 @@ static int do_with_xy_bias(int x_bias, int y_bias)
 static int do_with_handle_axis(float x_axis, float y_axis)
 {
     int x_turn_bais = 0, y_turn_bais = 0;
-    static int x_turn_bais_last = 0, y_turn_bais_last = 0;
 
     if (x_axis < X_LEFT_POINT) {
         /* TODO 左转 */
@@ -173,10 +174,8 @@ static int do_with_handle_axis(float x_axis, float y_axis)
         y_turn_bais_last = y_turn_bais;
     }
 
-    if (!x_turn_bais && !y_turn_bais) {
-        /* TODO 停止转台 */
-        do_xy_stop();
-    } else {
+    if (x_turn_bais || y_turn_bais) {
+        x_y_bias_zero_continue_times = 0;
         do_with_xy_bias(x_turn_bais, y_turn_bais);
     }
 
@@ -210,13 +209,32 @@ void *joystick_thread(void *arg)
     red_debug_lite("Oh no Hello joystick");
 
     while (1) {
+            // RedDebug::err("Begin catch joystick.");
         axes = glfwGetJoystickAxes(present, &axis_count);
         if (!axes)
+        {
+            // RedDebug::err("No catch joystick.:%d %d.", x_turn_bais_last, y_turn_bais_last);
+            if (!x_turn_bais_last && !y_turn_bais_last)
+            {
+                if (x_y_bias_zero_continue_times++ > 150) {
+                    /* TODO 停止转台 */
+                    do_xy_stop();
+                    x_turn_bais_last = INT_MAX;
+                    y_turn_bais_last = INT_MAX;
+                    x_y_bias_zero_continue_times = 0;
+                    // RedDebug::err("--------------------------------No catch joystick. just stop:%d\n", x_y_bias_zero_continue_times);
+                }
+            }
             continue;
+        }
+        // else
+        // {
+            // RedDebug::err("No catch joystick. %f, %f", axes[0], axes[1]);
+        // }
         /* TODO 检查工作模式，仅仅在手动模式时受操纵杆控制 */
         if (gs_screen->getJsonValue()->devices[gs_screen->getCurrentDevice()].turntable.mode == TURNTABLE_MANUAL_MODE)
             do_with_handle_axis(axes[0], axes[1]);
-        usleep(100000);
+        // usleep(100000);
 #if 0
         /* 目前测试
          * X 轴向中心数据是 479 ~ 521
