@@ -22,6 +22,7 @@ Window::Window(Widget *parent, const std::string &title, const std::string &Back
       m_drag(false), m_drag_enable(false) {
     if (!BackgroundImage.empty())
     {
+        m_background_image_name  = BackgroundImage;
         NVGcontext *ctx = screen()->nvg_context();
         m_background_image = nvgCreateImage(ctx, BackgroundImage.c_str(), 0);
     }
