@@ -1067,8 +1067,8 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
             }
             else
             {
-                raw_theme->m_button_gradient_top_focused        = Color(64, 255);
-                raw_theme->m_button_gradient_bot_focused        = Color(48, 255);
+                raw_theme->m_button_gradient_top_focused        = Color(0x2b, 0x5c, 0xd0, 255);
+                raw_theme->m_button_gradient_bot_focused        = Color(0x0f, 0x98, 0xe8, 255);
                 raw_theme->m_button_gradient_top_unfocused      = Color(0x31, 0x57, 0x97, 255);
                 raw_theme->m_button_gradient_bot_unfocused      = Color(0x31, 0x57, 0x97, 255);
                 raw_theme->m_button_gradient_top_pushed         = Color(0x2b, 0x5c, 0xd0, 255);

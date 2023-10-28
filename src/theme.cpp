@@ -42,13 +42,14 @@ Theme::Theme(NVGcontext *ctx) {
     m_border_dark                        = Color(29, 0);
     m_border_light                       = Color(92, 0);
     m_border_medium                      = Color(35, 255);
+    // 字体颜色修改这里
     m_text_color                         = Color(0xfa, 0xfc, 0xff, 0xff);
     m_disabled_text_color                = Color(255, 80);
     m_text_color_shadow                  = Color(0, 160);
     m_icon_color                         = m_text_color;
 
-    m_button_gradient_top_focused        = Color(64, 255);
-    m_button_gradient_bot_focused        = Color(48, 255);
+    m_button_gradient_top_focused        = Color(0x2b, 0x5c, 0xd0, 255);
+    m_button_gradient_bot_focused        = Color(0x0f, 0x98, 0xe8, 255);
     m_button_gradient_top_unfocused      = Color(0x31, 0x57, 0x97, 255);
     m_button_gradient_bot_unfocused      = Color(0x31, 0x57, 0x97, 255);
     m_button_gradient_top_pushed         = Color(0x2b, 0x5c, 0xd0, 255);
