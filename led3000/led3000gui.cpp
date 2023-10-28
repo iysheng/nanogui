@@ -925,21 +925,21 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         m_green_dev = new Label(cwindow, "灯光装置终端二 绿灯");
         m_green_dev->set_position({39, 9});
         Button *btn_green_led = new Button(cwindow, "常亮");
-        btn_green_led->set_fixed_size({120, 92});
-        btn_green_led->set_position({10, 48});
+        btn_green_led->set_fixed_size({120, 70});
+        btn_green_led->set_position({10, 70});
         btn_green_led->set_callback([&] {
             new MessageDialog(this, MessageDialog::Type::Warning, "", "", "确认", "取消", "", do_with_green_light_normal, do_paint_green_light_normal);
         });
 
         Button *btn_green_blink = new Button(cwindow, "爆闪绿");
-        btn_green_blink->set_fixed_size({120, 92});
-        btn_green_blink->set_position({140, 48});
+        btn_green_blink->set_fixed_size({120, 70});
+        btn_green_blink->set_position({140, 70});
         btn_green_blink->set_callback([&] {
             new MessageDialog(this, MessageDialog::Type::Question, "", "", "确认", "取消", "", do_with_green_light_blink, do_paint_green_light_blink);
         });
         Button *btn_green_mocode = new Button(cwindow, "莫码");
-        btn_green_mocode->set_fixed_size({120, 92});
-        btn_green_mocode->set_position({270, 48});
+        btn_green_mocode->set_fixed_size({120, 70});
+        btn_green_mocode->set_position({270, 70});
         btn_green_mocode->set_callback([&] {
             new MessageDialog(this, MessageDialog::Type::Question, "", "开启绿光莫码模式？", "确认", "取消", "", do_with_green_light_mocode, do_paint_green_light_mocode);
         });
@@ -959,20 +959,20 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
         m_white_dev = new Label(cwindow, "灯光装置终端二 白灯");
         m_white_dev->set_position({39, 9});
         auto * btn_white_led = new Button(cwindow, "常亮");
-        btn_white_led->set_position({10, 48});
-        btn_white_led->set_fixed_size({120, 92});
+        btn_white_led->set_position({10, 70});
+        btn_white_led->set_fixed_size({120, 70});
         btn_white_led->set_callback([&] {
             new MessageDialog(this, MessageDialog::Type::Warning, "", "", "确认", "取消", "", do_with_white_light_normal, do_paint_white_light_normal);
         });
         auto * btn_white_blink = new Button(cwindow, "爆闪白");
-        btn_white_blink->set_position({140, 48});
-        btn_white_blink->set_fixed_size({120, 92});
+        btn_white_blink->set_position({140, 70});
+        btn_white_blink->set_fixed_size({120, 70});
         btn_white_blink->set_callback([&] {
             new MessageDialog(this, MessageDialog::Type::Question, "", "", "确认", "取消", "", do_with_white_light_blink, do_paint_white_light_blink);
         });
         auto * btn_white_mocode = new Button(cwindow, "莫码");
-        btn_white_mocode->set_position({270, 48});
-        btn_white_mocode->set_fixed_size({120, 92});
+        btn_white_mocode->set_position({270, 70});
+        btn_white_mocode->set_fixed_size({120, 70});
         btn_white_mocode->set_callback([&] {
             new MessageDialog(this, MessageDialog::Type::Question, "", "开启白光莫码模式？", "确认", "取消", "", do_with_white_light_mocode, do_paint_white_light_mocode);
         });
@@ -1192,8 +1192,8 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
             this->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
         });
         btn_ai->set_flags(Button::RadioButton);
-        btn_ai->set_fixed_size({120, 92});
-        btn_ai->set_position({10, 48});
+        btn_ai->set_fixed_size({120, 70});
+        btn_ai->set_position({10, 70});
         auto *btn_manual = turntableWindow->add<Button>("手动");
         btn_manual->set_callback([&] {
             this->getJsonValue()->devices[this->getCurrentDevice()].turntable.mode = TURNTABLE_MANUAL_MODE;
@@ -1203,8 +1203,8 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
             this->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
         });
         btn_manual->set_flags(Button::RadioButton);
-        btn_manual->set_fixed_size({120, 92});
-        btn_manual->set_position({140, 48});
+        btn_manual->set_fixed_size({120, 70});
+        btn_manual->set_position({140, 70});
         auto *btn_scan = turntableWindow->add<Button>("扫海");
         btn_scan->set_callback([&] {
             this->getJsonValue()->devices[this->getCurrentDevice()].turntable.mode = TURNTABLE_SCAN_MODE;
@@ -1214,8 +1214,8 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
             this->getJsonQueue().put(PolyM::DataMsg<std::string>(POLYM_BUTTON_CONFIRM, "json"));
         });
         btn_scan->set_flags(Button::RadioButton);
-        btn_scan->set_fixed_size({120, 92});
-        btn_scan->set_position({270, 48});
+        btn_scan->set_fixed_size({120, 70});
+        btn_scan->set_position({270, 70});
         set_turntable_mode_btns(btn_ai, btn_manual, btn_scan);
         /* 在这里更新 button 的状态,根据系统配置参数更新转台工作在哪种模式 */
         switch (mJsonValue.devices[0].turntable.mode) {
