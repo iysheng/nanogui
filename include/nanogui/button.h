@@ -123,6 +123,9 @@ public:
     virtual bool mouse_button_event(const Vector2i &p, int button, bool down, int modifiers) override;
     /// Responsible for drawing the Button.
     virtual void draw(NVGcontext *ctx) override;
+
+    /// 同步背景图片
+    void sync_background_image(void);
 protected:
     /// The caption of this Button.
     std::string m_caption;
@@ -145,6 +148,9 @@ protected:
      * */
     int m_background_image;
     int m_pushed_background_image; /* 触发 pushed 的显示图片 */
+    std::string m_background_image_name;
+    std::string m_pushed_background_image_name;
+    std::string m_background_image_suffix_name;
 
     /// The position to draw the icon at.
     IconPosition m_icon_position;

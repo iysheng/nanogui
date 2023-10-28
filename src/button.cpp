@@ -20,7 +20,7 @@ NAMESPACE_BEGIN(nanogui)
 Button::Button(Widget *parent, const std::string &caption, int icon)
     : Widget(parent), m_caption(caption), m_icon(icon), m_background_image(0),
       m_pushed_background_image(0), m_icon_position(IconPosition::LeftCentered), m_pushed(false),
-      m_flags(NormalButton), m_background_color(Color(0x31, 0x57, 0x97, 255)), m_pseudo(false),
+      m_flags(NormalButton), m_background_color(Color(0x0, 0x0)), m_pseudo(false),
       m_text_color(Color(0, 0)) { }
 
 Button::Button(Widget *parent, const std::string &caption, const std::string &BackgroundImage, int icon)
@@ -31,6 +31,7 @@ Button::Button(Widget *parent, const std::string &caption, const std::string &Ba
     if (!BackgroundImage.empty())
     {
         NVGcontext *ctx = screen()->nvg_context();
+        m_background_image_name = BackgroundImage;
         m_background_image = nvgCreateImage(ctx, BackgroundImage.c_str(), 0);
     }
 }
@@ -43,10 +44,12 @@ Button::Button(Widget *parent, const std::string &caption, const std::string &Ba
     NVGcontext *ctx = screen()->nvg_context();
     if (!BackgroundImage.empty())
     {
+        m_background_image_name = BackgroundImage;
         m_background_image = nvgCreateImage(ctx, BackgroundImage.c_str(), 0);
     }
     if (!PushedBackgroundImage.empty())
     {
+        m_pushed_background_image_name = PushedBackgroundImage;
         m_pushed_background_image = nvgCreateImage(ctx, PushedBackgroundImage.c_str(), 0);
     }
 }
@@ -160,6 +163,25 @@ bool Button::mouse_button_event(const Vector2i &p, int button, bool down, int mo
     return false;
 }
 
+void Button::sync_background_image(void)
+{
+    NVGcontext *ctx = screen()->nvg_context();
+    if (m_background_image_suffix_name != m_theme->m_assets_suffix)
+    {
+        m_background_image_suffix_name =  m_theme->m_assets_suffix;
+        if (m_background_image)
+        {
+            nvgDeleteImage(ctx, m_background_image);
+            m_background_image = nvgCreateImage(ctx, (m_background_image_name + m_background_image_suffix_name).c_str(), 0);
+        }
+        if (m_pushed_background_image)
+        {
+            nvgDeleteImage(ctx, m_pushed_background_image);
+            m_pushed_background_image = nvgCreateImage(ctx, (m_pushed_background_image_name + m_background_image_suffix_name).c_str(), 0);
+        }
+    }
+}
+
 void Button::draw(NVGcontext *ctx) {
     /* 执行 child 的 widgets 的 draw() */
     Widget::draw(ctx);
@@ -168,6 +190,7 @@ void Button::draw(NVGcontext *ctx) {
     if (m_pseudo)
         return;
 
+    sync_background_image();
     NVGcolor grad_top = m_theme->m_button_gradient_top_unfocused;
     NVGcolor grad_bot = m_theme->m_button_gradient_bot_unfocused;
 
