@@ -80,7 +80,7 @@ void *network_thread(void *arg)
 
     if (gs_network_fd[0].udp.get_socket() > 0) {
         if (network_protocol_registe(NETWORK_PROTOCOL_TYPE_SEND_GUIDE, gs_network_fd[0].udp) < 0) {
-            RedDebug::log("Failed register network protocol.");
+            RedDebug::err("Failed register network protocol.");
         } else {
             RedDebug::log("Register guide socket success.");
         }

@@ -217,7 +217,7 @@ int NetworkTcp::send2server(char *buffer, uint16_t len, int flags)
 {
     int ret;
 
-        RedDebug::err("start send2server #############################");
+        // RedDebug::err("start send2server #############################");
     if ((m_socket <= 0) && (try_to_connect() <= 0)) {
         RedDebug::err("invalid socket and try to connect server failed");
         return -1;
@@ -239,7 +239,7 @@ int NetworkTcp::send2server(char *buffer, uint16_t len, int flags)
         }
     }
     m_index++;
-        RedDebug::err("end send2server #############################");
+        // RedDebug::err("end send2server #############################");
 
     return ret;
 }

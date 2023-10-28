@@ -51,7 +51,9 @@ typedef struct {
     uartport_t uart;
     Led3000Window *screen;
     NetworkTcp tcp_fd;
+#ifdef TCP_FD_DEBUG
     NetworkTcp tcp_fd_debug;
+#endif
     bool focal_auto;
     bool shake_auto; /* 隔震开关 1 开启， 0 关闭 */
 } led_device_t;
@@ -268,7 +270,9 @@ static void _do_with_turntable_stop(led_device_t* devp, std::string message)
     if (ret == -1) {
         red_debug_lite("Failed exit mode track mode");
     }
+#ifdef TCP_FD_DEBUG
     devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
+#endif
 }
 
 static void _do_with_turntable_mode_track(led_device_t* devp, std::string message)
@@ -283,7 +287,9 @@ static void _do_with_turntable_mode_track(led_device_t* devp, std::string messag
     } else {
         RedDebug::hexdump("TRACK TARGET", (char*)tcp_buffer, sizeof(tcp_buffer));
     }
+#ifdef TCP_FD_DEBUG
     devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
+#endif
 }
 
 /*
@@ -301,7 +307,9 @@ static void _do_with_turntable_mode_fuzzy_track(led_device_t* devp, std::string 
     } else {
         RedDebug::hexdump("FUZZY TRACK TARGET", (char*)tcp_buffer, sizeof(tcp_buffer));
     }
+#ifdef TCP_FD_DEBUG
     devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
+#endif
 }
 
 static void _do_with_turntable_mode_scan(led_device_t* devp, std::string message)
@@ -321,7 +329,9 @@ static void _do_with_turntable_mode_scan(led_device_t* devp, std::string message
     if (ret == -1) {
         red_debug_lite("Failed exit mode track mode");
     }
+#ifdef TCP_FD_DEBUG
     devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
+#endif
 }
 
 /* 扫海模式参数配置
@@ -455,7 +465,9 @@ static void _do_with_turntable_track_setting(led_device_t* devp, std::string mes
     } else {
         RedDebug::hexdump("TRACK TARGET", (char*)tcp_buffer, sizeof(tcp_buffer));
     }
+#ifdef TCP_FD_DEBUG
     devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
+#endif
     usleep(10000);
 
     write(devp->uart.fd, buffer, sizeof(buffer));
@@ -559,7 +571,9 @@ static void __do_with_focal_oneshot(led_device_t* devp, std::string message)
                          };
     tcp_buffer[8] = _get_sum(&tcp_buffer[0], 8);
     devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
+#ifdef TCP_FD_DEBUG
     devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
+#endif
     RedDebug::log("focal oneshot");
 }
 
@@ -571,7 +585,9 @@ static void __do_with_focal_auto(led_device_t* devp, std::string message)
                          };
     tcp_buffer[8] = _get_sum(&tcp_buffer[0], 8);
     devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
+#ifdef TCP_FD_DEBUG
     devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
+#endif
     RedDebug::log("focal auto");
 }
 
@@ -583,7 +599,9 @@ static void __do_with_focal_manual(led_device_t* devp, std::string message)
                          };
     tcp_buffer[8] = _get_sum(&tcp_buffer[0], 8);
     devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
+#ifdef TCP_FD_DEBUG
     devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
+#endif
     RedDebug::log("focal manual");
 }
 
@@ -609,7 +627,9 @@ static void __do_with_focal_add(led_device_t* devp, std::string message)
                          };
     tcp_buffer[8] = _get_sum(&tcp_buffer[0], 8);
     devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
+#ifdef TCP_FD_DEBUG
     devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
+#endif
     RedDebug::log("focal manual");
 }
 
@@ -621,7 +641,9 @@ static void __do_with_focal_dec(led_device_t* devp, std::string message)
                          };
     tcp_buffer[8] = _get_sum(&tcp_buffer[0], 8);
     devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
+#ifdef TCP_FD_DEBUG
     devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
+#endif
     RedDebug::log("focal manual");
 }
 
@@ -633,7 +655,9 @@ static void __do_with_fov_start_dec(led_device_t* devp, std::string message)
                          };
     tcp_buffer[8] = _get_sum(&tcp_buffer[0], 8);
     devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
+#ifdef TCP_FD_DEBUG
     devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
+#endif
     RedDebug::log("fov dec start");
 }
 
@@ -645,7 +669,9 @@ static void __do_with_fov_start_inc(led_device_t* devp, std::string message)
                          };
     tcp_buffer[8] = _get_sum(&tcp_buffer[0], 8);
     devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
+#ifdef TCP_FD_DEBUG
     devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
+#endif
     RedDebug::log("fov inc start");
 }
 
@@ -657,7 +683,9 @@ static void __do_with_fov_end_adj(led_device_t* devp, std::string message)
                          };
     tcp_buffer[8] = _get_sum(&tcp_buffer[0], 8);
     devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
+#ifdef TCP_FD_DEBUG
     devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
+#endif
     RedDebug::log("fov end adj");
 }
 
@@ -694,7 +722,9 @@ static void _do_with_focal(led_device_t* devp, std::string message)
     }
     tcp_buffer[7] = _get_sum(&tcp_buffer[0], 7);
     devp->tcp_fd.send2server(tcp_buffer, sizeof(tcp_buffer));
+#ifdef TCP_FD_DEBUG
     devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
+#endif
     RedDebug::log("focal:%s", message.c_str());
 }
 
@@ -1087,22 +1117,29 @@ void *devices_thread(void *arg)
 
     NetworkTcp tcp_client("192.168.1.11", 1025);
     gs_led_devices[0].tcp_fd = tcp_client;
-    NetworkTcp tcp_client_debug("192.168.1.2", 5000);
+#ifdef TCP_FD_DEBUG
+    NetworkTcp tcp_client_debug("192.168.1.99", 5000);
     gs_led_devices[0].tcp_fd_debug = tcp_client_debug;
+#endif
 
     NetworkTcp tcp_client2("192.168.1.12", 1025);
     gs_led_devices[1].tcp_fd = tcp_client2;
-    NetworkTcp tcp_client2_debug("192.168.1.2", 5001);
+#ifdef TCP_FD_DEBUG
+    NetworkTcp tcp_client2_debug("192.168.1.99", 5001);
     gs_led_devices[1].tcp_fd_debug = tcp_client2_debug;
+#endif
 
     gsDevice0Thread.detach();
     gsDevice1Thread.detach();
     gsDevicesGuardThread.detach();
 
+#ifdef TCP_FD_DEBUG
     tcp_client_debug.send2server("Hello Red", strlen("Hello Red"));
     tcp_client2_debug.send2server("Hello Red", strlen("Hello Red"));
+#endif
     printf("send data to network tcp");
     while (1) {
+        /* TODO 读取温度信息,高温时开启风扇 */
         sleep(10000000);
     }
 
