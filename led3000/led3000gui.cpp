@@ -1062,6 +1062,7 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
                 raw_theme->m_text_color = Color(0x8b, 0x75, 0x00, 0xff);
                 raw_theme->m_assets_suffix = ".dark";
                 led3000Window->set_theme(raw_theme);
+                led3000Window->set_background(Color(0x46, 0x46, 0x46, 255));
                 dark_mode = true;
             }
             else
@@ -1076,6 +1077,7 @@ Led3000Window::Led3000Window(): Screen(Vector2i(1280, 800), "NanoGUI Test", fals
                 raw_theme->m_text_color = Color(0xfa, 0xfc, 0xff, 0xff);
                 raw_theme->m_assets_suffix = "";
                 led3000Window->set_theme(raw_theme);
+                led3000Window->set_background(Color(0x17, 0x30, 0x69, 0xff));
                 dark_mode = false;
             }
         });
