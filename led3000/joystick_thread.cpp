@@ -216,7 +216,7 @@ void *joystick_thread(void *arg)
             // RedDebug::err("No catch joystick.:%d %d.", x_turn_bais_last, y_turn_bais_last);
             if (!x_turn_bais_last && !y_turn_bais_last)
             {
-                if (x_y_bias_zero_continue_times++ > 10) {
+                if (x_y_bias_zero_continue_times++ > 5) {
                     /* TODO 停止转台 */
                     do_xy_stop();
                     x_turn_bais_last = INT_MAX;
