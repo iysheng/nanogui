@@ -68,6 +68,7 @@ protected:
     std::string m_caption;
     std::string m_font;
     int m_icon;
+    /* 字体颜色 */
     Color m_color;
 };
 
