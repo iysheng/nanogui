@@ -334,9 +334,9 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
     gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_TURNTABLE_POSITION_SETTING, string(target_position_buffer)));
     if (led_type == NETWORK_PROTOCOL_WHITE_LED_TYPE) {
         if (led_mode == NETWORK_PROTOCOL_NORMAL_LED_MODE) {
-            gs_screen->getJsonValue()->devices[dev_num].white_led.normal_status = 100;
+            gs_screen->getJsonValue()->devices[dev_num].white_led.normal_status = 10;
             gs_screen->getJsonValue()->devices[dev_num].white_led.mode = LED_NORMAL_MODE;
-            gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_WHITE_NORMAL_SETTING, to_string(100)));
+            gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_WHITE_NORMAL_SETTING, to_string(10)));
         } else if (led_mode == NETWORK_PROTOCOL_BINK_LED_MODE) {
             /* 默认 5HZ 爆闪 */
             gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_WHITE_BLINK_SETTING, to_string(5)));
@@ -357,9 +357,9 @@ static int do_with_network_recv_guide(NetworkPackage &net_package)
         }
 
         if (led_mode == NETWORK_PROTOCOL_NORMAL_LED_MODE) {
-            gs_screen->getJsonValue()->devices[dev_num].green_led.normal_status = 100;
+            gs_screen->getJsonValue()->devices[dev_num].green_led.normal_status = 10;
             gs_screen->getJsonValue()->devices[dev_num].green_led.mode = LED_NORMAL_MODE;
-            gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_GREEN_NORMAL_SETTING, to_string(100)));
+            gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_GREEN_NORMAL_SETTING, to_string(10)));
         } else if (led_mode == NETWORK_PROTOCOL_BINK_LED_MODE) {
             /* 默认 5HZ 爆闪 */
             gs_screen->getDeviceQueue(dev_num).put(PolyM::DataMsg<std::string>(POLYM_GREEN_BLINK_SETTING, to_string(5)));
