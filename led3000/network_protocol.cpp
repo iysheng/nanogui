@@ -829,6 +829,7 @@ int update_offinfo2network(void)
     do_report_dev_off(network_package);
     /* 无效所有网络句柄,防止发送关机后还会发送其他状态报文 */
     network_fds_invalid();
+    usleep(1000000);
     return 0;
 }
 

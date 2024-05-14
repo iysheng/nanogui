@@ -79,6 +79,8 @@ public:
 
         // emplace the request in the map
         std::unique_lock<std::mutex> lock(responseMapMutex_);
+        // 插入指定 msg id 的 map 成员，如果该 key 已经存在 map 中，那么返回这个元素，否则返回
+        // 这个迭代器
         auto it = responseMap_.emplace(
             std::make_pair(msg.getUniqueId(), &req)).first;
 

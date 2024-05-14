@@ -66,7 +66,7 @@ private:
  * the reference count is very compactly integrated into the base object
  * itself.
  */
-/* 定义的模板类 */
+/* 定义的类模板 */
 template <typename T> class ref {
 public:
     /// Create a ``nullptr``-valued reference
@@ -79,12 +79,15 @@ public:
     }
 
     /// Copy constructor
+    // 拷贝构造函数
     ref(const ref &r) : m_ptr(r.m_ptr) {
         if (m_ptr)
+            /* 增加引用计数 */
             ((Object *) m_ptr)->inc_ref();
     }
 
     /// Move constructor
+    // 移动构造函数
     ref(ref &&r) noexcept : m_ptr(r.m_ptr) {
         r.m_ptr = nullptr;
     }
@@ -108,13 +111,15 @@ public:
     }
 
     /// Overwrite this reference with another reference
-    // 函数符 = 重载
+    // 函数符 = 重载, 是拷贝赋值构造函数
     ref& operator=(const ref& r) noexcept {
+
         if (m_ptr != r.m_ptr) {
             if (r.m_ptr)
                 ((Object *) r.m_ptr)->inc_ref();
             if (m_ptr)
                 ((Object *) m_ptr)->dec_ref();
+            /* 修改了 m_ptr 指针，指向符号右侧的对象成员 */
             m_ptr = r.m_ptr;
         }
         return *this;

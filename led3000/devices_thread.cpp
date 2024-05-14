@@ -27,7 +27,7 @@
 // 1号船需要修正
 // 右舷：-90,270 -> -180, 180
 // 左舷：-270,90 -> -180, 180
-#define NEED_FIX_DIRECTION_90270
+// #define NEED_FIX_DIRECTION_90270
 
 using std::cout;
 using std::cerr;
@@ -468,7 +468,7 @@ static void _do_with_turntable_track_setting(led_device_t* devp, std::string mes
 #ifdef TCP_FD_DEBUG
     devp->tcp_fd_debug.send2server(tcp_buffer, sizeof(tcp_buffer));
 #endif
-    usleep(10000);
+    usleep(250000);
 
     write(devp->uart.fd, buffer, sizeof(buffer));
 }
