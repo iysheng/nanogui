@@ -274,8 +274,8 @@ int NetworkUdp::recv_from_server(char *buffer, uint16_t len, int flags)
         if (errno == EAGAIN)
         {
             /* mark socket invalid */
-            close(m_socket);
-            m_socket = -1;
+            // close(m_socket);
+            // m_socket = -1;
         }
         errno = 0;
     } else if (ret > 0) {
