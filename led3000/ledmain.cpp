@@ -51,25 +51,25 @@ static void signal_func4trace(int sig, siginfo_t *info, void *secret)
     char **strings;
 
     nptrs = backtrace(buffer, BT_BUF_SIZE);
-    printf("backtrace() returned %d addresses sig=%d\n", nptrs, sig);
+    RedDebug::log("backtrace() returned %d addresses sig=%d\n", nptrs, sig);
 
     /* The call backtrace_symbols_fd(buffer, nptrs, STDOUT_FILENO)
        would produce similar output to the following: */
 
     strings = backtrace_symbols(buffer, nptrs);
     if (strings == NULL) {
-        perror("backtrace_symbols");
+        RedDebug::err("backtrace_symbols");
         exit(EXIT_FAILURE);
     }
 
     for (j = 0; j < nptrs; j++)
-        printf("%s\n", strings[j]);
+        RedDebug::log("%s\n", strings[j]);
 
     free(strings);
     if (!prctl(PR_GET_NAME, pthread_name))
-        printf("thread_name=%s\n", pthread_name);
+        RedDebug::log("thread_name=%s\n", pthread_name);
     else
-        perror("failed to get thread name\n");
+        RedDebug::err("failed to get thread name\n");
 
     exit(0);
 }
@@ -98,7 +98,7 @@ static int init_backtrace(signal_func4trace_t func4trace)
     LED3000_INSTALL_SIGNAL(SIGUSR1);
     LED3000_INSTALL_SIGNAL(SIGSEGV);
     LED3000_INSTALL_SIGNAL(SIGUSR2);
-    //LED3000_INSTALL_SIGNAL(SIGPIPE);
+    // LED3000_INSTALL_SIGNAL(SIGPIPE);
     signal(SIGPIPE, SIG_IGN);
     LED3000_INSTALL_SIGNAL(SIGALRM);
     LED3000_INSTALL_SIGNAL(SIGTERM);

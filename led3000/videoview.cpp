@@ -574,12 +574,15 @@ re_open:
         return -1;
     }
 
+    // 这里崩溃了
     value = avformat_open_input(&p_avformat_context, p_video_obj->mSrcUrl, NULL, &options);
 
     if (value) {
         av_strerror(value, errbuf, sizeof(errbuf));
         red_debug_lite("Failed open av input:%d  %s src=%s\n", value, errbuf, p_video_obj->mSrcUrl);
         sleep(1);
+        avformat_free_context(p_avformat_context);
+        p_avformat_context = NULL;
         goto re_open;
         //return -3;
     } else {
