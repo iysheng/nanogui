@@ -278,7 +278,6 @@ void dump_file(char * prefix, char *data, int data_len)
 int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_buffer, char *crop_buffer = nullptr)
 {
     RK_U32 pkt_done = 0;
-    RK_U32 pkt_eos  = 0;
     RK_U32 err_info = 0;
     MPP_RET ret = MPP_OK;
     MppCtx ctx  = data->ctx;
@@ -301,11 +300,11 @@ int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_b
     rga_buffer_t crop;
     im_rect crop_rect;
 #endif
+    int frame_counts = 0;
 
     ret = mpp_packet_init(&packet, av_packet->data, av_packet->size);
     mpp_packet_set_pts(packet, av_packet->pts);
 
-    do {
         RK_S32 times = 5;
         // send the packet first if packet is not done
         if (!pkt_done) {
@@ -365,10 +364,10 @@ int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_b
                         red_debug_lite("解码的帧出错了 decoder_get_frame get err info:%d discard:%d.\n",
                                mpp_frame_get_errinfo(frame), mpp_frame_get_discard(frame));
                     }
-                    data->frame_count++;
                     /* 如果成功解码了一帧 */
                     /*  准备显示这个 frame */
-                    if (!err_info) {
+                    else if (!err_info) {
+                        data->frame_count++;
                         /* 获取这个帧的 buffer 信息 */
                         buffer = mpp_frame_get_buffer(frame);
                         buf_size = mpp_frame_get_buf_size(frame);
@@ -417,7 +416,7 @@ int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_b
                         ret = (MPP_RET)imcheck(src, crop, crop_rect, src_rect, IM_CROP);
                         if (IM_STATUS_NOERROR != ret) {
                             red_debug_lite("%d, check error! %s", __LINE__, imStrError((IM_STATUS)ret));
-                            return -1;
+                            goto end;
                         }
 
                         ret = (MPP_RET)imcrop(src,
@@ -434,15 +433,17 @@ int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_b
                         ret = (MPP_RET)imcheck(crop, dst, crop_rect, dst_rect);
                         if (IM_STATUS_NOERROR != ret) {
                             red_debug_lite("%d, check error! %s", __LINE__, imStrError((IM_STATUS)ret));
-                            return -1;
+                            goto end;
                         }
                         ret = (MPP_RET)imresize(crop, dst);
+                        frame_counts ++;
+                        // red_debug_lite("hey hey display here:%x %x %p\n", *(unsigned int *)display_buffer, *((unsigned int *)display_buffer + 1), display_buffer);
                         //dump_file("imcrop", display_buffer, 4 * VIDEO_SHOW_FIXED_HEIGH * VIDEO_SHOW_FIXED_WIDTH);
 #else
                         ret = (MPP_RET)imcheck(src, dst, src_rect, dst_rect);
                         if (IM_STATUS_NOERROR != ret) {
                             red_debug_lite("%d, check error! %s", __LINE__, imStrError((IM_STATUS)ret));
-                            return -1;
+                            goto end;
                         }
                         ret = (MPP_RET)imresize(src, dst);
 #endif
@@ -455,18 +456,20 @@ int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_b
                 frame = NULL;
                 get_frm = 1;
             }
+            else
+            {
+                if (frame_counts == 0)
+                {
+                    ret = MPP_NOK;
+                }
+                goto end;
+            }
 
             // try get runtime frame memory usage
             if (data->frm_grp) {
                 size_t usage = mpp_buffer_group_usage(data->frm_grp);
                 if (usage > data->max_usage)
                     data->max_usage = usage;
-            }
-
-            // if last packet is send but last frame is not found continue
-            if (pkt_eos && pkt_done && !frm_eos) {
-                msleep(1);
-                continue;
             }
 
             if (frm_eos) {
@@ -476,33 +479,12 @@ int mpp_decode_simple(MpiDecLoopData *data, AVPacket *av_packet, char *display_b
 
             if (data->frame_num > 0 && data->frame_count >= data->frame_num) {
                 data->eos = 1;
+                red_debug_lite("reach max frame number %d\n", data->frame_count);
                 break;
             }
-
-            if (get_frm)
-                continue;
-            break;
         } while (1);
 
-        if (data->frame_num > 0 && data->frame_count >= data->frame_num) {
-            data->eos = 1;
-            red_debug_lite("reach max frame number %d\n", data->frame_count);
-            break;
-        }
-
-        if (pkt_done) {
-            break;
-        }
-
-        /*
-         * why sleep here:
-         * mpi->decode_put_packet will failed when packet in internal queue is
-         * full,waiting the package is consumed .Usually hardware decode one
-         * frame which resolution is 1080p needs 2 ms,so here we sleep 3ms
-         * * is enough.
-         */
-        msleep(3);
-    } while (1);
+end:
     mpp_packet_deinit(&packet);
 
     return ret;
@@ -675,29 +657,22 @@ just_draw:
         dump_file("hikraw", (char *)packet.data, packet.size);
 #endif
         if (ret < 0) {
-            red_debug_lite("Failed get frame 00000000000 %d\n", p_video_obj->m_no_frame_counts++);
+            red_debug_lite("Failed get frame %d", p_video_obj->m_no_frame_counts++);
             avcodec_send_packet(p_avcodec_context, NULL);
-            if (p_video_obj->m_no_frame_counts < 100)
-                continue;
-            else {
-                p_video_obj->m_no_frame_counts = 0;
-                p_video_obj->mStatus = R_VIDEO_UNINITLED;
-                _do_reopen_prepare(p_frame, p_avformat_context, p_avcodec_context);
-                p_frame = NULL;
-                p_avformat_context = NULL;
-                p_avcodec_context = NULL;
-                /* 需要重新使能设置 options
-                 * 因为 avformat_open_input 成功后会释放 otions 的相关资源
-                 * */
-                options_need_set = 1;
-                goto re_open;
-            }
         } else if (packet.stream_index != video_stream_index) {
-            red_debug_lite("No video frame 11111111111\n");
+            red_debug_lite("No video frame");
         } else {
-            p_video_obj->m_no_frame_counts = 0;
 #ifdef LED3000_MPP_H265
-            mpp_decode_simple(&mpp_data, &packet, (char *)p_video_obj->m_pixels, (char *)p_video_obj->m_crop4h265);
+            ret = mpp_decode_simple(&mpp_data, &packet, (char *)p_video_obj->m_pixels, (char *)p_video_obj->m_crop4h265);
+            if (ret == MPP_OK)
+            {
+                p_video_obj->m_no_frame_counts = 0;
+            }
+            else
+            {
+                if (p_video_obj->m_no_frame_counts++ > 0)
+                red_debug_lite("Failed decode frame %d@%d", p_video_obj->m_no_frame_counts++, ret);
+            }
 #else
             mpp_decode_simple(&mpp_data, &packet, (char *)p_video_obj->m_pixels);
 #endif
@@ -705,6 +680,22 @@ just_draw:
                 p_video_obj->mStatus = R_VIDEO_INITLED;
         }
         av_packet_unref(&packet);
+
+        if (p_video_obj->m_no_frame_counts < 100)
+            continue;
+        else {
+            p_video_obj->m_no_frame_counts = 0;
+            p_video_obj->mStatus = R_VIDEO_UNINITLED;
+            _do_reopen_prepare(p_frame, p_avformat_context, p_avcodec_context);
+            p_frame = NULL;
+            p_avformat_context = NULL;
+            p_avcodec_context = NULL;
+            /* 需要重新使能设置 options
+             * 因为 avformat_open_input 成功后会释放 otions 的相关资源
+             * */
+            options_need_set = 1;
+            goto re_open;
+        }
     }
 exit:
     /* 标记状态为未初始化 */
@@ -732,7 +723,7 @@ exit:
 }
 
 VideoView::VideoView(Widget* parent, int index = 0): ImageView(parent), m_texture(nullptr), m_pixels(nullptr), m_crop4h265(nullptr),
-    m_thread(nullptr), mSrcUrl("rtsp://admin:jariled123@192.168.100.64"), m_no_frame_counts(0), mIndex(index)
+    m_thread(nullptr), mSrcUrl("rtsp://admin:jariled123@192.168.100.64"), m_no_frame_counts(0), mIndex(index), mStatus(R_VIDEO_UNINITLED)
 {
     Window * wnd = parent->window();
     Screen* screen = dynamic_cast<Screen*>(wnd->parent());
@@ -756,6 +747,10 @@ VideoView::~VideoView() {}
 /* 图像绘制函数 */
 void VideoView::draw(NVGcontext *ctx)
 {
+    // red_debug_lite("status=%u %p\n", mStatus, m_pixels);
+    // if (m_pixels)
+    // red_debug_lite("value=%x\n", \
+        // *(unsigned int *)m_pixels);
     if (mStatus == R_VIDEO_INITLED) {
         if (m_texture) {
             if (m_fixed_size != Vector2i(0)) {

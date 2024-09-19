@@ -16,6 +16,7 @@ using namespace std;
 
 /* 默认设置 socket 为无阻塞模式 */
 #define SOCKET_NO_BLOCK
+//#define SUIJIAN_MODE
 
 int NetworkUdp::gs_socket_udp_alone_fd = -1;
 
@@ -86,6 +87,7 @@ int NetworkUdp::try_to_connect(void)
     }
 
     int ret;
+#ifndef SUIJIAN_MODE
     struct in_addr dstip_in_addr;
     dstip_in_addr.s_addr = ((sockaddr_in *)(this->addrinfo()->ai_addr))->sin_addr.s_addr;
     struct ip_mreq req = {0};//结构体对象
@@ -98,6 +100,7 @@ int NetworkUdp::try_to_connect(void)
         m_socket = -1;
         return -6;
     }
+#endif
 
     /* 禁止环回 */
     uint32_t loop_enable = 0;
@@ -189,6 +192,7 @@ NetworkUdp::NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port, in
     }
 
     int ret;
+#ifndef SUIJIAN_MODE
     struct ip_mreq req = {0};//结构体对象
     req.imr_multiaddr.s_addr = inet_addr(dstip.c_str());//设置组播地址
     req.imr_interface.s_addr = inet_addr("168.9.0.1");//本地地址
@@ -199,6 +203,7 @@ NetworkUdp::NetworkUdp(string dstip, uint16_t source_port, uint16_t dst_port, in
         m_socket = -1;
         return;
     }
+#endif
 
     /* 禁止环回 */
     uint32_t loop_enable = 0;
