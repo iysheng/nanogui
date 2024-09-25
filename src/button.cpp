@@ -33,6 +33,15 @@ Button::Button(Widget *parent, const std::string &caption, const std::string &Ba
         NVGcontext *ctx = screen()->nvg_context();
         m_background_image_name = BackgroundImage;
         m_background_image = nvgCreateImage(ctx, BackgroundImage.c_str(), 0);
+
+        // 默认按下的图标前缀 push_
+        m_pushed_background_image_name = BackgroundImage + ".push";
+        printf("pushed icon:%s\n", m_pushed_background_image_name.c_str());
+        m_pushed_background_image = nvgCreateImage(ctx, m_pushed_background_image_name.c_str(), 0);
+        if (!m_pushed_background_image)
+        {
+            m_pushed_background_image_name = "";
+        }
     }
 }
 
